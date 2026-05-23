@@ -9,6 +9,11 @@ venv/
 ENV/
 .env
 
+# SQLite database (runtime-generated)
+*.db
+*.db-journal
+!Thumbs.db
+
 # Hệ điều hành
 .DS_Store
 Thumbs.db
