@@ -6,3 +6,5 @@ python-multipart
 python-dotenv
 pydantic-settings
 alembic
+python-jose[cryptography]
+passlib[bcrypt]

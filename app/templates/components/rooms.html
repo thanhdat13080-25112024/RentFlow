@@ -1,0 +1,82 @@
+<!-- ═══════════════════════════════════════
+     TAB: ROOMS
+═══════════════════════════════════════ -->
+<div x-show="activeTab === 'rooms'" class="space-y-4">
+    <!-- Sub-header -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-3 flex flex-wrap gap-3 items-center">
+        <h2 class="font-bold text-gray-800">
+            <b class="text-blue-600" x-text="rooms.length"></b>
+            <span x-text="' ' + t.roomsSubtitle"></span>
+        </h2>
+        <div class="flex-1"></div>
+        <input x-model="searchQuery" :placeholder="t.search"
+               class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-52">
+    </div>
+
+    <!-- Floors -->
+    <template x-for="floor in floorGroups" :key="floor.num">
+        <div>
+            <div class="flex items-center gap-3 mb-3">
+                <h3 class="font-bold text-gray-700 text-sm" x-text="t.floor + ' ' + floor.num"></h3>
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-xs text-gray-400" x-text="floor.occupied + '/' + floor.total + ' ' + t.statOccupied"></span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <template x-for="room in floor.rooms" :key="room.id">
+                    <div class="bg-white rounded-xl border shadow-sm p-4 transition hover:shadow-md cursor-pointer"
+                         :class="room.is_occupied ? 'border-gray-100' : 'border-dashed border-gray-200 opacity-70'"
+                         @click="openRoomEdit(room)">
+                        <!-- Room number + status -->
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-2xl font-extrabold" :class="getFloorText(room.room_number)" x-text="room.room_number"></span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                  :class="getBillForRoom(room) ? (getBillForRoom(room).status==='paid' ? 'bg-green-100 text-green-700' : getBillForRoom(room).status==='prepaid' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700') : 'bg-gray-100 text-gray-500'"
+                                  x-text="getBillForRoom(room) ? (t.status_map[getBillForRoom(room).status] || '') : t.status_map.empty"></span>
+                        </div>
+                        <!-- Tenant -->
+                        <div class="mb-3 min-h-[2.5rem]">
+                            <p class="font-semibold text-gray-800 text-sm truncate" x-text="room.contact_info || t.status_map.empty"></p>
+                            <p class="text-xs text-gray-400" x-show="room.is_occupied" x-text="formatMoney(room.rent_price) + '/th'"></p>
+                        </div>
+                        <!-- Bill total -->
+                        <template x-if="getBillForRoom(room) && room.is_occupied">
+                            <div>
+                                <div class="flex justify-between text-xs mb-2">
+                                    <span class="text-gray-400" x-text="'T' + month"></span>
+                                    <span class="font-bold text-gray-800" x-text="formatMoney(getBillForRoom(room).total)"></span>
+                                </div>
+                                <!-- Electricity mini row -->
+                                <div class="flex items-center gap-1.5 bg-gray-50 rounded-lg px-2 py-1 text-xs" x-show="!getBillForRoom(room).is_fixed">
+                                    <span class="text-gray-400" x-text="getBillForRoom(room).old_reading"></span>
+                                    <i class="fas fa-arrow-right text-gray-300 text-[9px]"></i>
+                                    <input type="number" :value="getBillForRoom(room).new_reading"
+                                           @click.stop
+                                           @change.stop="updateElectricityByRoom(room, $event.target.value)"
+                                           class="w-14 bg-transparent text-blue-600 font-bold outline-none text-center" />
+                                    <span class="text-gray-300">|</span>
+                                    <span class="text-indigo-500 font-semibold" x-text="(getBillForRoom(room).new_reading - getBillForRoom(room).old_reading) + 'kWh'"></span>
+                                </div>
+                                <!-- Quick collect -->
+                                <div class="flex gap-2 mt-2">
+                                    <template x-if="getBillForRoom(room).status === 'unpaid'">
+                                        <button @click.stop="quickCollect(getBillForRoom(room))"
+                                                class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 rounded-lg transition" x-text="t.collect"></button>
+                                    </template>
+                                    <button @click.stop="showQR(getBillForRoom(room))"
+                                            class="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs rounded-lg transition">
+                                        <i class="fas fa-qrcode"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!room.is_occupied">
+                            <div class="text-center mt-2">
+                                <span class="text-xs text-gray-400 border border-dashed border-gray-300 rounded-lg px-3 py-1.5" x-text="t.vacantRoom"></span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</div>
