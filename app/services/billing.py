@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app.models.entities import Room, ElectricityReading, MonthlyBill
+from app.models import ElectricityReading, MonthlyBill, Room
 
 def update_bill(db: Session, room: Room, month: int, year: int):
     reading = db.query(ElectricityReading).filter(

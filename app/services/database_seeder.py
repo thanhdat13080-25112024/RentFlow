@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.entities import Setting, Room, ElectricityReading, MonthlyBill
+from app.models import ElectricityReading, MonthlyBill, Room, Setting
 from datetime import datetime, timedelta
 
 def seed_initial_data(db: Session):
