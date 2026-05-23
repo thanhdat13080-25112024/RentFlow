@@ -1,6 +1,8 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from typing import List
+
 from app.api.deps import get_db
 from app.models import Setting
 from app.schemas import SettingUpdate

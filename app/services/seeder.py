@@ -1,6 +1,9 @@
-from sqlalchemy.orm import Session
-from app.models import ElectricityReading, MonthlyBill, Room, Setting
 from datetime import datetime, timedelta
+
+from sqlalchemy.orm import Session
+
+from app.models import ElectricityReading, MonthlyBill, Room, Setting
+
 
 def seed_initial_data(db: Session):
     # 1. Cài đặt mặc định

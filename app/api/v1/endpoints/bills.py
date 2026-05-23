@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from typing import List
-from datetime import datetime
-import io
 import csv
+import io
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from app.api.deps import get_db
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
 from app.schemas import BillPaidUpdate, BillPrepaidUpdate

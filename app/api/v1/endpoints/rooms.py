@@ -1,9 +1,11 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+
 from app.api.deps import get_db
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
-from app.schemas import BillRead, RoomHistoryRead, RoomRead, RoomUpdate
+from app.schemas import RoomHistoryRead, RoomRead, RoomUpdate
 from app.services.billing import update_bill
 
 router = APIRouter()

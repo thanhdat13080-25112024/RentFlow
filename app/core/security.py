@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Any
+from typing import Any, Optional
+
+from fastapi import HTTPException, Request, status
 from jose import jwt
 from passlib.context import CryptContext
-from fastapi import Request, HTTPException, status
+
 from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

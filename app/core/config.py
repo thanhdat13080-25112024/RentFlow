@@ -1,7 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
 import secrets
 from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _ENV_FILE = Path(".env")
 
