@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Trọ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="/static/js/alpine.min.js"></script>
+    <script src="/static/js/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        #invoice-content { width: 800px !important; background: white !important; }
+        #invoice-content * { line-height: 1.4 !important; vertical-align: middle !important; }
+        #invoice-content .flex { display: flex !important; }
+        .tab-active { background: white; color: #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .bar-segment { transition: height 0.6s cubic-bezier(.4,0,.2,1); }
+        @keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        .slide-up { animation: slideUp 0.2s ease-out; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-900"
+      x-data="app()" x-init="init()" x-cloak
+      @keydown.window="handleKeydown($event)">
+
+<!-- ── TOAST ── -->
+<div x-show="toast.show" x-cloak
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 -translate-y-2"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100 translate-y-0"
+     x-transition:leave-end="opacity-0 -translate-y-2"
+     class="fixed top-4 right-4 z-[200] pointer-events-none">
+    <div class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl border text-sm font-semibold"
+         :class="toast.type==='error' ? 'bg-red-600 text-white border-red-500' : 'bg-green-600 text-white border-green-500'">
+        <i class="fas" :class="toast.type==='error' ? 'fa-circle-exclamation' : 'fa-circle-check'"></i>
+        <span x-text="toast.message"></span>
+    </div>
+</div>
+
+<!-- ── MODAL: EDIT ROOM ── -->
+<div x-show="editRoomModal.show" x-cloak
+     class="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden slide-up">
+        <div class="px-6 py-5 border-b flex items-center justify-between bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+                     :class="getFloorBg(editRoomModal.room.room_number)">
+                    <span x-text="editRoomModal.room.room_number"></span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800" x-text="t.editRoom"></h3>
+                    <p class="text-xs text-gray-400" x-text="t.dataMonth + ' ' + month + '/' + year"></p>
+                </div>
+            </div>
+            <button @click="editRoomModal.show = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5" x-text="t.rentFee"></label>
+                    <input type="text" :value="formatInput(editRoomModal.room.rent_price)"
+                           @input="editRoomModal.room.rent_price = parseInput($event.target.value)"
+                           @blur="fixMoney(editRoomModal.room, 'rent_price')"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5" x-text="t.serviceFee"></label>
+                    <input type="text" :value="formatInput(editRoomModal.room.service_fee)"
+                           @input="editRoomModal.room.service_fee = parseInput($event.target.value)"
+                           @blur="fixMoney(editRoomModal.room, 'service_fee')"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5" x-text="t.depositLabel"></label>
+                    <input type="text" :value="formatInput(editRoomModal.room.deposit)"
+                           @input="editRoomModal.room.deposit = parseInput($event.target.value)"
+                           @blur="fixMoney(editRoomModal.room, 'deposit')"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5" x-text="t.moveInDate"></label>
+                    <input type="text" :value="editRoomModal.room.move_in_date"
+                           @input="editRoomModal.room.move_in_date = formatDate($event.target.value)"
+                           @blur="fixDate(editRoomModal.room)"
+                           placeholder="DD/MM/YYYY"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+                <div x-show="month === 8 && year === 2025" class="col-span-2">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5" x-text="t.initialReading"></label>
+                    <input type="number" x-model.number="editRoomModal.room.old_reading"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-blue-600 font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5" x-text="t.contactInfo"></label>
+                <input type="text" x-model="editRoomModal.room.contact_info"
+                       :placeholder="t.contactInfo"
+                       class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+            </div>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t flex gap-3">
+            <button @click="showHistory(editRoomModal.room)"
+                    class="px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 text-sm font-semibold transition flex items-center gap-2">
+                <i class="fas fa-clock-rotate-left"></i> <span x-text="t.history"></span>
+            </button>
+            <button @click="saveQuickEdit()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold text-sm transition" x-text="t.saveChanges"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: ROOM HISTORY ── -->
+<div x-show="roomHistory.show" x-cloak
+     class="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col slide-up">
+        <div class="px-6 py-5 border-b flex items-center justify-between">
+            <div>
+                <h3 class="font-bold text-gray-800 text-lg">
+                    <span x-text="t.historyTitle"></span> <span class="text-blue-600" x-text="roomHistory.room_number"></span>
+                </h3>
+                <p class="text-xs text-gray-400 mt-0.5" x-text="t.historySubtitle"></p>
+            </div>
+            <button @click="roomHistory.show = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+            <table class="w-full text-sm">
+                <thead class="sticky top-0 bg-gray-50 border-b">
+                    <tr class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        <th class="px-4 py-3 text-left" x-text="t.period"></th>
+                        <th class="px-4 py-3 text-left" x-text="t.tenant"></th>
+                        <th class="px-4 py-3 text-right" x-text="t.rentFee"></th>
+                        <th class="px-4 py-3 text-center" x-text="t.electricity"></th>
+                        <th class="px-4 py-3 text-right" x-text="t.total"></th>
+                        <th class="px-4 py-3 text-center" x-text="t.status"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <template x-for="rec in roomHistory.records" :key="rec.month + '-' + rec.year">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 font-semibold text-gray-800" x-text="rec.month + '/' + rec.year"></td>
+                            <td class="px-4 py-3 text-gray-600" x-text="rec.tenant_name || '—'"></td>
+                            <td class="px-4 py-3 text-right text-gray-600" x-text="formatMoney(rec.rent_fee)"></td>
+                            <td class="px-4 py-3 text-center text-gray-500 text-xs">
+                                <span x-text="rec.old_reading"></span>
+                                <i class="fas fa-arrow-right mx-1 text-gray-300"></i>
+                                <span class="text-blue-600 font-semibold" x-text="rec.new_reading"></span>
+                                <span class="text-gray-400 ml-1" x-text="'(' + rec.usage + ' kWh)'"></span>
+                            </td>
+                            <td class="px-4 py-3 text-right font-semibold text-gray-800" x-text="formatMoney(rec.total)"></td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                                      :class="rec.status==='paid' ? 'bg-green-100 text-green-700' : rec.status==='prepaid' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'"
+                                      x-text="t.status_map[rec.status] || rec.status"></span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+            <template x-if="roomHistory.records.length === 0">
+                <div class="py-16 text-center text-gray-400">
+                    <i class="fas fa-folder-open text-4xl mb-3 block text-gray-200"></i>
+                    <span x-text="t.noHistory"></span>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: QR / INVOICE ── -->
+<div x-show="qrModal.show" x-cloak
+     class="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden slide-up">
+        <div id="invoice-content" class="p-8 bg-white">
+            <div class="flex justify-between items-start mb-8 pb-6 border-b-2 border-blue-50">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-blue-900 mb-2 tracking-tight" x-text="t.invoiceTitle"></h2>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold">
+                            <span x-text="t.month + ' ' + month + ' / ' + year"></span>
+                        </span>
+                        <span class="text-gray-500 font-semibold">
+                            <span x-text="t.room + ': '"></span>
+                            <span class="text-blue-600 font-bold text-xl" x-text="qrModal.room"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="bg-blue-50 px-5 py-3 rounded-xl text-right border border-blue-100">
+                    <p class="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1" x-text="settings.bank_name"></p>
+                    <p class="text-lg font-extrabold text-gray-800" x-text="settings.bank_account"></p>
+                    <p class="text-xs text-gray-500 font-semibold" x-text="settings.account_holder"></p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-8 items-start">
+                <div class="space-y-3">
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-3">
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide" x-text="t.rentFee"></span>
+                            <span class="font-bold text-gray-800" x-text="formatMoney(qrModal.rent_fee)"></span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide" x-text="t.serviceFee"></span>
+                            <span class="font-bold text-gray-800" x-text="formatMoney(qrModal.service_fee)"></span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                            <div>
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide" x-text="t.electricityFee"></span>
+                                <p class="text-xs text-blue-400 font-semibold mt-0.5">
+                                    <span x-text="t.usage + ': ' + qrModal.elec_usage + ' kWh'"></span>
+                                </p>
+                            </div>
+                            <span class="font-bold text-gray-800" x-text="formatMoney(qrModal.elec_fee)"></span>
+                        </div>
+                        <div class="bg-blue-600 rounded-xl px-4 py-4 flex justify-between items-center mt-2">
+                            <p class="text-xs font-bold text-blue-200 uppercase tracking-wider" x-text="t.totalAmount"></p>
+                            <p class="text-2xl font-extrabold text-white" x-text="formatMoney(qrModal.amount)"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center gap-4">
+                    <div class="p-3 bg-white rounded-2xl shadow-lg border border-gray-100">
+                        <img :src="getQRUrl()" alt="QR" class="w-48 h-48 rounded-xl" crossorigin="anonymous">
+                    </div>
+                    <div class="text-center w-full">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2" x-text="t.transferContent"></p>
+                        <div class="bg-gray-100 px-4 py-3 rounded-xl border-2 border-dashed border-gray-200">
+                            <p class="font-extrabold text-blue-700 tracking-widest text-sm"
+                               x-text="'PHONG ' + qrModal.room + ' THANG ' + month"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t flex gap-3 justify-center">
+            <button @click="saveInvoiceAsImage()"
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold text-sm flex items-center gap-2 transition">
+                <i class="fas fa-download"></i> <span x-text="t.downloadInvoice"></span>
+            </button>
+            <button @click="qrModal.show = false"
+                    class="bg-gray-800 hover:bg-black text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition" x-text="t.close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: PREPAID ── -->
+<div x-show="prepaidModal.show" x-cloak
+     class="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 slide-up">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3 class="font-bold text-gray-800" x-text="t.prepaidTitle"></h3>
+        </div>
+        <p class="text-sm text-gray-500 mb-3">
+            <span x-text="t.prepaidHint"></span>
+            <span class="text-blue-600 font-bold" x-text="prepaidModal.room_number"></span>:
+        </p>
+        <input type="text" x-model="prepaidModal.months" autofocus
+               placeholder="6, 7, 8"
+               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 font-bold text-xl text-blue-600 mb-5 focus:border-blue-400 outline-none transition">
+        <div class="flex gap-3">
+            <button @click="confirmPrepaid()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition" x-text="t.confirm"></button>
+            <button @click="prepaidModal.show = false"
+                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold transition" x-text="t.cancel"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: CONFIRM ── -->
+<div x-show="confirmModal.show" x-cloak
+     class="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center slide-up">
+        <div class="w-14 h-14 bg-amber-100 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+            <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-lg mb-2" x-text="confirmModal.title"></h3>
+        <p class="text-sm text-gray-400 mb-6" x-text="confirmModal.message"></p>
+        <div class="flex gap-3">
+            <button @click="confirmModal.callback(); confirmModal.show = false"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition" x-text="t.confirm"></button>
+            <button @click="confirmModal.show = false"
+                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold transition" x-text="t.cancel"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ── HEADER ── -->
+<header class="bg-white border-b sticky top-0 z-40 shadow-sm">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+        <!-- Logo -->
+        <div class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <i class="fas fa-house-chimney-user text-white text-sm"></i>
+            </div>
+            <span class="font-extrabold text-gray-800 tracking-tight hidden sm:block" x-text="t.appName"></span>
+        </div>
+
+        <!-- Tab nav (desktop) -->
+        <nav class="hidden md:flex items-center bg-gray-100 rounded-xl p-1 gap-0.5 ml-2">
+            <template x-for="tab in tabs" :key="tab.id">
+                <button @click="activeTab = tab.id"
+                        :class="activeTab === tab.id ? 'tab-active' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'"
+                        class="px-4 py-1.5 rounded-lg text-sm font-semibold transition"
+                        x-text="tab.label"></button>
+            </template>
+        </nav>
+
+        <div class="flex-1"></div>
+
+        <!-- Search -->
+        <div class="hidden md:flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 w-52 text-sm text-gray-400 cursor-pointer hover:border-blue-300 transition"
+             @click="document.getElementById('globalSearch').focus()">
+            <i class="fas fa-magnifying-glass text-gray-400 text-xs"></i>
+            <input id="globalSearch" x-model="searchQuery" :placeholder="t.search"
+                   class="bg-transparent outline-none flex-1 text-gray-700 text-sm">
+        </div>
+
+        <!-- Month nav -->
+        <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+            <button @click="prevMonth()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition text-gray-500 hover:text-blue-600 active:scale-90">
+                <i class="fas fa-chevron-left text-xs"></i>
+            </button>
+            <div class="px-3 py-1 bg-white rounded-lg shadow-sm border border-blue-100 text-center min-w-[110px]">
+                <span class="block text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-0.5" x-text="t.dataMonth"></span>
+                <span class="text-sm font-extrabold text-blue-600">
+                    <span x-text="month"></span> / <span x-text="year"></span>
+                </span>
+            </div>
+            <button @click="nextMonth()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition text-gray-500 hover:text-blue-600 active:scale-90">
+                <i class="fas fa-chevron-right text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Lang switcher -->
+        <div class="relative" x-data="{ open: false }">
+            <button @click="open = !open"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-semibold text-gray-700 transition">
+                <span x-text="langFlags[lang]"></span>
+                <span class="hidden sm:block uppercase" x-text="lang"></span>
+                <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+            </button>
+            <div x-show="open" @click.outside="open = false" x-cloak
+                 class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl py-1 w-36 z-50 slide-up">
+                <template x-for="l in ['vi','en','ko','ja','zh']" :key="l">
+                    <button @click="setLang(l); open = false"
+                            class="flex items-center gap-2.5 w-full px-4 py-2 hover:bg-gray-50 text-sm font-semibold transition"
+                            :class="lang === l ? 'text-blue-600' : 'text-gray-700'">
+                        <span x-text="langFlags[l]"></span>
+                        <span x-text="langNames[l]"></span>
+                        <i x-show="lang === l" class="fas fa-check text-blue-600 ml-auto text-xs"></i>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- CSV import hidden input -->
+        <input type="file" x-ref="csvFile" @change="handleImport($event)" class="hidden" accept=".csv">
+    </div>
+</header>
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t md:hidden flex">
+    <template x-for="tab in mobileTabs" :key="tab.id">
+        <button @click="activeTab = tab.id"
+                class="flex-1 flex flex-col items-center gap-0.5 py-2 transition"
+                :class="activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'">
+            <i class="text-lg" :class="tab.icon"></i>
+            <span class="text-[10px] font-semibold" x-text="tab.label"></span>
+        </button>
+    </template>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 pb-20 md:pb-8">
+
+    <!-- ═══════════════════════════════════════
+         TAB: DASHBOARD
+    ═══════════════════════════════════════ -->
+    <div x-show="activeTab === 'dashboard'" class="space-y-6">
+
+        <!-- Greeting + actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-gray-800">
+                    <span x-text="getGreeting()"></span>
+                    <template x-if="settings.account_holder">
+                        <span class="text-blue-600">, <span x-text="settings.account_holder"></span></span>
+                    </template>
+                    <span> 👋</span>
+                </h1>
+                <p class="text-sm text-gray-400 mt-1">
+                    <span x-text="todayStr()"></span> —
+                    <template x-if="stats.unpaidCount > 0">
+                        <span><b class="text-red-600" x-text="stats.unpaidCount"></b> <span x-text="t.dashUnpaidNote"></span></span>
+                    </template>
+                    <template x-if="stats.unpaidCount === 0">
+                        <span class="text-green-600 font-semibold" x-text="t.dashAllPaid"></span>
+                    </template>
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button @click="$refs.csvFile.click()"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-semibold text-gray-600 transition">
+                    <i class="fas fa-file-import text-emerald-500"></i>
+                    <span class="hidden sm:block" x-text="t.importCSV"></span>
+                </button>
+                <button @click="activeTab = 'revenue'"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="hidden sm:block" x-text="t.tabs.revenue"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 6 stat tiles -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
+                <div class="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-door-open text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statTotalRooms"></p>
+                    <p class="text-xl font-extrabold text-gray-800" x-text="stats.totalRooms"></p>
+                    <p class="text-[10px] text-gray-400" x-text="stats.occupiedCount + ' ' + t.statOccupied + ' · ' + stats.emptyCount + ' ' + t.statEmpty"></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
+                <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-clock text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statUnpaid"></p>
+                    <p class="text-xl font-extrabold text-red-600" x-text="stats.unpaidCount"></p>
+                    <p class="text-[10px] text-gray-400" x-text="t.statRooms"></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
+                <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-circle-check text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statPaid"></p>
+                    <p class="text-xl font-extrabold text-green-600" x-text="stats.paidCount"></p>
+                    <p class="text-[10px] text-gray-400" x-text="t.statRooms"></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
+                <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-calendar-check text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statPrepaid"></p>
+                    <p class="text-xl font-extrabold text-blue-600" x-text="stats.prepaidCount"></p>
+                    <p class="text-[10px] text-gray-400" x-text="t.statRooms"></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
+                <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-wallet text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statCollected"></p>
+                    <p class="text-base font-extrabold text-emerald-700" x-text="formatMoney(stats.collectedAmount)"></p>
+                    <p class="text-[10px] text-gray-400" x-text="t.statThisMonth"></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-coins text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statDeposit"></p>
+                    <p class="text-base font-extrabold text-indigo-700" x-text="formatMoney(stats.depositTotal)"></p>
+                    <p class="text-[10px] text-gray-400" x-text="stats.occupiedCount + ' ' + t.statRooms"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts + attention row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Bar chart -->
+            <div class="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-gray-800" x-text="t.chartTitle"></h3>
+                        <p class="text-xs text-gray-400" x-text="t.chartSubtitle"></p>
+                    </div>
+                </div>
+                <div class="flex items-end gap-2 h-44 border-b border-gray-100 pb-1">
+                    <template x-if="dashboardChart.length === 0">
+                        <div class="w-full flex items-center justify-center text-gray-300">
+                            <i class="fas fa-chart-bar text-4xl"></i>
+                        </div>
+                    </template>
+                    <template x-for="bar in dashboardChart" :key="bar.label">
+                        <div class="flex flex-col items-center justify-end gap-1 flex-1 h-full">
+                            <span class="text-[10px] text-gray-400 font-semibold" x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
+                            <div class="w-full rounded-t-lg bar-segment transition-all"
+                                 :class="bar.current ? 'bg-blue-600' : 'bg-blue-200'"
+                                 :style="'height:' + Math.max(bar.pct, 5) + '%'">
+                            </div>
+                            <span class="text-[10px] font-semibold" :class="bar.current ? 'text-blue-600' : 'text-gray-400'" x-text="bar.label"></span>
+                        </div>
+                    </template>
+                </div>
+                <div class="mt-3 flex items-center gap-4 text-xs text-gray-400">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-600 inline-block"></span> <span x-text="t.statThisMonth"></span></span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-200 inline-block"></span> <span x-text="t.statPrevMonths"></span></span>
+                </div>
+            </div>
+
+            <!-- Donut -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <h3 class="font-bold text-gray-800 mb-4" x-text="t.donutTitle + ' ' + month + '/' + year"></h3>
+                <div class="flex items-center gap-6">
+                    <div class="relative shrink-0">
+                        <svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90">
+                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f3f4f6" stroke-width="4"/>
+                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#16a34a" stroke-width="4"
+                                    :stroke-dasharray="donut.paid + ' 100'"
+                                    stroke-dashoffset="0"/>
+                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#2563eb" stroke-width="4"
+                                    :stroke-dasharray="donut.prepaid + ' 100'"
+                                    :stroke-dashoffset="-donut.paidOffset"/>
+                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#ef4444" stroke-width="4"
+                                    :stroke-dasharray="donut.unpaid + ' 100'"
+                                    :stroke-dashoffset="-donut.unpaidOffset"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center rotate-90">
+                            <span class="text-xl font-extrabold text-gray-800" x-text="donut.paidPct + '%'"></span>
+                            <span class="text-[10px] text-gray-400 font-semibold" x-text="t.statPaid"></span>
+                        </div>
+                    </div>
+                    <div class="space-y-3 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-green-600 shrink-0"></span>
+                            <span class="text-sm flex-1" x-text="t.statPaid"></span>
+                            <b class="text-lg font-extrabold text-gray-800" x-text="donut.paidCount"></b>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 shrink-0"></span>
+                            <span class="text-sm flex-1" x-text="t.statUnpaid"></span>
+                            <b class="text-lg font-extrabold text-gray-800" x-text="donut.unpaidCount"></b>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-blue-600 shrink-0"></span>
+                            <span class="text-sm flex-1" x-text="t.statPrepaid"></span>
+                            <b class="text-lg font-extrabold text-gray-800" x-text="donut.prepaidCount"></b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attention + Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Rooms needing attention -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-gray-800" x-text="t.attentionTitle"></h3>
+                    <span class="text-xs text-gray-400" x-text="stats.unpaidCount + ' ' + t.statRooms"></span>
+                </div>
+                <template x-if="attentionRooms.length === 0">
+                    <div class="py-8 text-center text-gray-400">
+                        <i class="fas fa-party-horn text-3xl text-green-300 mb-2 block"></i>
+                        <span class="text-sm font-semibold" x-text="t.dashAllPaid"></span>
+                    </div>
+                </template>
+                <div class="space-y-3">
+                    <template x-for="bill in attentionRooms" :key="bill.room_id">
+                        <div class="flex items-center gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                                 :class="getFloorBg(bill.room_number)" x-text="bill.room_number"></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-gray-800 text-sm truncate" x-text="bill.contact_info || '—'"></p>
+                                <p class="text-xs text-gray-400" x-text="formatMoney(bill.total)"></p>
+                            </div>
+                            <button @click="quickCollect(bill)"
+                                    class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition shrink-0" x-text="t.collect"></button>
+                        </div>
+                    </template>
+                </div>
+                <template x-if="stats.unpaidCount > 3">
+                    <button @click="activeTab = 'bills'"
+                            class="mt-3 w-full text-center text-sm text-blue-600 font-semibold hover:underline"
+                            x-text="t.viewAll + ' ' + stats.unpaidCount + ' →'"></button>
+                </template>
+            </div>
+
+            <!-- Recent activity -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <h3 class="font-bold text-gray-800 mb-4" x-text="t.activityTitle"></h3>
+                <template x-if="recentActivity.length === 0">
+                    <div class="py-8 text-center text-gray-300 text-sm" x-text="t.noActivity"></div>
+                </template>
+                <div class="space-y-3">
+                    <template x-for="(act, i) in recentActivity" :key="i">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 rounded-full shrink-0"
+                                 :class="act.type === 'paid' ? 'bg-green-500' : act.type === 'prepaid' ? 'bg-blue-500' : 'bg-amber-400'"></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-700">
+                                    <b x-text="'P.' + act.room"></b>
+                                    <span x-text="' ' + (act.type === 'paid' ? t.actPaid : t.actPrepaid)"></span>
+                                    <b class="text-blue-600" x-text="' ' + formatMoney(act.amount)"></b>
+                                </p>
+                            </div>
+                            <span class="text-xs text-gray-400 shrink-0" x-text="act.when"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         TAB: BILLS (Master / Detail)
+    ═══════════════════════════════════════ -->
+    <div x-show="activeTab === 'bills'" class="space-y-4">
+        <!-- Filter bar -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex flex-wrap gap-3 items-center">
+            <div class="flex bg-gray-100 rounded-lg p-1 gap-0.5">
+                <button @click="billTab = 'all'"
+                        :class="billTab === 'all' ? 'tab-active' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-1 rounded-md text-sm font-semibold transition">
+                    <span x-text="t.filterAll"></span>
+                    <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.is_occupied).length"></span>
+                </button>
+                <button @click="billTab = 'unpaid'"
+                        :class="billTab === 'unpaid' ? 'bg-white shadow text-red-600' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-1 rounded-md text-sm font-semibold transition">
+                    <span x-text="t.filterUnpaid"></span>
+                    <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.status==='unpaid'&&b.is_occupied).length"></span>
+                </button>
+                <button @click="billTab = 'paid'"
+                        :class="billTab === 'paid' ? 'bg-white shadow text-green-600' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-1 rounded-md text-sm font-semibold transition">
+                    <span x-text="t.filterPaid"></span>
+                    <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.status==='paid').length"></span>
+                </button>
+                <button @click="billTab = 'prepaid'"
+                        :class="billTab === 'prepaid' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-1 rounded-md text-sm font-semibold transition">
+                    <span x-text="t.filterPrepaid"></span>
+                    <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.status==='prepaid').length"></span>
+                </button>
+            </div>
+            <div class="flex-1 min-w-36 md:hidden">
+                <input x-model="searchQuery" :placeholder="t.search"
+                       class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+        </div>
+
+        <!-- Master / Detail grid -->
+        <div class="grid gap-4" :class="!isMobile ? 'grid-cols-[1fr_1.1fr]' : 'grid-cols-1'">
+            <!-- List pane -->
+            <div x-show="!isMobile || !selectedBillId"
+                 class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-4 py-3 border-b bg-gray-50 grid text-xs font-bold text-gray-500 uppercase tracking-wide"
+                     style="grid-template-columns:56px 1fr 100px 80px">
+                    <span x-text="t.room"></span>
+                    <span x-text="t.tenant"></span>
+                    <span class="text-right" x-text="t.total"></span>
+                    <span class="text-center" x-text="t.status"></span>
+                </div>
+                <div class="divide-y divide-gray-50 overflow-y-auto max-h-[70vh]">
+                    <template x-for="bill in filteredBills" :key="bill.room_id">
+                        <div @click="selectedBillId = bill.room_id"
+                             class="grid px-4 py-3 cursor-pointer transition items-center"
+                             style="grid-template-columns:56px 1fr 100px 80px"
+                             :class="selectedBillId === bill.room_id ? 'bg-blue-50 border-l-4 border-blue-600' : 'hover:bg-gray-50 border-l-4 border-transparent'">
+                            <span class="text-lg font-extrabold" :class="getFloorText(bill.room_number)" x-text="bill.room_number"></span>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-gray-800 text-sm truncate" x-text="bill.contact_info || '—'"></p>
+                                <p class="text-xs text-gray-400 truncate" x-show="bill.contact_info && bill.contact_info.includes(' ')">
+                                </p>
+                            </div>
+                            <span class="text-right font-bold text-sm text-gray-800" x-text="formatMoney(bill.total)"></span>
+                            <span class="text-center">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                      :class="bill.status==='paid' ? 'bg-green-100 text-green-700' : bill.status==='prepaid' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'"
+                                      x-text="t.status_map[bill.status] || bill.status"></span>
+                            </span>
+                        </div>
+                    </template>
+                    <template x-if="filteredBills.length === 0">
+                        <div class="py-16 text-center text-gray-300">
+                            <i class="fas fa-inbox text-4xl mb-3 block"></i>
+                            <p class="text-sm font-semibold" x-text="t.noBills"></p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Detail pane -->
+            <div x-show="!isMobile || selectedBillId">
+                <template x-if="!selectedBill">
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center h-64 text-gray-300">
+                        <i class="fas fa-hand-pointer text-4xl mb-3"></i>
+                        <p class="text-sm font-semibold" x-text="t.selectRoom"></p>
+                    </div>
+                </template>
+                <template x-if="selectedBill">
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden slide-up">
+                        <!-- Mobile back -->
+                        <div x-show="isMobile" class="px-4 pt-4">
+                            <button @click="selectedBillId = null" class="flex items-center gap-2 text-sm text-blue-600 font-semibold mb-3">
+                                <i class="fas fa-arrow-left"></i> <span x-text="t.back"></span>
+                            </button>
+                        </div>
+
+                        <!-- Header -->
+                        <div class="px-5 py-4 border-b flex items-center gap-4"
+                             :class="selectedBill.status === 'unpaid' ? 'bg-red-50' : selectedBill.status === 'prepaid' ? 'bg-blue-50' : 'bg-green-50'">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shrink-0"
+                                 :class="getFloorBg(selectedBill.room_number)" x-text="selectedBill.room_number"></div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-extrabold text-gray-800 text-lg truncate" x-text="selectedBill.contact_info || '—'"></h3>
+                                <p class="text-xs text-gray-500">
+                                    <span x-show="selectedBill.move_in_date" x-text="t.moveIn + ' ' + selectedBill.move_in_date"></span>
+                                </p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold shrink-0"
+                                  :class="selectedBill.status==='paid' ? 'bg-green-100 text-green-700' : selectedBill.status==='prepaid' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'"
+                                  x-text="t.status_map[selectedBill.status] || selectedBill.status"></span>
+                        </div>
+
+                        <div class="p-5 space-y-4">
+                            <!-- Electricity reading -->
+                            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3" x-text="t.electricity + ' ' + t.month + ' ' + month"></p>
+                                <div class="flex items-center gap-4">
+                                    <div class="flex-1 text-center">
+                                        <p class="text-xs text-gray-400 mb-1" x-text="t.oldReading"></p>
+                                        <p class="text-2xl font-extrabold text-gray-400" x-text="selectedBill.old_reading"></p>
+                                    </div>
+                                    <i class="fas fa-arrow-right text-gray-300"></i>
+                                    <div class="flex-1 text-center">
+                                        <p class="text-xs text-gray-400 mb-1" x-text="t.newReading"></p>
+                                        <input type="number" x-model.number="selectedBill.new_reading"
+                                               @change="updateElectricity(selectedBill)"
+                                               :disabled="selectedBill.status !== 'unpaid'"
+                                               :class="selectedBill.new_reading === 0 ? 'border-amber-400 bg-amber-50' : 'border-blue-300 bg-white'"
+                                               class="w-full border-2 rounded-lg text-center text-2xl font-extrabold text-blue-600 py-1 outline-none focus:ring-2 focus:ring-blue-500 transition disabled:opacity-50">
+                                    </div>
+                                    <div class="flex-1 text-center">
+                                        <p class="text-xs text-gray-400 mb-1" x-text="t.usage"></p>
+                                        <p class="text-2xl font-extrabold text-indigo-600"
+                                           x-text="(selectedBill.new_reading - selectedBill.old_reading || 0)"></p>
+                                    </div>
+                                </div>
+                                <p x-show="selectedBill.new_reading === 0 && !selectedBill.is_fixed"
+                                   class="text-xs text-amber-600 font-semibold mt-2 flex items-center gap-1">
+                                    <i class="fas fa-triangle-exclamation"></i> <span x-text="t.noElecInput"></span>
+                                </p>
+                            </div>
+
+                            <!-- Breakdown -->
+                            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-2">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3" x-text="t.breakdown"></p>
+                                <div class="flex justify-between text-sm py-1.5 border-b border-gray-100">
+                                    <span class="text-gray-600" x-text="t.rentFee"></span>
+                                    <span class="font-semibold" x-text="formatMoney(selectedBill.rent_fee)"></span>
+                                </div>
+                                <div class="flex justify-between text-sm py-1.5 border-b border-gray-100">
+                                    <span class="text-gray-600" x-text="t.serviceFee"></span>
+                                    <span class="font-semibold" x-text="formatMoney(selectedBill.service_fee)"></span>
+                                </div>
+                                <div class="flex justify-between text-sm py-1.5 border-b border-gray-100">
+                                    <span class="text-gray-600" x-text="t.electricityFee"></span>
+                                    <span class="font-semibold" x-text="formatMoney(selectedBill.electricity_fee)"></span>
+                                </div>
+                                <div class="flex justify-between items-baseline pt-1">
+                                    <span class="font-bold text-gray-800" x-text="t.totalAmount"></span>
+                                    <span class="text-2xl font-extrabold text-blue-600" x-text="formatMoney(selectedBill.total)"></span>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <button @click="toggleStatus(selectedBill)"
+                                        x-show="selectedBill.status === 'unpaid'"
+                                        class="col-span-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                                    <i class="fas fa-circle-check"></i> <span x-text="t.markPaid"></span>
+                                </button>
+                                <button @click="toggleStatus(selectedBill)"
+                                        x-show="selectedBill.status === 'paid'"
+                                        class="col-span-2 bg-blue-100 hover:bg-blue-200 text-blue-700 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                                    <i class="fas fa-calendar-check"></i> <span x-text="t.prepaid"></span>
+                                </button>
+                                <button @click="showQR(selectedBill)"
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2">
+                                    <i class="fas fa-qrcode"></i> <span x-text="t.qrBtn"></span>
+                                </button>
+                                <button @click="openEditModal(selectedBill)"
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2">
+                                    <i class="fas fa-pen-to-square"></i> <span x-text="t.edit"></span>
+                                </button>
+                            </div>
+
+                            <!-- Footer info -->
+                            <div class="flex justify-between text-xs text-gray-400 pt-1">
+                                <span><span x-text="t.deposit + ': '"></span><b class="text-gray-700" x-text="formatMoney(selectedBill.deposit)"></b></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         TAB: ROOMS
+    ═══════════════════════════════════════ -->
+    <div x-show="activeTab === 'rooms'" class="space-y-4">
+        <!-- Sub-header -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-3 flex flex-wrap gap-3 items-center">
+            <h2 class="font-bold text-gray-800">
+                <b class="text-blue-600" x-text="rooms.length"></b>
+                <span x-text="' ' + t.roomsSubtitle"></span>
+            </h2>
+            <div class="flex-1"></div>
+            <input x-model="searchQuery" :placeholder="t.search"
+                   class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-52">
+        </div>
+
+        <!-- Floors -->
+        <template x-for="floor in floorGroups" :key="floor.num">
+            <div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h3 class="font-bold text-gray-700 text-sm" x-text="t.floor + ' ' + floor.num"></h3>
+                    <div class="flex-1 h-px bg-gray-200"></div>
+                    <span class="text-xs text-gray-400" x-text="floor.occupied + '/' + floor.total + ' ' + t.statOccupied"></span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <template x-for="room in floor.rooms" :key="room.id">
+                        <div class="bg-white rounded-xl border shadow-sm p-4 transition hover:shadow-md cursor-pointer"
+                             :class="room.is_occupied ? 'border-gray-100' : 'border-dashed border-gray-200 opacity-70'"
+                             @click="openRoomEdit(room)">
+                            <!-- Room number + status -->
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-2xl font-extrabold" :class="getFloorText(room.room_number)" x-text="room.room_number"></span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                      :class="getBillForRoom(room) ? (getBillForRoom(room).status==='paid' ? 'bg-green-100 text-green-700' : getBillForRoom(room).status==='prepaid' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700') : 'bg-gray-100 text-gray-500'"
+                                      x-text="getBillForRoom(room) ? (t.status_map[getBillForRoom(room).status] || '') : t.status_map.empty"></span>
+                            </div>
+                            <!-- Tenant -->
+                            <div class="mb-3 min-h-[2.5rem]">
+                                <p class="font-semibold text-gray-800 text-sm truncate" x-text="room.contact_info || t.status_map.empty"></p>
+                                <p class="text-xs text-gray-400" x-show="room.is_occupied" x-text="formatMoney(room.rent_price) + '/th'"></p>
+                            </div>
+                            <!-- Bill total -->
+                            <template x-if="getBillForRoom(room) && room.is_occupied">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-2">
+                                        <span class="text-gray-400" x-text="'T' + month"></span>
+                                        <span class="font-bold text-gray-800" x-text="formatMoney(getBillForRoom(room).total)"></span>
+                                    </div>
+                                    <!-- Electricity mini row -->
+                                    <div class="flex items-center gap-1.5 bg-gray-50 rounded-lg px-2 py-1 text-xs" x-show="!getBillForRoom(room).is_fixed">
+                                        <span class="text-gray-400" x-text="getBillForRoom(room).old_reading"></span>
+                                        <i class="fas fa-arrow-right text-gray-300 text-[9px]"></i>
+                                        <input type="number" :value="getBillForRoom(room).new_reading"
+                                               @click.stop
+                                               @change.stop="updateElectricityByRoom(room, $event.target.value)"
+                                               class="w-14 bg-transparent text-blue-600 font-bold outline-none text-center" />
+                                        <span class="text-gray-300">|</span>
+                                        <span class="text-indigo-500 font-semibold" x-text="(getBillForRoom(room).new_reading - getBillForRoom(room).old_reading) + 'kWh'"></span>
+                                    </div>
+                                    <!-- Quick collect -->
+                                    <div class="flex gap-2 mt-2">
+                                        <template x-if="getBillForRoom(room).status === 'unpaid'">
+                                            <button @click.stop="quickCollect(getBillForRoom(room))"
+                                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 rounded-lg transition" x-text="t.collect"></button>
+                                        </template>
+                                        <button @click.stop="showQR(getBillForRoom(room))"
+                                                class="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs rounded-lg transition">
+                                            <i class="fas fa-qrcode"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="!room.is_occupied">
+                                <div class="text-center mt-2">
+                                    <span class="text-xs text-gray-400 border border-dashed border-gray-300 rounded-lg px-3 py-1.5" x-text="t.vacantRoom"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         TAB: REVENUE
+    ═══════════════════════════════════════ -->
+    <div x-show="activeTab === 'revenue'" class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-extrabold text-gray-800" x-text="t.revenueTitle"></h2>
+        </div>
+
+        <!-- Mini bar chart -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5" x-show="revenueSummary.length > 0">
+            <h3 class="font-bold text-gray-700 mb-4" x-text="t.chartTitle"></h3>
+            <div class="flex items-end gap-2 h-32 border-b border-gray-100 pb-1">
+                <template x-for="bar in revChartData" :key="bar.label">
+                    <div class="flex flex-col items-center justify-end gap-1 flex-1 h-full">
+                        <span class="text-[10px] text-gray-400" x-text="(bar.v/1e6).toFixed(0)+'M'"></span>
+                        <div class="w-full rounded-t-lg bar-segment"
+                             :class="bar.current ? 'bg-indigo-600' : 'bg-indigo-200'"
+                             :style="'height:' + Math.max(bar.pct, 4) + '%'"></div>
+                        <span class="text-[10px] font-semibold" :class="bar.current ? 'text-indigo-600' : 'text-gray-400'" x-text="bar.label"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Revenue table -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                        <th class="px-5 py-3 text-left" x-text="t.revMonth"></th>
+                        <th class="px-5 py-3 text-right" x-text="t.electricityFee"></th>
+                        <th class="px-5 py-3 text-right" x-text="t.serviceFee"></th>
+                        <th class="px-5 py-3 text-right" x-text="t.rentFee"></th>
+                        <th class="px-5 py-3 text-right" x-text="t.totalAmount"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <template x-for="row in revenueSummary" :key="row.month + '-' + row.year">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-5 py-4 font-bold text-gray-800 text-lg" x-text="row.month + '/' + row.year"></td>
+                            <td class="px-5 py-4 text-right text-orange-600 font-semibold" x-text="formatMoney(row.total_elec)"></td>
+                            <td class="px-5 py-4 text-right text-gray-500 font-semibold" x-text="formatMoney(row.total_service)"></td>
+                            <td class="px-5 py-4 text-right text-blue-600 font-semibold" x-text="formatMoney(row.total_rent)"></td>
+                            <td class="px-5 py-4 text-right font-extrabold text-indigo-700 text-lg" x-text="formatMoney(row.total_revenue)"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+            <template x-if="revenueSummary.length === 0">
+                <div class="py-16 text-center text-gray-300">
+                    <i class="fas fa-chart-pie text-4xl mb-3 block"></i>
+                    <p class="text-sm font-semibold" x-text="t.noRevData"></p>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         TAB: SETTINGS
+    ═══════════════════════════════════════ -->
+    <div x-show="activeTab === 'settings'" class="max-w-xl space-y-6">
+        <h2 class="text-xl font-extrabold text-gray-800" x-text="t.settingsTitle"></h2>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
+            <template x-for="(value, key) in settings" :key="key">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5" x-text="t.settingLabels[key] || key"></label>
+                    <input type="text" x-model="settings[key]"
+                           class="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                </div>
+            </template>
+        </div>
+        <button @click="saveSettings()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition" x-text="t.saveChanges"></button>
+    </div>
+
+</main>
+
+<script>
+const TRANSLATIONS = {
+    vi: {
+        appName: 'Quản Lý Trọ', dataMonth: 'Tháng',
+        tabs: { dashboard: 'Tổng quan', rooms: 'Phòng & Khách', bills: 'Hóa đơn', revenue: 'Doanh thu', settings: 'Cài đặt' },
+        status_map: { unpaid: 'Chưa thu', paid: 'Đã thu', prepaid: 'Đóng trước', empty: 'Trống' },
+        statTotalRooms:'Tổng phòng', statOccupied:'đang thuê', statEmpty:'trống', statRooms:'phòng',
+        statUnpaid:'Chưa thu', statPaid:'Đã thu', statPrepaid:'Đóng trước',
+        statCollected:'Đã thu tháng này', statDeposit:'Tiền cọc giữ', statThisMonth:'tháng này', statPrevMonths:'tháng trước',
+        chartTitle:'Doanh thu 6 tháng gần nhất', chartSubtitle:'Tổng: điện + dịch vụ + tiền phòng',
+        donutTitle:'Trạng thái',
+        attentionTitle:'⚠ Phòng cần chú ý', activityTitle:'Hoạt động gần đây',
+        dashUnpaidNote:'phòng chưa thu tiền tháng này.', dashAllPaid:'Tất cả đã thu! 🎉',
+        actPaid:'đã thanh toán', actPrepaid:'đóng tiền trước',
+        viewAll:'Xem tất cả', noActivity:'Chưa có hoạt động',
+        filterAll:'Tất cả', filterUnpaid:'Chưa thu', filterPaid:'Đã thu', filterPrepaid:'Đóng trước',
+        room:'Phòng', tenant:'Khách thuê', total:'Tổng', status:'Trạng thái', period:'Kỳ',
+        electricity:'Số điện', oldReading:'Số cũ', newReading:'Số mới', usage:'Sử dụng',
+        breakdown:'Chi tiết tháng này', rentFee:'Tiền phòng', serviceFee:'Phí dịch vụ',
+        electricityFee:'Tiền điện', totalAmount:'Tổng cộng', month:'Tháng',
+        markPaid:'✓ Đánh dấu đã thu', prepaid:'📅 Đóng trước nhiều tháng',
+        qrBtn:'QR / Hóa đơn', edit:'Chỉnh sửa', history:'Lịch sử',
+        deposit:'Tiền cọc', moveIn:'Ngày thuê:', back:'Quay lại',
+        selectRoom:'Chọn phòng để xem chi tiết', noBills:'Không có hóa đơn nào',
+        noElecInput:'⚠ Chưa nhập số điện tháng này',
+        floor:'Tầng', roomsSubtitle:'phòng', vacantRoom:'Chưa có khách',
+        collect:'✓ Thu', remind:'Nhắc',
+        revenueTitle:'Tổng hợp doanh thu', revMonth:'Tháng/Năm', noRevData:'Chưa có dữ liệu doanh thu',
+        settingsTitle:'Cài đặt hệ thống',
+        settingLabels: { electricity_unit_price:'Giá điện (VNĐ/kWh)', bank_account:'Số tài khoản', bank_name:'Ngân hàng', account_holder:'Chủ tài khoản' },
+        editRoom:'Chỉnh sửa thông tin phòng', saveChanges:'Lưu thay đổi',
+        rentFee:'Tiền phòng', serviceFee:'Dịch vụ', depositLabel:'Tiền cọc',
+        moveInDate:'Ngày thuê', initialReading:'Số điện ban đầu', contactInfo:'Khách thuê & Liên hệ',
+        invoiceTitle:'HÓA ĐƠN TIỀN TRỌ', transferContent:'Nội dung chuyển khoản',
+        downloadInvoice:'Tải ảnh hóa đơn', close:'Đóng cửa sổ',
+        historyTitle:'Lịch sử phòng', historySubtitle:'Toàn bộ thông tin qua các tháng', noHistory:'Chưa có dữ liệu',
+        prepaidTitle:'Đóng tiền trước', prepaidHint:'Nhập các tháng đóng trước cho phòng',
+        confirm:'Xác nhận', cancel:'Hủy',
+        search:'Tìm phòng, khách, SĐT...',
+        importCSV:'Import CSV',
+        greeting_morning:'Chào buổi sáng', greeting_afternoon:'Chào buổi chiều', greeting_evening:'Chào buổi tối',
+    },
+    en: {
+        appName:'Rent Manager', dataMonth:'Month',
+        tabs:{ dashboard:'Overview', rooms:'Rooms & Tenants', bills:'Bills', revenue:'Revenue', settings:'Settings' },
+        status_map:{ unpaid:'Unpaid', paid:'Paid', prepaid:'Prepaid', empty:'Vacant' },
+        statTotalRooms:'Total Rooms', statOccupied:'occupied', statEmpty:'vacant', statRooms:'rooms',
+        statUnpaid:'Unpaid', statPaid:'Paid', statPrepaid:'Prepaid',
+        statCollected:'Collected This Month', statDeposit:'Deposits Held', statThisMonth:'this month', statPrevMonths:'prev months',
+        chartTitle:'Revenue — Last 6 Months', chartSubtitle:'Electricity + service + rent',
+        donutTitle:'Status',
+        attentionTitle:'⚠ Needs Attention', activityTitle:'Recent Activity',
+        dashUnpaidNote:'rooms unpaid this month.', dashAllPaid:'All collected! 🎉',
+        actPaid:'paid', actPrepaid:'prepaid months',
+        viewAll:'View all', noActivity:'No recent activity',
+        filterAll:'All', filterUnpaid:'Unpaid', filterPaid:'Paid', filterPrepaid:'Prepaid',
+        room:'Room', tenant:'Tenant', total:'Total', status:'Status', period:'Period',
+        electricity:'Electricity', oldReading:'Old Reading', newReading:'New Reading', usage:'Usage',
+        breakdown:'This Month Breakdown', rentFee:'Rent', serviceFee:'Service Fee',
+        electricityFee:'Electricity', totalAmount:'Total', month:'Month',
+        markPaid:'✓ Mark as Paid', prepaid:'📅 Prepaid Months',
+        qrBtn:'QR / Invoice', edit:'Edit', history:'History',
+        deposit:'Deposit', moveIn:'Move-in:', back:'Back',
+        selectRoom:'Select a room to view details', noBills:'No bills found',
+        noElecInput:'⚠ No meter reading entered',
+        floor:'Floor', roomsSubtitle:'rooms', vacantRoom:'Vacant',
+        collect:'✓ Collect', remind:'Remind',
+        revenueTitle:'Revenue Report', revMonth:'Month/Year', noRevData:'No revenue data yet',
+        settingsTitle:'System Settings',
+        settingLabels:{ electricity_unit_price:'Electricity Rate (VND/kWh)', bank_account:'Bank Account', bank_name:'Bank', account_holder:'Account Holder' },
+        editRoom:'Edit Room Info', saveChanges:'Save Changes',
+        rentFee:'Rent', serviceFee:'Service', depositLabel:'Deposit',
+        moveInDate:'Move-in Date', initialReading:'Initial Reading', contactInfo:'Tenant & Contact',
+        invoiceTitle:'RENT INVOICE', transferContent:'Transfer Reference',
+        downloadInvoice:'Download Invoice', close:'Close',
+        historyTitle:'Room History', historySubtitle:'All billing records', noHistory:'No records',
+        prepaidTitle:'Mark Prepaid', prepaidHint:'Enter months to mark prepaid for room',
+        confirm:'Confirm', cancel:'Cancel',
+        search:'Search rooms, tenants...',
+        importCSV:'Import CSV',
+        greeting_morning:'Good morning', greeting_afternoon:'Good afternoon', greeting_evening:'Good evening',
+    },
+    ko: {
+        appName:'임대 관리', dataMonth:'월',
+        tabs:{ dashboard:'개요', rooms:'방 & 세입자', bills:'청구서', revenue:'수익', settings:'설정' },
+        status_map:{ unpaid:'미수금', paid:'수납완료', prepaid:'선납', empty:'공실' },
+        statTotalRooms:'총 방 수', statOccupied:'입주', statEmpty:'공실', statRooms:'개',
+        statUnpaid:'미수금', statPaid:'수납완료', statPrepaid:'선납',
+        statCollected:'이번 달 수납', statDeposit:'보증금', statThisMonth:'이번 달', statPrevMonths:'이전 달',
+        chartTitle:'최근 6개월 수익', chartSubtitle:'전기 + 관리비 + 임대료',
+        donutTitle:'현황',
+        attentionTitle:'⚠ 주의 필요', activityTitle:'최근 활동',
+        dashUnpaidNote:'개 방 미수금.', dashAllPaid:'전부 수납완료! 🎉',
+        actPaid:'납부', actPrepaid:'선납',
+        viewAll:'전체 보기', noActivity:'최근 활동 없음',
+        filterAll:'전체', filterUnpaid:'미수금', filterPaid:'수납완료', filterPrepaid:'선납',
+        room:'방', tenant:'세입자', total:'합계', status:'상태', period:'기간',
+        electricity:'전기', oldReading:'이전 검침', newReading:'현재 검침', usage:'사용량',
+        breakdown:'이번 달 내역', rentFee:'임대료', serviceFee:'관리비',
+        electricityFee:'전기요금', totalAmount:'합계', month:'월',
+        markPaid:'✓ 수납 완료', prepaid:'📅 선납 처리',
+        qrBtn:'QR / 영수증', edit:'편집', history:'이력',
+        deposit:'보증금', moveIn:'입주일:', back:'뒤로',
+        selectRoom:'방을 선택하세요', noBills:'청구서 없음',
+        noElecInput:'⚠ 전기 검침 미입력',
+        floor:'층', roomsSubtitle:'개 방', vacantRoom:'공실',
+        collect:'✓ 수납', remind:'알림',
+        revenueTitle:'수익 보고서', revMonth:'월/연', noRevData:'수익 데이터 없음',
+        settingsTitle:'시스템 설정',
+        settingLabels:{ electricity_unit_price:'전기 요금(VND/kWh)', bank_account:'계좌번호', bank_name:'은행', account_holder:'예금주' },
+        editRoom:'방 정보 편집', saveChanges:'저장',
+        rentFee:'임대료', serviceFee:'관리비', depositLabel:'보증금',
+        moveInDate:'입주일', initialReading:'초기 검침', contactInfo:'세입자 & 연락처',
+        invoiceTitle:'임대 청구서', transferContent:'이체 내용',
+        downloadInvoice:'청구서 다운로드', close:'닫기',
+        historyTitle:'방 이력', historySubtitle:'전체 납부 기록', noHistory:'기록 없음',
+        prepaidTitle:'선납 처리', prepaidHint:'선납 월 입력 (방',
+        confirm:'확인', cancel:'취소',
+        search:'방, 세입자 검색...',
+        importCSV:'CSV 가져오기',
+        greeting_morning:'좋은 아침', greeting_afternoon:'안녕하세요', greeting_evening:'좋은 저녁',
+    },
+    ja: {
+        appName:'賃貸管理', dataMonth:'月',
+        tabs:{ dashboard:'概要', rooms:'部屋 & 入居者', bills:'請求書', revenue:'収益', settings:'設定' },
+        status_map:{ unpaid:'未収', paid:'収納済', prepaid:'前払', empty:'空室' },
+        statTotalRooms:'総部屋数', statOccupied:'入居中', statEmpty:'空室', statRooms:'室',
+        statUnpaid:'未収', statPaid:'収納済', statPrepaid:'前払',
+        statCollected:'今月収納', statDeposit:'預り敷金', statThisMonth:'今月', statPrevMonths:'前月',
+        chartTitle:'直近6ヶ月収益', chartSubtitle:'電気 + 管理費 + 家賃',
+        donutTitle:'状況',
+        attentionTitle:'⚠ 要注意', activityTitle:'最近の活動',
+        dashUnpaidNote:'室未収。', dashAllPaid:'全部収納済! 🎉',
+        actPaid:'納付', actPrepaid:'前払',
+        viewAll:'全て表示', noActivity:'活動なし',
+        filterAll:'全て', filterUnpaid:'未収', filterPaid:'収納済', filterPrepaid:'前払',
+        room:'部屋', tenant:'入居者', total:'合計', status:'状態', period:'期間',
+        electricity:'電気', oldReading:'前回検針', newReading:'今回検針', usage:'使用量',
+        breakdown:'今月内訳', rentFee:'家賃', serviceFee:'管理費',
+        electricityFee:'電気代', totalAmount:'合計', month:'月',
+        markPaid:'✓ 収納済にする', prepaid:'📅 前払処理',
+        qrBtn:'QR / 領収書', edit:'編集', history:'履歴',
+        deposit:'敷金', moveIn:'入居日:', back:'戻る',
+        selectRoom:'部屋を選択', noBills:'請求書なし',
+        noElecInput:'⚠ 検針未入力',
+        floor:'階', roomsSubtitle:'室', vacantRoom:'空室',
+        collect:'✓ 収納', remind:'通知',
+        revenueTitle:'収益レポート', revMonth:'月/年', noRevData:'収益データなし',
+        settingsTitle:'システム設定',
+        settingLabels:{ electricity_unit_price:'電気料金(VND/kWh)', bank_account:'口座番号', bank_name:'銀行', account_holder:'口座名義' },
+        editRoom:'部屋情報編集', saveChanges:'保存',
+        rentFee:'家賃', serviceFee:'管理費', depositLabel:'敷金',
+        moveInDate:'入居日', initialReading:'初回検針', contactInfo:'入居者 & 連絡先',
+        invoiceTitle:'賃貸請求書', transferContent:'振込内容',
+        downloadInvoice:'請求書ダウンロード', close:'閉じる',
+        historyTitle:'部屋履歴', historySubtitle:'全納付記録', noHistory:'記録なし',
+        prepaidTitle:'前払処理', prepaidHint:'前払月を入力 (部屋',
+        confirm:'確認', cancel:'キャンセル',
+        search:'部屋・入居者検索...',
+        importCSV:'CSVインポート',
+        greeting_morning:'おはようございます', greeting_afternoon:'こんにちは', greeting_evening:'こんばんは',
+    },
+    zh: {
+        appName:'租金管理', dataMonth:'月',
+        tabs:{ dashboard:'概览', rooms:'房间 & 租户', bills:'账单', revenue:'收入', settings:'设置' },
+        status_map:{ unpaid:'未收款', paid:'已收款', prepaid:'预付款', empty:'空置' },
+        statTotalRooms:'总房间数', statOccupied:'已入住', statEmpty:'空置', statRooms:'间',
+        statUnpaid:'未收款', statPaid:'已收款', statPrepaid:'预付款',
+        statCollected:'本月已收', statDeposit:'押金总额', statThisMonth:'本月', statPrevMonths:'上月',
+        chartTitle:'近6个月收入', chartSubtitle:'电费 + 服务费 + 房租',
+        donutTitle:'状态',
+        attentionTitle:'⚠ 需关注', activityTitle:'最近活动',
+        dashUnpaidNote:'间未收款。', dashAllPaid:'全部收款! 🎉',
+        actPaid:'已付款', actPrepaid:'预付',
+        viewAll:'查看全部', noActivity:'暂无活动',
+        filterAll:'全部', filterUnpaid:'未收款', filterPaid:'已收款', filterPrepaid:'预付款',
+        room:'房间', tenant:'租户', total:'合计', status:'状态', period:'期间',
+        electricity:'用电', oldReading:'上期读数', newReading:'本期读数', usage:'用量',
+        breakdown:'本月明细', rentFee:'房租', serviceFee:'服务费',
+        electricityFee:'电费', totalAmount:'合计', month:'月',
+        markPaid:'✓ 标记已收款', prepaid:'📅 预付处理',
+        qrBtn:'QR / 账单', edit:'编辑', history:'历史',
+        deposit:'押金', moveIn:'入住:', back:'返回',
+        selectRoom:'请选择房间查看详情', noBills:'暂无账单',
+        noElecInput:'⚠ 未录入电表读数',
+        floor:'楼', roomsSubtitle:'间房', vacantRoom:'空置',
+        collect:'✓ 收款', remind:'提醒',
+        revenueTitle:'收入报告', revMonth:'月/年', noRevData:'暂无收入数据',
+        settingsTitle:'系统设置',
+        settingLabels:{ electricity_unit_price:'电费单价(VND/kWh)', bank_account:'银行账号', bank_name:'银行', account_holder:'账户名' },
+        editRoom:'编辑房间信息', saveChanges:'保存',
+        rentFee:'房租', serviceFee:'服务费', depositLabel:'押金',
+        moveInDate:'入住日期', initialReading:'初始读数', contactInfo:'租户 & 联系方式',
+        invoiceTitle:'租金账单', transferContent:'转账备注',
+        downloadInvoice:'下载账单', close:'关闭',
+        historyTitle:'房间历史', historySubtitle:'全部账单记录', noHistory:'暂无记录',
+        prepaidTitle:'预付处理', prepaidHint:'输入预付月份 (房间',
+        confirm:'确认', cancel:'取消',
+        search:'搜索房间、租户...',
+        importCSV:'导入CSV',
+        greeting_morning:'早上好', greeting_afternoon:'下午好', greeting_evening:'晚上好',
+    }
+};
+
+function app() {
+    return {
+        month: {{ month }},
+        year: {{ year }},
+        lang: localStorage.getItem('qlTroLang') || 'vi',
+        activeTab: 'dashboard',
+        billTab: 'all',
+        searchQuery: '',
+        selectedBillId: null,
+        isMobile: false,
+
+        bills: [],
+        rooms: [],
+        settings: {},
+        revenueSummary: [],
+
+        toast: { show: false, message: '', type: 'success' },
+        editRoomModal: { show: false, room: {} },
+        roomHistory: { show: false, room_number: '', records: [] },
+        qrModal: { show: false, room: '', amount: 0, room_id: 0, rent_fee: 0, service_fee: 0, elec_fee: 0, elec_usage: 0 },
+        confirmModal: { show: false, title: '', message: '', callback: null },
+        prepaidModal: { show: false, room_id: 0, room_number: '', months: '' },
+
+        langFlags: { vi:'🇻🇳', en:'🇺🇸', ko:'🇰🇷', ja:'🇯🇵', zh:'🇨🇳' },
+        langNames: { vi:'Tiếng Việt', en:'English', ko:'한국어', ja:'日本語', zh:'中文' },
+
+        get t() { return TRANSLATIONS[this.lang]; },
+
+        get tabs() {
+            return [
+                { id: 'dashboard', label: this.t.tabs.dashboard },
+                { id: 'rooms',     label: this.t.tabs.rooms },
+                { id: 'bills',     label: this.t.tabs.bills },
+                { id: 'revenue',   label: this.t.tabs.revenue },
+                { id: 'settings',  label: this.t.tabs.settings },
+            ];
+        },
+        get mobileTabs() {
+            return [
+                { id: 'dashboard', label: this.t.tabs.dashboard, icon: 'fas fa-chart-pie' },
+                { id: 'rooms',     label: this.t.tabs.rooms,     icon: 'fas fa-door-open' },
+                { id: 'bills',     label: this.t.tabs.bills,     icon: 'fas fa-file-invoice' },
+                { id: 'settings',  label: this.t.tabs.settings,  icon: 'fas fa-sliders' },
+            ];
+        },
+
+        get selectedBill() {
+            if (!this.selectedBillId) return null;
+            return this.bills.find(b => b.room_id === this.selectedBillId) || null;
+        },
+
+        get filteredBills() {
+            let list = this.bills.filter(b => b.is_occupied);
+            if (this.billTab !== 'all') list = list.filter(b => b.status === this.billTab);
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase();
+                list = list.filter(b =>
+                    (b.room_number || '').toLowerCase().includes(q) ||
+                    (b.contact_info || '').toLowerCase().includes(q)
+                );
+            }
+            return list;
+        },
+
+        get stats() {
+            const occupied = this.bills.filter(b => b.is_occupied);
+            const paidBills = occupied.filter(b => b.status === 'paid' || b.status === 'prepaid');
+            return {
+                totalRooms: this.rooms.length,
+                occupiedCount: this.rooms.filter(r => r.is_occupied).length,
+                emptyCount: this.rooms.filter(r => !r.is_occupied).length,
+                unpaidCount: occupied.filter(b => b.status === 'unpaid').length,
+                paidCount: occupied.filter(b => b.status === 'paid').length,
+                prepaidCount: occupied.filter(b => b.status === 'prepaid').length,
+                collectedAmount: paidBills.reduce((s, b) => s + (b.total || 0), 0),
+                depositTotal: this.rooms.filter(r => r.is_occupied).reduce((s, r) => s + (r.deposit || 0), 0),
+            };
+        },
+
+        get attentionRooms() {
+            return this.bills.filter(b => b.status === 'unpaid' && b.is_occupied).slice(0, 3);
+        },
+
+        get recentActivity() {
+            return this.bills
+                .filter(b => (b.status === 'paid' || b.status === 'prepaid') && b.paid_at)
+                .map(b => ({ room: b.room_number, type: b.status, amount: b.total, when: this.relativeTime(b.paid_at) }))
+                .slice(0, 5);
+        },
+
+        get dashboardChart() {
+            const recent = [...this.revenueSummary].reverse().slice(-6);
+            if (!recent.length) return [];
+            const max = Math.max(...recent.map(r => r.total_revenue), 1);
+            return recent.map(r => ({
+                label: 'T' + r.month,
+                v: r.total_revenue,
+                pct: Math.round((r.total_revenue / max) * 90),
+                current: r.month === this.month && r.year === this.year
+            }));
+        },
+
+        get revChartData() {
+            const recent = [...this.revenueSummary].reverse().slice(-12);
+            if (!recent.length) return [];
+            const max = Math.max(...recent.map(r => r.total_revenue), 1);
+            return recent.map(r => ({
+                label: 'T' + r.month,
+                v: r.total_revenue,
+                pct: Math.round((r.total_revenue / max) * 90),
+                current: r.month === this.month && r.year === this.year
+            }));
+        },
+
+        get donut() {
+            const occupied = this.bills.filter(b => b.is_occupied);
+            const total = occupied.length || 1;
+            const paidCount = occupied.filter(b => b.status === 'paid').length;
+            const prepaidCount = occupied.filter(b => b.status === 'prepaid').length;
+            const unpaidCount = occupied.filter(b => b.status === 'unpaid').length;
+            const paid = parseFloat((paidCount / total * 100).toFixed(2));
+            const prepaid = parseFloat((prepaidCount / total * 100).toFixed(2));
+            const unpaid = parseFloat((unpaidCount / total * 100).toFixed(2));
+            return {
+                paid, prepaid, unpaid,
+                paidOffset: 0,
+                prepaidOffset: paid,
+                unpaidOffset: paid + prepaid,
+                paidCount, prepaidCount, unpaidCount,
+                paidPct: Math.round((paidCount + prepaidCount) / total * 100)
+            };
+        },
+
+        get floorGroups() {
+            const floorMap = {};
+            let filtered = this.rooms;
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase();
+                filtered = this.rooms.filter(r =>
+                    (r.room_number || '').toLowerCase().includes(q) ||
+                    (r.contact_info || '').toLowerCase().includes(q)
+                );
+            }
+            filtered.forEach(r => {
+                const fl = (r.room_number || '?')[0];
+                if (!floorMap[fl]) floorMap[fl] = [];
+                floorMap[fl].push(r);
+            });
+            return Object.keys(floorMap).sort().map(fl => ({
+                num: fl,
+                rooms: floorMap[fl],
+                total: floorMap[fl].length,
+                occupied: floorMap[fl].filter(r => r.is_occupied).length
+            }));
+        },
+
+        async init() {
+            this.isMobile = window.innerWidth < 768;
+            window.addEventListener('resize', () => { this.isMobile = window.innerWidth < 768; });
+            await Promise.all([this.loadData(), this.loadSettings(), this.loadRooms()]);
+            this.loadRevenueSummary();
+        },
+
+        setLang(l) { this.lang = l; localStorage.setItem('qlTroLang', l); },
+
+        getGreeting() {
+            const h = new Date().getHours();
+            if (h < 12) return this.t.greeting_morning;
+            if (h < 18) return this.t.greeting_afternoon;
+            return this.t.greeting_evening;
+        },
+
+        todayStr() {
+            return new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+        },
+
+        relativeTime(ts) {
+            if (!ts) return '';
+            const diff = (Date.now() - new Date(ts)) / 3600000;
+            if (diff < 1) return '< 1h';
+            if (diff < 24) return Math.round(diff) + 'h';
+            return Math.round(diff / 24) + 'd';
+        },
+
+        showToast(msg, type = 'success') {
+            this.toast = { show: true, message: msg, type };
+            setTimeout(() => { this.toast.show = false; }, 3000);
+        },
+
+        async loadData() {
+            const res = await fetch(`/api/bills?month=${this.month}&year=${this.year}`);
+            this.bills = await res.json();
+            if (this.selectedBillId && !this.bills.find(b => b.room_id === this.selectedBillId))
+                this.selectedBillId = null;
+        },
+
+        async loadRooms() {
+            const res = await fetch('/api/rooms');
+            this.rooms = await res.json();
+        },
+
+        async loadSettings() {
+            const res = await fetch('/api/settings');
+            this.settings = await res.json();
+        },
+
+        async loadRevenueSummary() {
+            const res = await fetch('/api/bills/revenue/summary');
+            this.revenueSummary = (await res.json()).reverse();
+        },
+
+        getBillForRoom(room) {
+            return this.bills.find(b => b.room_id === room.id) || null;
+        },
+
+        async handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                this.showToast('Đang import...');
+                const res = await fetch('/api/import-csv', { method: 'POST', body: formData });
+                const result = await res.json();
+                if (res.ok) {
+                    this.showToast(result.message);
+                    await this.loadData();
+                    this.loadRevenueSummary();
+                } else {
+                    this.showToast(result.detail || 'Lỗi import', 'error');
+                }
+            } catch (e) {
+                this.showToast('Lỗi kết nối server', 'error');
+            } finally {
+                event.target.value = '';
+            }
+        },
+
+        async saveSettings() {
+            const data = Object.keys(this.settings).map(key => ({ key, value: this.settings[key] }));
+            await fetch('/api/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            this.showToast(this.t.settingOk || 'Đã lưu cài đặt!');
+            this.loadData();
+        },
+
+        async openEditModal(bill) {
+            const room = this.rooms.find(r => r.id === bill.room_id);
+            if (room) {
+                this.editRoomModal.room = {
+                    ...room,
+                    rent_price: bill.rent_fee,
+                    service_fee: bill.service_fee,
+                    deposit: bill.deposit,
+                    contact_info: bill.contact_info,
+                    move_in_date: bill.move_in_date,
+                    old_reading: bill.old_reading
+                };
+                this.editRoomModal.show = true;
+            }
+        },
+
+        async openRoomEdit(room) {
+            const bill = this.getBillForRoom(room);
+            if (bill) {
+                await this.openEditModal(bill);
+            } else {
+                this.editRoomModal.room = { ...room };
+                this.editRoomModal.show = true;
+            }
+        },
+
+        async saveQuickEdit() {
+            const room = this.editRoomModal.room;
+            const res = await fetch('/api/rooms/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...room, month: this.month, year: this.year })
+            });
+            if (res.ok) {
+                this.showToast(`Đã cập nhật phòng ${room.room_number}`);
+                this.editRoomModal.show = false;
+                await this.loadData();
+                await this.loadRooms();
+            }
+        },
+
+        async showHistory(room) {
+            const res = await fetch(`/api/rooms/${room.id}/history`);
+            this.roomHistory.records = await res.json();
+            this.roomHistory.room_number = room.room_number;
+            this.editRoomModal.show = false;
+            this.roomHistory.show = true;
+        },
+
+        async updateElectricity(bill) {
+            await fetch('/api/electricity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ room_id: bill.room_id, month: this.month, year: this.year, new_reading: bill.new_reading })
+            });
+            this.showToast(`Đã lưu số điện P.${bill.room_number}`);
+            await this.loadData();
+        },
+
+        async updateElectricityByRoom(room, newReading) {
+            const bill = this.getBillForRoom(room);
+            if (!bill) return;
+            bill.new_reading = parseInt(newReading) || 0;
+            await this.updateElectricity(bill);
+        },
+
+        async toggleStatus(bill) {
+            if (bill.status === 'unpaid') {
+                this.quickCollect(bill);
+            } else if (bill.status === 'paid') {
+                this.prepaidModal = { show: true, room_id: bill.room_id, room_number: bill.room_number, months: '' };
+            }
+        },
+
+        async quickCollect(bill) {
+            this.confirmModal = {
+                show: true,
+                title: this.t.confirmCollect || 'Thu tiền phòng',
+                message: `Xác nhận phòng ${bill.room_number} đã đóng đủ tiền tháng ${this.month}?`,
+                callback: async () => {
+                    await fetch('/api/bills/mark-paid', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ room_id: bill.room_id, month: this.month, year: this.year })
+                    });
+                    this.showToast(`Đã thu tiền phòng ${bill.room_number}`);
+                    await this.loadData();
+                }
+            };
+        },
+
+        async confirmPrepaid() {
+            if (!this.prepaidModal.months) return;
+            await fetch('/api/bills/mark-prepaid', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    room_id: this.prepaidModal.room_id,
+                    months: this.prepaidModal.months.split(',').map(m => parseInt(m.trim())).filter(Boolean),
+                    year: this.year
+                })
+            });
+            this.prepaidModal.show = false;
+            this.showToast('Đã lưu đóng tiền trước!');
+            await this.loadData();
+        },
+
+        showQR(bill) {
+            this.qrModal = {
+                show: true, room: bill.room_number, amount: bill.total, room_id: bill.room_id,
+                rent_fee: bill.rent_fee, service_fee: bill.service_fee, elec_fee: bill.electricity_fee,
+                elec_usage: bill.is_fixed ? 0 : (bill.new_reading - bill.old_reading || 0)
+            };
+        },
+
+        getQRUrl() {
+            const bank = this.settings.bank_name || 'MB';
+            const account = this.settings.bank_account || '';
+            const desc = encodeURIComponent(`PHONG ${this.qrModal.room} THANG ${this.month}`);
+            return `https://qr.sepay.vn/img?bank=${bank}&acc=${account}&template=compact&amount=${this.qrModal.amount}&des=${desc}`;
+        },
+
+        async saveInvoiceAsImage() {
+            const element = document.getElementById('invoice-content');
+            this.showToast('Đang tạo ảnh hóa đơn...');
+            try {
+                const canvas = await html2canvas(element, { useCORS: true, scale: 3, backgroundColor: '#ffffff', logging: false, width: 800 });
+                const link = document.createElement('a');
+                link.download = `HoaDon_Phong${this.qrModal.room}_Thang${this.month}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+                this.showToast('Ảnh đã được tải về!');
+            } catch (e) {
+                this.showToast('Lỗi khi tạo ảnh!', 'error');
+            }
+        },
+
+        prevMonth() {
+            if (this.year === 2025 && this.month === 8) { this.showToast('Dữ liệu bắt đầu từ tháng 8/2025'); return; }
+            if (this.month === 1) { this.month = 12; this.year--; } else { this.month--; }
+            this.updateUrl(); this.loadData();
+        },
+
+        nextMonth() {
+            const now = new Date();
+            let maxM = now.getMonth() + 2, maxY = now.getFullYear();
+            if (maxM > 12) { maxM = 1; maxY++; }
+            if (this.year > maxY || (this.year === maxY && this.month >= maxM)) {
+                this.showToast(`Tối đa đến tháng ${maxM}/${maxY}`); return;
+            }
+            if (this.month === 12) { this.month = 1; this.year++; } else { this.month++; }
+            this.updateUrl(); this.loadData();
+        },
+
+        updateUrl() {
+            const url = new URL(window.location);
+            url.searchParams.set('month', this.month);
+            url.searchParams.set('year', this.year);
+            window.history.pushState({}, '', url);
+        },
+
+        handleKeydown(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'ArrowLeft') this.prevMonth();
+            if (e.key === 'ArrowRight') this.nextMonth();
+        },
+
+        getFloorBg(roomNumber) {
+            const f = (roomNumber || '?')[0];
+            return { '1':'bg-blue-600','2':'bg-cyan-500','3':'bg-teal-500','4':'bg-emerald-500','5':'bg-amber-500','6':'bg-orange-500','7':'bg-red-600' }[f] || 'bg-gray-600';
+        },
+
+        getFloorText(roomNumber) {
+            const f = (roomNumber || '?')[0];
+            return { '1':'text-blue-600','2':'text-cyan-500','3':'text-teal-500','4':'text-emerald-500','5':'text-amber-500','6':'text-orange-500','7':'text-red-600' }[f] || 'text-gray-600';
+        },
+
+        formatMoney(amount) { return new Intl.NumberFormat('vi-VN').format(amount || 0) + 'đ'; },
+
+        formatInput(val) {
+            if (val === null || val === undefined || val === '') return '';
+            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        },
+
+        parseInput(val) { return parseInt((val || '').toString().replace(/\./g, '')) || 0; },
+
+        formatDate(val) {
+            let v = val.replace(/\D/g, '').slice(0, 8);
+            if (v.length > 4) return v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
+            if (v.length > 2) return v.slice(0,2) + '/' + v.slice(2);
+            return v;
+        },
+
+        fixDate(room) {
+            if (!room.move_in_date) return;
+            let v = room.move_in_date.replace(/\D/g, '');
+            if (v.length === 6) room.move_in_date = v.slice(0,2) + '/' + v.slice(2,4) + '/20' + v.slice(4);
+        },
+
+        fixMoney(room, field) {
+            if (room[field] > 0 && room[field] < 10000) room[field] = room[field] * 1000;
+        },
+    };
+}
+</script>
+</body>
+</html>
