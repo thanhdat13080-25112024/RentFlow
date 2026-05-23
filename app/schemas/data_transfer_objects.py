@@ -2,18 +2,18 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
-class ElectricityInput(BaseModel):
+class ElectricityReadingCreate(BaseModel):
     room_id: int
     month: int
     year: int
     new_reading: int
 
-class PaidInput(BaseModel):
+class BillPaidUpdate(BaseModel):
     room_id: int
     month: int
     year: int
 
-class PrepaidInput(BaseModel):
+class BillPrepaidUpdate(BaseModel):
     room_id: int
     months: List[int]
     year: int
@@ -22,11 +22,11 @@ class SettingUpdate(BaseModel):
     key: str
     value: str
 
-class SettingResponse(BaseModel):
+class SettingRead(BaseModel):
     key: str
     value: str
 
-class RoomResponse(BaseModel):
+class RoomRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -55,7 +55,7 @@ class RoomUpdate(BaseModel):
     year: Optional[int] = None
     old_reading: Optional[int] = None
 
-class RevenueSummaryResponse(BaseModel):
+class RevenueSummaryRead(BaseModel):
     year: int
     month: int
     total_elec: int
@@ -63,7 +63,7 @@ class RevenueSummaryResponse(BaseModel):
     total_rent: int
     total_revenue: int
 
-class BillResponse(BaseModel):
+class BillRead(BaseModel):
     room_id: int
     room_number: str
     rent_fee: int
@@ -80,7 +80,7 @@ class BillResponse(BaseModel):
     deposit: int
     is_fixed: bool
 
-class RoomHistoryResponse(BaseModel):
+class RoomHistoryRead(BaseModel):
     month: int
     year: int
     tenant_name: Optional[str]

@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.entities import Room, ElectricityReading, Setting
-from app.schemas.data_transfer_objects import ElectricityInput
+from app.schemas.data_transfer_objects import ElectricityReadingCreate
 from app.services.billing import update_bill
 
 router = APIRouter()
 
 @router.post("/")
-async def update_electricity(data: ElectricityInput, db: Session = Depends(get_db)):
+async def update_electricity(data: ElectricityReadingCreate, db: Session = Depends(get_db)):
     room = db.query(Room).filter(Room.id == data.room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")

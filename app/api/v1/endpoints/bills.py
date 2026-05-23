@@ -7,7 +7,7 @@ import io
 import csv
 from app.core.database import get_db
 from app.models.entities import Room, MonthlyBill, ElectricityReading, Setting
-from app.schemas.data_transfer_objects import PaidInput, PrepaidInput
+from app.schemas.data_transfer_objects import BillPaidUpdate, BillPrepaidUpdate
 from app.services.billing import update_bill
 
 router = APIRouter()
@@ -101,7 +101,7 @@ async def get_bills(month: int, year: int, db: Session = Depends(get_db)):
     return results
 
 @router.post("/mark-paid")
-async def mark_paid(data: PaidInput, db: Session = Depends(get_db)):
+async def mark_paid(data: BillPaidUpdate, db: Session = Depends(get_db)):
     bill = db.query(MonthlyBill).filter(
         MonthlyBill.room_id == data.room_id,
         MonthlyBill.month == data.month,
@@ -128,7 +128,7 @@ async def mark_paid(data: PaidInput, db: Session = Depends(get_db)):
     return {"message": "Đã đánh dấu thanh toán"}
 
 @router.post("/mark-prepaid")
-async def mark_prepaid(data: PrepaidInput, db: Session = Depends(get_db)):
+async def mark_prepaid(data: BillPrepaidUpdate, db: Session = Depends(get_db)):
     room = db.query(Room).filter(Room.id == data.room_id).first()
     if not room: raise HTTPException(status_code=404, detail="Room not found")
 

@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
 from app.models.entities import Room, ElectricityReading, Setting, MonthlyBill
-from app.schemas.data_transfer_objects import RoomUpdate, BillResponse, RoomHistoryResponse, RoomResponse
+from app.schemas.data_transfer_objects import RoomUpdate, BillRead, RoomHistoryRead, RoomRead
 from app.services.billing import update_bill
 
 router = APIRouter()
 
-@router.get("/", response_model=List[RoomResponse])
+@router.get("/", response_model=List[RoomRead])
 async def get_rooms(db: Session = Depends(get_db)):
     return db.query(Room).all()
 
@@ -53,7 +53,7 @@ async def update_room(data: RoomUpdate, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Cập nhật thông tin thành công"}
 
-@router.get("/{room_id}/history", response_model=List[RoomHistoryResponse])
+@router.get("/{room_id}/history", response_model=List[RoomHistoryRead])
 async def get_room_history(room_id: int, db: Session = Depends(get_db)):
     bills = db.query(MonthlyBill).filter(MonthlyBill.room_id == room_id).order_by(MonthlyBill.year.desc(), MonthlyBill.month.desc()).all()
     readings = db.query(ElectricityReading).filter(ElectricityReading.room_id == room_id).all()
