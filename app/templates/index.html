@@ -11,22 +11,22 @@
     {% include 'components/modals.html' %}
 
     <!-- ── HEADER ── -->
-    <header class="bg-white border-b sticky top-0 z-40 shadow-sm">
+    <header class="header-root sticky top-0 z-40">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
             <!-- Logo -->
             <div class="flex items-center gap-2.5 shrink-0">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <div class="logo-icon w-8 h-8 rounded-lg flex items-center justify-center">
                     <i class="fas fa-house-chimney-user text-white text-sm"></i>
                 </div>
                 <span class="font-extrabold text-gray-800 tracking-tight hidden lg:block" x-text="t.appName"></span>
             </div>
 
             <!-- Tab nav (desktop) -->
-            <nav class="hidden md:flex items-center bg-gray-100 rounded-xl p-1 gap-0.5 ml-2">
+            <nav class="hidden md:flex items-center header-nav rounded-xl p-1 gap-0.5 ml-2">
                 <template x-for="tab in tabs" :key="tab.id">
                     <button @click="activeTab = tab.id"
-                            :class="activeTab === tab.id ? 'tab-active' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'"
-                            class="px-4 py-1.5 rounded-lg text-sm font-semibold transition"
+                            :class="activeTab === tab.id ? 'tab-active' : ''"
+                            class="tab-btn px-4 py-1.5 rounded-lg text-sm font-semibold"
                             x-text="tab.label"></button>
                 </template>
             </nav>
@@ -34,25 +34,25 @@
             <div class="flex-1"></div>
 
             <!-- Search -->
-            <div class="hidden md:flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 w-52 text-sm text-gray-400 cursor-pointer hover:border-blue-300 transition"
+            <div class="search-box hidden md:flex items-center gap-2 rounded-lg px-3 py-1.5 w-52 text-sm cursor-pointer"
                  @click="document.getElementById('globalSearch').focus()">
-                <i class="fas fa-magnifying-glass text-gray-400 text-xs"></i>
+                <i class="fas fa-magnifying-glass text-xs"></i>
                 <input id="globalSearch" x-model="searchQuery" :placeholder="t.search"
                        class="bg-transparent outline-none flex-1 text-gray-700 text-sm">
             </div>
 
             <!-- Month nav -->
-            <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
-                <button @click="prevMonth()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition text-gray-500 hover:text-blue-600 active:scale-90">
+            <div class="month-nav-wrap flex items-center gap-1 rounded-xl p-1">
+                <button @click="prevMonth()" class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
                     <i class="fas fa-chevron-left text-xs"></i>
                 </button>
-                <div class="px-3 py-1 bg-white rounded-lg shadow-sm border border-blue-100 text-center min-w-[110px]">
-                    <span class="block text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-0.5" x-text="t.dataMonth"></span>
-                    <span class="text-sm font-extrabold text-blue-600">
+                <div class="month-display px-3 py-1 rounded-lg text-center min-w-[110px]">
+                    <span class="month-label" x-text="t.dataMonth"></span>
+                    <span class="month-value">
                         <span x-text="month"></span> / <span x-text="year"></span>
                     </span>
                 </div>
-                <button @click="nextMonth()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition text-gray-500 hover:text-blue-600 active:scale-90">
+                <button @click="nextMonth()" class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
                     <i class="fas fa-chevron-right text-xs"></i>
                 </button>
             </div>
@@ -60,20 +60,20 @@
             <!-- Lang switcher -->
             <div class="relative mr-2" x-data="{ open: false }">
                 <button @click="open = !open"
-                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-semibold text-gray-700 transition">
+                        class="lang-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg">
                     <span x-text="langFlags[lang]"></span>
                     <span class="hidden sm:block uppercase" x-text="lang"></span>
-                    <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                    <i class="fas fa-chevron-down text-xs text-gray-400"></i>
                 </button>
                 <div x-show="open" @click.outside="open = false" x-cloak
-                     class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl py-1 w-36 z-50 slide-up">
+                     class="lang-dropdown absolute right-0 top-full mt-1 rounded-xl py-1 w-36 z-50 slide-up">
                     <template x-for="l in ['vi','en','ko','ja','zh']" :key="l">
                         <button @click="setLang(l); open = false"
-                                class="flex items-center gap-2.5 w-full px-4 py-2 hover:bg-gray-50 text-sm font-semibold transition"
-                                :class="lang === l ? 'text-blue-600' : 'text-gray-700'">
+                                class="lang-option flex items-center gap-2.5 w-full px-4 py-2.5"
+                                :class="lang === l ? 'lang-option--active' : ''">
                             <span x-text="langFlags[l]"></span>
                             <span x-text="langNames[l]"></span>
-                            <i x-show="lang === l" class="fas fa-check text-blue-600 ml-auto text-xs"></i>
+                            <i x-show="lang === l" class="fas fa-check ml-auto text-xs" style="color: var(--color-primary)"></i>
                         </button>
                     </template>
                 </div>
@@ -85,13 +85,13 @@
     </header>
 
     <!-- ── MOBILE BOTTOM NAV ── -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t md:hidden flex">
+    <nav class="mobile-nav fixed bottom-0 left-0 right-0 z-40 md:hidden flex">
         <template x-for="tab in mobileTabs" :key="tab.id">
             <button @click="activeTab = tab.id"
-                    class="flex-1 flex flex-col items-center gap-0.5 py-2 transition"
-                    :class="activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'">
+                    class="mobile-tab flex-1 flex flex-col items-center gap-0.5 py-2"
+                    :class="activeTab === tab.id ? 'mobile-tab--active' : ''">
                 <i class="text-lg" :class="tab.icon"></i>
-                <span class="text-[10px] font-semibold" x-text="tab.label"></span>
+                <span class="mobile-tab__label" x-text="tab.label"></span>
             </button>
         </template>
     </nav>

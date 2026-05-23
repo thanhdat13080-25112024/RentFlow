@@ -228,11 +228,18 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  transition: box-shadow var(--duration-normal) var(--ease-out);
+  transition: box-shadow var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
 }
 
 .stat-tile:hover {
   box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.stat-tile--success-soft {
+  background: var(--green-50);
+  border-color: var(--green-200);
 }
 
 .stat-tile__icon {
@@ -249,7 +256,7 @@
 
 .stat-tile__label {
   font-size: var(--text-xs);
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-text-tertiary);
@@ -257,17 +264,36 @@
 }
 
 .stat-tile__value {
-  font-size: var(--text-xl);
+  font-size: var(--text-2xl);
   font-weight: 800;
   line-height: var(--leading-xl);
   color: var(--color-text-primary);
+}
+
+.stat-tile__value--money {
+  font-size: var(--text-xl);
 }
 
 .stat-tile__sub {
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);
   line-height: var(--leading-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* Tile icon background variants */
+.tile-icon--neutral      { background: var(--neutral-500); }
+.tile-icon--neutral-strong { background: var(--neutral-700); }
+.tile-icon--danger       { background: var(--red-600); }
+.tile-icon--success      { background: var(--green-600); }
+.tile-icon--primary      { background: var(--color-primary); }
+
+/* Tile value text-color variants */
+.tile-value--danger      { color: var(--red-600); }
+.tile-value--success     { color: var(--green-600); }
+.tile-value--primary     { color: var(--color-primary); }
 
 /* ── Status badges ────────────────────────────────────────────────
    Thay thế: px-2 py-0.5 rounded-full text-[10px] font-bold
@@ -524,4 +550,240 @@
 .focus-ring:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* ================================================================
+   HEADER & NAVIGATION COMPONENTS
+   ================================================================ */
+
+/* ── Header shell ─────────────────────────────────────────────────
+   Thay thế: bg-white border-b shadow-sm
+─────────────────────────────────────────────────────────────────── */
+.header-root {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── Logo icon ────────────────────────────────────────────────────
+   Thay thế: bg-blue-600 shadow-sm
+─────────────────────────────────────────────────────────────────── */
+.logo-icon {
+  background: var(--color-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── Tab nav pill wrapper ─────────────────────────────────────────
+   Thay thế: bg-gray-100
+─────────────────────────────────────────────────────────────────── */
+.header-nav {
+  background: var(--neutral-100);
+}
+
+/* ── Tab button inactive ──────────────────────────────────────────
+   Thay thế: text-gray-500 hover:text-gray-700 hover:bg-gray-200
+   Dùng :not(.tab-active) để tránh conflict specificity mà không
+   cần !important.
+─────────────────────────────────────────────────────────────────── */
+.tab-btn {
+  color: var(--color-text-secondary);
+  transition: background var(--duration-fast) var(--ease-out),
+              color      var(--duration-fast) var(--ease-out);
+}
+
+.tab-btn:not(.tab-active):hover {
+  background: var(--neutral-200);
+  color: var(--color-text-primary);
+}
+
+/* ── Tab active (chuyển từ base.html <style>) ─────────────────────
+   Định nghĩa ở đây thay vì inline <style> để dùng design tokens.
+─────────────────────────────────────────────────────────────────── */
+.tab-active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Search box ───────────────────────────────────────────────────
+   Khác với month-nav: trắng, viền mỏng — trông như input field.
+   Thay thế: bg-gray-100 border border-gray-200 hover:border-blue-300
+─────────────────────────────────────────────────────────────────── */
+.search-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow   var(--duration-fast) var(--ease-out);
+}
+
+.search-box:hover:not(:focus-within) {
+  border-color: var(--neutral-300);
+}
+
+.search-box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* ── Month nav wrapper ────────────────────────────────────────────
+   Khác với search: nền xanh nhạt + viền blue-100 — nổi bật hơn,
+   truyền đạt "đây là control quan trọng, không phải input".
+   Thay thế: bg-gray-100
+─────────────────────────────────────────────────────────────────── */
+.month-nav-wrap {
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary-muted);
+}
+
+/* ── Month display box ────────────────────────────────────────────
+   Thay thế: bg-white shadow-sm border border-blue-100
+─────────────────────────────────────────────────────────────────── */
+.month-display {
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary-muted);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── Month label ("THÁNG") ────────────────────────────────────────
+   Thay thế: text-[10px] text-blue-400 font-bold uppercase
+   tracking-widest leading-none mb-0.5 block
+   Fix: 10px → 12px (var(--text-xs))
+─────────────────────────────────────────────────────────────────── */
+.month-label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blue-400);
+  line-height: 1;
+  margin-bottom: 0.125rem;
+}
+
+/* ── Month value ("5 / 2026") ─────────────────────────────────────
+   Thay thế: text-sm font-extrabold text-blue-600
+─────────────────────────────────────────────────────────────────── */
+.month-value {
+  font-size: var(--text-sm);
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+/* ── Month arrow buttons ──────────────────────────────────────────
+   Thay thế: text-gray-500 hover:bg-white hover:shadow-sm
+   hover:text-blue-600 active:scale-90 transition
+─────────────────────────────────────────────────────────────────── */
+.month-arrow {
+  color: var(--color-text-secondary);
+  transition: background var(--duration-fast) var(--ease-out),
+              color      var(--duration-fast) var(--ease-out),
+              transform  var(--duration-fast) var(--ease-out);
+}
+
+.month-arrow:hover {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.month-arrow:active {
+  transform: scale(0.88);
+}
+
+/* ── Lang switcher trigger button ─────────────────────────────────
+   Thay thế: border border-gray-200 bg-white hover:bg-gray-50
+   text-gray-700 text-sm font-semibold transition
+─────────────────────────────────────────────────────────────────── */
+.lang-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition: background  var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.lang-btn:hover {
+  background: var(--neutral-50);
+  border-color: var(--neutral-300);
+}
+
+.lang-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Lang dropdown ────────────────────────────────────────────────
+   Thay thế: bg-white border border-gray-200 shadow-xl
+─────────────────────────────────────────────────────────────────── */
+.lang-dropdown {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-overlay);
+}
+
+/* ── Lang option item ─────────────────────────────────────────────
+   Thay thế: hover:bg-gray-50 text-gray-700 / text-blue-600 transition
+─────────────────────────────────────────────────────────────────── */
+.lang-option {
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.lang-option:hover {
+  background: var(--neutral-50);
+}
+
+.lang-option--active {
+  color: var(--color-primary);
+}
+
+/* ── Mobile bottom nav ────────────────────────────────────────────
+   Thay thế: bg-white border-t
+   Thêm: env(safe-area-inset-bottom) cho iPhone notch/home indicator
+─────────────────────────────────────────────────────────────────── */
+.mobile-nav {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border-subtle);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Mobile tab button ────────────────────────────────────────────
+   Thay thế: text-gray-400 / text-blue-600 transition
+   Thêm: position relative cho ::before indicator
+─────────────────────────────────────────────────────────────────── */
+.mobile-tab {
+  position: relative;
+  color: var(--color-text-tertiary);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.mobile-tab--active {
+  color: var(--color-primary);
+}
+
+/* Active indicator: thin top-border accent, centered 60% chiều rộng */
+.mobile-tab--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+/* ── Mobile tab label ─────────────────────────────────────────────
+   Thay thế: text-[10px] font-semibold
+   Fix: 10px → var(--text-xs) = 12px
+─────────────────────────────────────────────────────────────────── */
+.mobile-tab__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
 }
