@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.core.config import settings
-from app.core.database import engine, Base, SessionLocal, get_db
+from app.db import engine, Base, SessionLocal, get_db
 from app.api.v1.api import api_router
 from app.services.database_seeder import seed_initial_data
 from app.core.security import get_current_user
