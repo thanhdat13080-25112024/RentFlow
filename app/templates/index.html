@@ -92,7 +92,7 @@
                            placeholder="DD/MM/YYYY"
                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                 </div>
-                <div x-show="month === 8 && year === 2025" class="col-span-2">
+                <div x-show="roomHistory.records && roomHistory.records.length > 0 && month === roomHistory.records[roomHistory.records.length-1].month && year === roomHistory.records[roomHistory.records.length-1].year" class="col-span-2">
                     <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5" x-text="t.initialReading"></label>
                     <input type="number" x-model.number="editRoomModal.room.old_reading"
                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-blue-600 font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
@@ -1566,7 +1566,6 @@ function app() {
         },
 
         prevMonth() {
-            if (this.year === 2025 && this.month === 8) { this.showToast('Dữ liệu bắt đầu từ tháng 8/2025'); return; }
             if (this.month === 1) { this.month = 12; this.year--; } else { this.month--; }
             this.updateUrl(); this.loadData();
         },
