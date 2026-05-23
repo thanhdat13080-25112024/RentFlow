@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models import ElectricityReading, Room, Setting
-from app.schemas.data_transfer_objects import ElectricityReadingCreate
+from app.schemas import ElectricityReadingCreate
 from app.services.billing import update_bill
 
 router = APIRouter()

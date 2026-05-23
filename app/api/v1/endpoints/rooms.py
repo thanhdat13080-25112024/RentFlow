@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.db import get_db
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
-from app.schemas.data_transfer_objects import RoomUpdate, BillRead, RoomHistoryRead, RoomRead
+from app.schemas import BillRead, RoomHistoryRead, RoomRead, RoomUpdate
 from app.services.billing import update_bill
 
 router = APIRouter()

@@ -7,7 +7,7 @@ import io
 import csv
 from app.db import get_db
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
-from app.schemas.data_transfer_objects import BillPaidUpdate, BillPrepaidUpdate
+from app.schemas import BillPaidUpdate, BillPrepaidUpdate
 from app.services.billing import update_bill
 
 router = APIRouter()

@@ -1,30 +1,8 @@
-from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
 from datetime import datetime
+from typing import Optional
 
-class ElectricityReadingCreate(BaseModel):
-    room_id: int
-    month: int
-    year: int
-    new_reading: int
+from pydantic import BaseModel, ConfigDict
 
-class BillPaidUpdate(BaseModel):
-    room_id: int
-    month: int
-    year: int
-
-class BillPrepaidUpdate(BaseModel):
-    room_id: int
-    months: List[int]
-    year: int
-
-class SettingUpdate(BaseModel):
-    key: str
-    value: str
-
-class SettingRead(BaseModel):
-    key: str
-    value: str
 
 class RoomRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -39,6 +17,7 @@ class RoomRead(BaseModel):
     electricity_type: str
     fixed_electricity_fee: int
     is_occupied: bool
+
 
 class RoomUpdate(BaseModel):
     id: int
@@ -55,30 +34,6 @@ class RoomUpdate(BaseModel):
     year: Optional[int] = None
     old_reading: Optional[int] = None
 
-class RevenueSummaryRead(BaseModel):
-    year: int
-    month: int
-    total_elec: int
-    total_service: int
-    total_rent: int
-    total_revenue: int
-
-class BillRead(BaseModel):
-    room_id: int
-    room_number: str
-    rent_fee: int
-    service_fee: int
-    electricity_fee: int
-    old_reading: int
-    new_reading: int
-    total: int
-    status: str
-    is_occupied: bool
-    paid_at: Optional[datetime]
-    contact_info: Optional[str]
-    move_in_date: Optional[str]
-    deposit: int
-    is_fixed: bool
 
 class RoomHistoryRead(BaseModel):
     month: int
