@@ -39,64 +39,70 @@
 
     <!-- 6 stat tiles -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
-            <div class="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-door-open text-white text-sm"></i>
+        <!-- Tổng phòng — neutral -->
+        <div class="stat-tile">
+            <div class="stat-tile__icon tile-icon--neutral">
+                <i class="fas fa-door-open"></i>
             </div>
-            <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statTotalRooms"></p>
-                <p class="text-xl font-extrabold text-gray-800" x-text="stats.totalRooms"></p>
-                <p class="text-[10px] text-gray-400" x-text="stats.occupiedCount + ' ' + t.statOccupied + ' · ' + stats.emptyCount + ' ' + t.statEmpty"></p>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
-            <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-clock text-white text-sm"></i>
-            </div>
-            <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statUnpaid"></p>
-                <p class="text-xl font-extrabold text-red-600" x-text="stats.unpaidCount"></p>
-                <p class="text-[10px] text-gray-400" x-text="t.statRooms"></p>
+            <div class="min-w-0">
+                <p class="stat-tile__label" x-text="t.statTotalRooms"></p>
+                <p class="stat-tile__value" x-text="stats.totalRooms"></p>
+                <p class="stat-tile__sub" x-text="stats.occupiedCount + ' ' + t.statOccupied + ' · ' + stats.emptyCount + ' ' + t.statEmpty"></p>
             </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
-            <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-circle-check text-white text-sm"></i>
+        <!-- Chưa thu — danger -->
+        <div class="stat-tile">
+            <div class="stat-tile__icon tile-icon--danger">
+                <i class="fas fa-clock"></i>
             </div>
-            <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statPaid"></p>
-                <p class="text-xl font-extrabold text-green-600" x-text="stats.paidCount"></p>
-                <p class="text-[10px] text-gray-400" x-text="t.statRooms"></p>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
-            <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-calendar-check text-white text-sm"></i>
-            </div>
-            <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statPrepaid"></p>
-                <p class="text-xl font-extrabold text-blue-600" x-text="stats.prepaidCount"></p>
-                <p class="text-[10px] text-gray-400" x-text="t.statRooms"></p>
+            <div class="min-w-0">
+                <p class="stat-tile__label" x-text="t.statUnpaid"></p>
+                <p class="stat-tile__value tile-value--danger" x-text="stats.unpaidCount"></p>
+                <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
-            <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-wallet text-white text-sm"></i>
+        <!-- Đã thu — success -->
+        <div class="stat-tile">
+            <div class="stat-tile__icon tile-icon--success">
+                <i class="fas fa-circle-check"></i>
             </div>
-            <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statCollected"></p>
-                <p class="text-base font-extrabold text-emerald-700" x-text="formatMoney(stats.collectedAmount)"></p>
-                <p class="text-[10px] text-gray-400" x-text="t.statThisMonth"></p>
+            <div class="min-w-0">
+                <p class="stat-tile__label" x-text="t.statPaid"></p>
+                <p class="stat-tile__value tile-value--success" x-text="stats.paidCount"></p>
+                <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-coins text-white text-sm"></i>
+        <!-- Đóng trước — primary -->
+        <div class="stat-tile">
+            <div class="stat-tile__icon tile-icon--primary">
+                <i class="fas fa-calendar-check"></i>
             </div>
-            <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide" x-text="t.statDeposit"></p>
-                <p class="text-base font-extrabold text-indigo-700" x-text="formatMoney(stats.depositTotal)"></p>
-                <p class="text-[10px] text-gray-400" x-text="stats.occupiedCount + ' ' + t.statRooms"></p>
+            <div class="min-w-0">
+                <p class="stat-tile__label" x-text="t.statPrepaid"></p>
+                <p class="stat-tile__value tile-value--primary" x-text="stats.prepaidCount"></p>
+                <p class="stat-tile__sub" x-text="t.statRooms"></p>
+            </div>
+        </div>
+        <!-- Đã thu tháng này — success-soft -->
+        <div class="stat-tile stat-tile--success-soft">
+            <div class="stat-tile__icon tile-icon--success">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="stat-tile__label" x-text="t.statCollected"></p>
+                <p class="stat-tile__value stat-tile__value--money tile-value--success" x-text="formatMoney(stats.collectedAmount)"></p>
+                <p class="stat-tile__sub" x-text="t.statThisMonth"></p>
+            </div>
+        </div>
+        <!-- Tiền cọc — neutral-strong -->
+        <div class="stat-tile">
+            <div class="stat-tile__icon tile-icon--neutral-strong">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="stat-tile__label" x-text="t.statDeposit"></p>
+                <p class="stat-tile__value stat-tile__value--money" x-text="formatMoney(stats.depositTotal)"></p>
+                <p class="stat-tile__sub" x-text="stats.occupiedCount + ' ' + t.statRooms"></p>
             </div>
         </div>
     </div>
@@ -111,63 +117,144 @@
                     <p class="text-xs text-gray-400" x-text="t.chartSubtitle"></p>
                 </div>
             </div>
-            <div class="flex items-end gap-2 h-44 border-b border-gray-100 pb-1">
-                <template x-if="dashboardChart.length === 0">
-                    <div class="w-full flex items-center justify-center text-gray-300">
-                        <i class="fas fa-chart-bar text-4xl"></i>
-                    </div>
-                </template>
-                <template x-for="bar in dashboardChart" :key="bar.label">
-                    <div class="flex flex-col items-center justify-end gap-1 flex-1 h-full">
-                        <span class="text-[10px] text-gray-400 font-semibold" x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
-                        <div class="w-full rounded-t-lg bar-segment transition-all"
-                             :class="bar.current ? 'bg-blue-600' : 'bg-blue-200'"
-                             :style="'height:' + Math.max(bar.pct, 5) + '%'">
+            <!-- Chart area: grid lines sit behind the bars via absolute positioning -->
+            <div class="relative h-44">
+                <div class="absolute inset-0 pointer-events-none">
+                    <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:0"></div>
+                    <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:25%"></div>
+                    <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:50%"></div>
+                    <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:75%"></div>
+                </div>
+                <div class="flex items-end gap-2 h-full border-b border-gray-200 pb-1">
+                    <template x-if="dashboardChart.length === 0">
+                        <div class="w-full flex flex-col items-center justify-center gap-3 h-full">
+                            <div class="flex items-end gap-1 opacity-25">
+                                <div class="w-4 h-5 bg-blue-300 rounded-t"></div>
+                                <div class="w-4 h-9 bg-blue-300 rounded-t"></div>
+                                <div class="w-4 h-6 bg-blue-300 rounded-t"></div>
+                                <div class="w-4 h-11 bg-blue-300 rounded-t"></div>
+                                <div class="w-4 h-7 bg-blue-300 rounded-t"></div>
+                                <div class="w-4 h-8 bg-blue-300 rounded-t"></div>
+                            </div>
+                            <p class="text-xs font-medium text-gray-300" x-text="t.noActivity"></p>
                         </div>
-                        <span class="text-[10px] font-semibold" :class="bar.current ? 'text-blue-600' : 'text-gray-400'" x-text="bar.label"></span>
-                    </div>
-                </template>
+                    </template>
+                    <template x-for="bar in dashboardChart" :key="bar.label">
+                        <div class="flex flex-col items-center justify-end gap-1 flex-1 h-full"
+                             x-data="{ hovered: false }"
+                             @mouseenter="hovered = true"
+                             @mouseleave="hovered = false">
+                            <span class="text-[10px] font-semibold leading-none"
+                                  :class="bar.current ? 'text-blue-600' : 'text-gray-400'"
+                                  x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
+                            <div class="w-full rounded-t-lg"
+                                 :style="{
+                                     height: Math.max(bar.pct, 5) + '%',
+                                     background: bar.current
+                                         ? 'linear-gradient(to top, #2563eb, #60a5fa)'
+                                         : hovered
+                                             ? 'linear-gradient(to top, #93c5fd, #bfdbfe)'
+                                             : 'linear-gradient(to top, #bfdbfe, #dbeafe)',
+                                     boxShadow: bar.current
+                                         ? (hovered ? '0 0 18px rgba(37,99,235,0.5)' : '0 0 10px rgba(37,99,235,0.3)')
+                                         : 'none',
+                                     transform: hovered ? 'scale(1.05)' : 'none',
+                                     transformOrigin: 'bottom center',
+                                     transition: 'all 0.18s ease'
+                                 }"
+                                 :title="(bar.v/1e6).toFixed(2) + 'M'">
+                            </div>
+                            <span class="text-[10px] font-semibold transition-colors"
+                                  :class="bar.current ? 'text-blue-600' : 'text-gray-400'"
+                                  x-text="bar.label"></span>
+                        </div>
+                    </template>
+                </div>
             </div>
             <div class="mt-3 flex items-center gap-4 text-xs text-gray-400">
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-600 inline-block"></span> <span x-text="t.statThisMonth"></span></span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-200 inline-block"></span> <span x-text="t.statPrevMonths"></span></span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded inline-block" style="background:linear-gradient(to right,#2563eb,#60a5fa)"></span>
+                    <span x-text="t.statThisMonth"></span>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded inline-block" style="background:linear-gradient(to right,#bfdbfe,#dbeafe)"></span>
+                    <span x-text="t.statPrevMonths"></span>
+                </span>
             </div>
         </div>
 
         <!-- Donut -->
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5"
+             x-data="{ highlightedSegment: null }">
             <h3 class="font-bold text-gray-800 mb-4" x-text="t.donutTitle + ' ' + month + '/' + year"></h3>
             <div class="flex items-center gap-6">
                 <div class="relative shrink-0">
                     <svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90">
-                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f3f4f6" stroke-width="4"/>
-                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#16a34a" stroke-width="4"
+                        <defs>
+                            <filter id="dsf-green" x="-30%" y="-30%" width="160%" height="160%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#16a34a" flood-opacity="0.45"/>
+                            </filter>
+                            <filter id="dsf-blue" x="-30%" y="-30%" width="160%" height="160%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#2563eb" flood-opacity="0.45"/>
+                            </filter>
+                            <filter id="dsf-red" x="-30%" y="-30%" width="160%" height="160%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#ef4444" flood-opacity="0.45"/>
+                            </filter>
+                        </defs>
+                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f3f4f6" stroke-width="5"/>
+                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#16a34a" stroke-width="5"
+                                filter="url(#dsf-green)"
                                 :stroke-dasharray="donut.paid + ' 100'"
-                                stroke-dashoffset="0"/>
-                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#2563eb" stroke-width="4"
+                                stroke-dashoffset="0"
+                                :style="{ opacity: highlightedSegment && highlightedSegment !== 'paid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#2563eb" stroke-width="5"
+                                filter="url(#dsf-blue)"
                                 :stroke-dasharray="donut.prepaid + ' 100'"
-                                :stroke-dashoffset="-donut.paidOffset"/>
-                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#ef4444" stroke-width="4"
+                                :stroke-dashoffset="-donut.paidOffset"
+                                :style="{ opacity: highlightedSegment && highlightedSegment !== 'prepaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#ef4444" stroke-width="5"
+                                filter="url(#dsf-red)"
                                 :stroke-dasharray="donut.unpaid + ' 100'"
-                                :stroke-dashoffset="-donut.unpaidOffset"/>
+                                :stroke-dashoffset="-donut.unpaidOffset"
+                                :style="{ opacity: highlightedSegment && highlightedSegment !== 'unpaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center rotate-90">
-                        <span class="text-xl font-extrabold text-gray-800" x-text="donut.paidPct + '%'"></span>
-                        <span class="text-[10px] text-gray-400 font-semibold" x-text="t.statPaid"></span>
+                        <span class="text-xl font-extrabold text-gray-800 leading-none" x-text="donut.paidPct + '%'"></span>
+                        <span class="text-[10px] text-gray-400 font-semibold mt-0.5" x-text="t.statPaid"></span>
+                        <span class="text-[9px] text-gray-400 mt-0.5"
+                              x-text="(donut.paidCount + donut.prepaidCount) + ' / ' + (donut.paidCount + donut.prepaidCount + donut.unpaidCount) + ' ' + t.statRooms"></span>
                     </div>
                 </div>
-                <div class="space-y-3 flex-1">
-                    <div class="flex items-center gap-2">
+                <div class="space-y-1.5 flex-1">
+                    <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
+                         :class="{
+                             'bg-green-50 ring-1 ring-green-200': highlightedSegment === 'paid',
+                             'hover:bg-gray-50': highlightedSegment !== 'paid',
+                             'opacity-35': highlightedSegment && highlightedSegment !== 'paid'
+                         }"
+                         @click="highlightedSegment = highlightedSegment === 'paid' ? null : 'paid'">
                         <span class="w-3 h-3 rounded-full bg-green-600 shrink-0"></span>
                         <span class="text-sm flex-1" x-text="t.statPaid"></span>
                         <b class="text-lg font-extrabold text-gray-800" x-text="donut.paidCount"></b>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
+                         :class="{
+                             'bg-red-50 ring-1 ring-red-200': highlightedSegment === 'unpaid',
+                             'hover:bg-gray-50': highlightedSegment !== 'unpaid',
+                             'opacity-35': highlightedSegment && highlightedSegment !== 'unpaid'
+                         }"
+                         @click="highlightedSegment = highlightedSegment === 'unpaid' ? null : 'unpaid'">
                         <span class="w-3 h-3 rounded-full bg-red-500 shrink-0"></span>
                         <span class="text-sm flex-1" x-text="t.statUnpaid"></span>
                         <b class="text-lg font-extrabold text-gray-800" x-text="donut.unpaidCount"></b>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
+                         :class="{
+                             'bg-blue-50 ring-1 ring-blue-200': highlightedSegment === 'prepaid',
+                             'hover:bg-gray-50': highlightedSegment !== 'prepaid',
+                             'opacity-35': highlightedSegment && highlightedSegment !== 'prepaid'
+                         }"
+                         @click="highlightedSegment = highlightedSegment === 'prepaid' ? null : 'prepaid'">
                         <span class="w-3 h-3 rounded-full bg-blue-600 shrink-0"></span>
                         <span class="text-sm flex-1" x-text="t.statPrepaid"></span>
                         <b class="text-lg font-extrabold text-gray-800" x-text="donut.prepaidCount"></b>
