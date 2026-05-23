@@ -3,7 +3,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Quản Lý Trọ"
-    SQLALCHEMY_DATABASE_URL: str = "sqlite:///./quan_ly_tro.db"
+    SQLALCHEMY_DATABASE_URL: str = "sqlite:///./rentflow.db"
     
     # Electricity settings
     DEFAULT_ELECTRICITY_UNIT_PRICE: int = 4000

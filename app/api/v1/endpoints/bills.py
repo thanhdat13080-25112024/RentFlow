@@ -6,9 +6,9 @@ from datetime import datetime
 import io
 import csv
 from app.core.database import get_db
-from app.models.models import Room, MonthlyBill, ElectricityReading, Setting
-from app.schemas.schemas import PaidInput, PrepaidInput
-from app.services.bill_service import update_bill
+from app.models.entities import Room, MonthlyBill, ElectricityReading, Setting
+from app.schemas.data_transfer_objects import PaidInput, PrepaidInput
+from app.services.billing import update_bill
 
 router = APIRouter()
 

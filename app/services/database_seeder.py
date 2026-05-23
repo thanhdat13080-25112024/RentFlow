@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.models import Setting, Room
+from app.models.entities import Setting, Room
 
 def init_data(db: Session):
     # Cài đặt mặc định

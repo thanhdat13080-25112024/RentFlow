@@ -8,7 +8,7 @@ from datetime import datetime
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal, get_db
 from app.api.v1.api import api_router
-from app.services.init_db import init_data
+from app.services.database_seeder import init_data
 
 # Khởi tạo database
 Base.metadata.create_all(bind=engine)
