@@ -5,7 +5,7 @@ from typing import List
 from datetime import datetime
 import io
 import csv
-from app.db import get_db
+from app.api.deps import get_db
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
 from app.schemas import BillPaidUpdate, BillPrepaidUpdate
 from app.services.billing import update_bill

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.api.v1.endpoints import rooms, bills, electricity, settings, auth
-from app.core.security import get_current_user
+from app.api.deps import get_current_user
 
 api_router = APIRouter()
 

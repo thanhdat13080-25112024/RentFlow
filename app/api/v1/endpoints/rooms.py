@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from app.db import get_db
+from app.api.deps import get_db
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
 from app.schemas import BillRead, RoomHistoryRead, RoomRead, RoomUpdate
 from app.services.billing import update_bill
