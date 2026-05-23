@@ -110,12 +110,17 @@ async def mark_paid(data: PaidInput, db: Session = Depends(get_db)):
     
     if not bill:
         room = db.query(Room).filter(Room.id == data.room_id).first()
+        if not room:
+            raise HTTPException(status_code=404, detail="Room not found")
         update_bill(db, room, data.month, data.year)
         bill = db.query(MonthlyBill).filter(
             MonthlyBill.room_id == data.room_id,
             MonthlyBill.month == data.month,
             MonthlyBill.year == data.year
         ).first()
+
+    if not bill:
+        raise HTTPException(status_code=404, detail="Bill could not be created")
 
     bill.status = "paid"
     bill.paid_at = datetime.now()

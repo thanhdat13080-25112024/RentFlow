@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
@@ -27,6 +27,8 @@ class SettingResponse(BaseModel):
     value: str
 
 class RoomResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     room_number: str
     rent_price: int
@@ -37,9 +39,6 @@ class RoomResponse(BaseModel):
     electricity_type: str
     fixed_electricity_fee: int
     is_occupied: bool
-
-    class Config:
-        from_attributes = True
 
 class RoomUpdate(BaseModel):
     id: int

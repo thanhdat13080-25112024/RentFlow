@@ -108,14 +108,14 @@
 
 {% block scripts %}
 <script>
-    // Khởi tạo app với dữ liệu từ server
-    document.addEventListener('alpine:init', () => {
-        // App logic đã được tách ra file app.js
-    });
-    
-    // Hàm khởi tạo app nhận tham số từ Jinja2
-    function app() {
-        return window.app({{ month }}, {{ year }});
-    }
+    // Truyền tham số tháng/năm từ server vào app factory (app.js)
+    // Dùng IIFE để capture window.app gốc trước khi ghi đè,
+    // tránh đệ quy vô hạn khi function declaration bị hoisted
+    ;(function () {
+        var _factory = window.app;
+        window.app = function () {
+            return _factory({{ month }}, {{ year }});
+        };
+    })();
 </script>
 {% endblock %}

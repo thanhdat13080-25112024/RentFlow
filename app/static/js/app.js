@@ -427,7 +427,7 @@ function app(initialMonth, initialYear) {
             formData.append('file', file);
             try {
                 this.showToast('Đang import...');
-                const res = await fetch('/api/import-csv', { method: 'POST', body: formData });
+                const res = await fetch('/api/bills/import-csv', { method: 'POST', body: formData });
                 const result = await res.json();
                 if (res.ok) {
                     this.showToast(result.message);
