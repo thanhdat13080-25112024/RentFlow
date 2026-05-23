@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.models.entities import Setting, Room, ElectricityReading, MonthlyBill
 from datetime import datetime, timedelta
 
-def init_data(db: Session):
+def seed_initial_data(db: Session):
     # 1. Cài đặt mặc định
     default_settings = [
         {"key": "electricity_unit_price", "value": "3500"},

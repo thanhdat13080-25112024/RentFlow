@@ -8,14 +8,14 @@ from datetime import datetime
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal, get_db
 from app.api.v1.api import api_router
-from app.services.database_seeder import init_data
+from app.services.database_seeder import seed_initial_data
 from app.core.security import get_current_user
 
 # Khởi tạo database
 Base.metadata.create_all(bind=engine)
 # Seed data
 with SessionLocal() as db:
-    init_data(db)
+    seed_initial_data(db)
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
