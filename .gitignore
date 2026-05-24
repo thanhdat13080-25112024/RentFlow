@@ -12,16 +12,15 @@ ENV/
 # SQLite database (runtime-generated)
 *.db
 *.db-journal
-!Thumbs.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
 
 # Hệ điều hành
 .DS_Store
 Thumbs.db
-
-# Logs
-app.log
-error.log
-*.log
 
 # IDE và Editor
 .vscode/
@@ -31,5 +30,6 @@ error.log
 *.njsproj
 *.sln
 *.swp
-.claude
-CLAUDE.md
+
+# Claude Code (chỉ ignore local settings, không ignore project settings)
+.claude/settings.local.json
