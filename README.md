@@ -115,6 +115,7 @@ RentFlow/
 ├── alembic/                     # Migration scaffold (Alembic)
 ├── tests/                       # Scaffold (chưa có test)
 ├── main.py                      # Entry point uvicorn
+├── rentflow.db                  # DB mẫu (12 phòng + 3 tháng dữ liệu)
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -159,14 +160,16 @@ Tài liệu OpenAPI tự động tại `http://localhost:8000/docs` (Swagger UI)
   - Schema suffix theo CRUD: `*Create`, `*Update`, `*Read` (e.g. `RoomRead`, `BillPaidUpdate`)
 - **Auth** — JWT trong cookie `httponly` `samesite=lax`; password lưu bcrypt; `SECRET_KEY` persist trong `.env`.
 
-## 🌱 Dữ liệu seed
+## 🗄 Database mẫu
 
-Lần đầu chạy, hàm `seed_initial_data` trong `app/services/seeder.py` sẽ:
-1. Thêm 4 cài đặt mặc định (giá điện, thông tin ngân hàng)
-2. Tạo 12 phòng mẫu (3 tầng × 4 phòng), 9 phòng có khách + 3 phòng trống
-3. Sinh dữ liệu hoá đơn + số điện cho 3 tháng gần nhất
+File `rentflow.db` đã được commit sẵn vào repo — clone xong chạy ngay, không cần seed thủ công.
 
-Để reset, xoá file `rentflow.db` rồi chạy lại.
+Dữ liệu mẫu gồm:
+- 4 cài đặt mặc định (giá điện, thông tin ngân hàng)
+- 12 phòng mẫu (3 tầng × 4 phòng): 9 phòng có khách, 3 phòng trống
+- Hoá đơn + số điện cho 3 tháng gần nhất
+
+Để reset về trạng thái ban đầu, xoá `rentflow.db` rồi chạy lại — hàm `seed_initial_data` trong `app/services/seeder.py` sẽ tự tạo lại.
 
 ## 🧰 Lint
 
@@ -176,11 +179,6 @@ Dự án dùng `ruff` cho import sorting + unused-import check:
 pip install ruff
 ruff check app/ tests/ alembic/env.py main.py --select I,F
 ```
-
-## 📄 Tài liệu kèm theo
-
-- [`BÁO_CÁO_FIX.md`](BÁO_CÁO_FIX.md) — danh sách 7 lỗi đã sửa (URL CSV sai, đệ quy Alpine.js, deprecated APIs, …)
-- [`BÁO_CÁO_REFACTOR.md`](BÁO_CÁO_REFACTOR.md) — chi tiết tái cấu trúc 11 commit theo chuẩn FastAPI layered
 
 ## 📜 License
 

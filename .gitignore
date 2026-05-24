@@ -9,11 +9,13 @@ venv/
 ENV/
 .env
 
-# SQLite database (runtime-generated)
-*.db
+# SQLite — ignore WAL/journal temp files, nhưng commit DB mẫu
 *.db-journal
 *.db-shm
 *.db-wal
+
+# macOS LaunchAgent (config cá nhân, đường dẫn máy mỗi người khác nhau)
+*.plist
 
 # Logs
 *.log
