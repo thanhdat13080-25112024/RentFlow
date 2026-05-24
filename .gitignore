@@ -18,6 +18,11 @@ ENV/
 .DS_Store
 Thumbs.db
 
+# Logs
+app.log
+error.log
+*.log
+
 # IDE và Editor
 .vscode/
 .idea/
