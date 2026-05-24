@@ -9,7 +9,8 @@ venv/
 ENV/
 .env
 
-# SQLite — ignore WAL/journal temp files, nhưng commit DB mẫu
+# SQLite
+*.db
 *.db-journal
 *.db-shm
 *.db-wal
