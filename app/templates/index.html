@@ -11,46 +11,116 @@
     {% include 'components/modals.html' %}
 
     <!-- ── HEADER ── -->
-    <header class="header-root sticky top-0 z-40">
+    <header class="header-root sticky top-0 z-40"
+            x-data="{ scrolled: false }"
+            @scroll.window="scrolled = window.scrollY > 8"
+            :class="scrolled && 'header-scrolled'">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
             <!-- Logo -->
-            <div class="flex items-center gap-2.5 shrink-0">
-                <div class="logo-icon w-8 h-8 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-house-chimney-user text-white text-sm"></i>
+            <div class="flex items-center gap-2.5 shrink-0 group cursor-default select-none">
+                <div class="logo-icon w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-150 ease-out group-hover:-translate-y-0.5">
+                    <i class="fas fa-house-chimney-user text-white text-sm transition-transform duration-150 ease-out group-hover:scale-110"></i>
                 </div>
-                <span class="font-extrabold text-gray-800 tracking-tight hidden lg:block" x-text="t.appName"></span>
+                <span class="font-extrabold text-gray-800 tracking-tight hidden lg:block transition-opacity duration-150 group-hover:opacity-70" x-text="t.appName"></span>
             </div>
 
-            <!-- Tab nav (desktop) -->
-            <nav class="hidden md:flex items-center header-nav rounded-xl p-1 gap-0.5 ml-2">
+            <!-- Tab nav (desktop) — sliding underline indicator -->
+            <nav class="hidden md:flex items-center relative ml-2 pb-px"
+                 x-data="{
+                   ind: { x: 0, w: 80 },
+                   sync() {
+                     const btns = $el.querySelectorAll('button');
+                     const idx  = tabs.findIndex(t => t.id === activeTab);
+                     if (btns[idx]) {
+                       const nr = $el.getBoundingClientRect();
+                       const ar = btns[idx].getBoundingClientRect();
+                       ind.x = ar.left - nr.left;
+                       ind.w = ar.width;
+                     }
+                   }
+                 }"
+                 x-init="$nextTick(sync)"
+                 @click="$nextTick(sync)">
+                <div class="tab-underline-indicator"
+                     :style="{ transform: 'translateX(' + ind.x + 'px)', width: ind.w + 'px' }"></div>
                 <template x-for="tab in tabs" :key="tab.id">
                     <button @click="activeTab = tab.id"
-                            :class="activeTab === tab.id ? 'tab-active' : ''"
-                            class="tab-btn px-4 py-1.5 rounded-lg text-sm font-semibold"
+                            :class="activeTab === tab.id ? 'text-blue-600 font-semibold' : 'text-gray-400 hover:text-gray-800'"
+                            class="px-4 py-2 text-sm font-medium transition-colors duration-100 whitespace-nowrap relative"
                             x-text="tab.label"></button>
                 </template>
             </nav>
 
             <div class="flex-1"></div>
 
-            <!-- Search -->
+            <!-- Search trigger — ⌘K / Ctrl+K opens full overlay -->
             <div class="search-box hidden md:flex items-center gap-2 rounded-lg px-3 py-1.5 w-52 text-sm cursor-pointer"
-                 @click="document.getElementById('globalSearch').focus()">
-                <i class="fas fa-magnifying-glass text-xs"></i>
-                <input id="globalSearch" x-model="searchQuery" :placeholder="t.search"
-                       class="bg-transparent outline-none flex-1 text-gray-700 text-sm">
+                 @click="window.dispatchEvent(new CustomEvent('rf-search-open'))">
+                <i class="fas fa-magnifying-glass text-xs flex-shrink-0"></i>
+                <span class="flex-1 truncate"
+                      :class="searchQuery ? 'text-gray-700' : ''"
+                      x-text="searchQuery || t.search"></span>
+                <template x-if="!searchQuery">
+                    <span class="flex-shrink-0 text-xs border border-gray-200 rounded px-1 font-mono leading-tight">⌘K</span>
+                </template>
+                <template x-if="searchQuery">
+                    <button @click.stop="searchQuery = ''"
+                            class="flex-shrink-0 hover:text-gray-500 transition-colors">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </template>
             </div>
 
-            <!-- Month nav -->
-            <div class="month-nav-wrap flex items-center gap-1 rounded-xl p-1">
+            <!-- Month nav + month picker popover -->
+            <div class="month-nav-wrap flex items-center gap-1 rounded-xl p-1"
+                 x-data="{ pop: false, popYear: year }"
+                 @click.outside="pop = false">
                 <button @click="prevMonth()" class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
                     <i class="fas fa-chevron-left text-xs"></i>
                 </button>
-                <div class="month-display px-3 py-1 rounded-lg text-center min-w-[110px]">
-                    <span class="month-label" x-text="t.dataMonth"></span>
-                    <span class="month-value">
-                        <span x-text="month"></span> / <span x-text="year"></span>
-                    </span>
+                <div class="relative">
+                    <button @click="pop = !pop; popYear = year"
+                            class="month-display px-3 py-1 rounded-lg text-center min-w-[110px] cursor-pointer hover:ring-2 hover:ring-blue-200 transition-shadow">
+                        <span class="month-label" x-text="t.dataMonth"></span>
+                        <span class="month-value">
+                            <span x-text="month"></span> / <span x-text="year"></span>
+                        </span>
+                    </button>
+                    <!-- Month picker popover (3×4 grid + year arrows) -->
+                    <div x-show="pop" x-cloak
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         style="transform-origin: top center;"
+                         class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-50 w-60">
+                        <!-- Year navigation -->
+                        <div class="flex items-center justify-between mb-3">
+                            <button @click.stop="popYear--"
+                                    class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
+                                <i class="fas fa-chevron-left text-xs"></i>
+                            </button>
+                            <span class="font-bold text-gray-800 text-sm" x-text="popYear"></span>
+                            <button @click.stop="popYear++"
+                                    class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                        <!-- Month grid 3×4 -->
+                        <div class="grid grid-cols-3 gap-1">
+                            <template x-for="m in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="m">
+                                <button @click="month = m; year = popYear; pop = false; updateUrl(); loadData()"
+                                        class="py-1.5 rounded-lg text-sm font-semibold transition-colors"
+                                        :class="m === month && popYear === year
+                                                  ? 'bg-blue-600 text-white'
+                                                  : 'text-gray-700 hover:bg-blue-50'">
+                                    <span x-text="m"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
                 <button @click="nextMonth()" class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
                     <i class="fas fa-chevron-right text-xs"></i>
@@ -66,7 +136,14 @@
                     <i class="fas fa-chevron-down text-xs text-gray-400"></i>
                 </button>
                 <div x-show="open" @click.outside="open = false" x-cloak
-                     class="lang-dropdown absolute right-0 top-full mt-1 rounded-xl py-1 w-36 z-50 slide-up">
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-100"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     style="transform-origin: top right;"
+                     class="lang-dropdown absolute right-0 top-full mt-1 rounded-xl py-1 w-36 z-50">
                     <template x-for="l in ['vi','en','ko','ja','zh']" :key="l">
                         <button @click="setLang(l); open = false"
                                 class="lang-option flex items-center gap-2.5 w-full px-4 py-2.5"
@@ -84,16 +161,114 @@
         </div>
     </header>
 
+    <!-- Search overlay — ⌘K / Ctrl+K (body-level để tránh stacking context header) -->
+    <div x-data="{ open: false }"
+         @rf-search-open.window="open = true; $nextTick(() => $refs.searchInput.focus())"
+         @keydown.window.meta.k.prevent="open = true; $nextTick(() => $refs.searchInput.focus())"
+         @keydown.window.ctrl.k.prevent="open = true; $nextTick(() => $refs.searchInput.focus())"
+         @keydown.window.escape="open = false">
+        <div x-show="open" x-cloak
+             @click.self="open = false"
+             class="search-overlay"
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            <div class="search-overlay__box">
+                <i class="fas fa-magnifying-glass text-gray-400 flex-shrink-0"></i>
+                <input x-ref="searchInput"
+                       x-model="searchQuery"
+                       :placeholder="t.search"
+                       class="flex-1 bg-transparent outline-none text-gray-800 text-base"
+                       @keydown.escape.stop="open = false">
+                <button @click="open = false"
+                        class="flex-shrink-0 text-xs text-gray-400 border border-gray-200 rounded px-2 py-1 hover:bg-gray-50 transition-colors">
+                    ESC
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ── MOBILE BOTTOM NAV ── -->
-    <nav class="mobile-nav fixed bottom-0 left-0 right-0 z-40 md:hidden flex">
-        <template x-for="tab in mobileTabs" :key="tab.id">
-            <button @click="activeTab = tab.id"
-                    class="mobile-tab flex-1 flex flex-col items-center gap-0.5 py-2"
-                    :class="activeTab === tab.id ? 'mobile-tab--active' : ''">
-                <i class="text-lg" :class="tab.icon"></i>
-                <span class="mobile-tab__label" x-text="tab.label"></span>
-            </button>
-        </template>
+    <nav class="mobile-nav fixed bottom-0 left-0 right-0 z-40 md:hidden"
+         x-data="{ actionSheet: false }">
+        <div class="flex items-end px-1">
+            <!-- Slots 1–2 -->
+            <template x-for="tab in mobileTabs.slice(0, 2)" :key="tab.id">
+                <button @click="activeTab = tab.id"
+                        class="mobile-tab flex-1 flex flex-col items-center gap-0.5 py-2"
+                        :class="activeTab === tab.id ? 'mobile-tab--active' : ''">
+                    <i class="text-lg" :class="tab.icon"></i>
+                    <span class="mobile-tab__label" x-text="tab.label"></span>
+                </button>
+            </template>
+            <!-- Slot 3 — FAB (Quick action) -->
+            <div class="flex-1 flex flex-col items-center pb-1.5 pt-0.5">
+                <button @click="actionSheet = true" class="mobile-fab">
+                    <i class="fas fa-plus text-base"></i>
+                </button>
+                <span class="mobile-tab__label text-gray-400 mt-0.5">Nhanh</span>
+            </div>
+            <!-- Slots 4–5 -->
+            <template x-for="tab in mobileTabs.slice(2)" :key="tab.id">
+                <button @click="activeTab = tab.id"
+                        class="mobile-tab flex-1 flex flex-col items-center gap-0.5 py-2"
+                        :class="activeTab === tab.id ? 'mobile-tab--active' : ''">
+                    <i class="text-lg" :class="tab.icon"></i>
+                    <span class="mobile-tab__label" x-text="tab.label"></span>
+                </button>
+            </template>
+        </div>
+        <!-- Action sheet backdrop -->
+        <div x-show="actionSheet" x-cloak
+             @click="actionSheet = false"
+             class="fixed inset-0 bg-black/40 z-40"
+             style="backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+        </div>
+        <!-- Action sheet panel — trượt từ dưới lên -->
+        <div x-show="actionSheet" x-cloak
+             class="action-sheet"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-full"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-full">
+            <div class="action-sheet__handle"></div>
+            <div class="space-y-1">
+                <button class="action-sheet__item"
+                        @click="activeTab = 'bills'; actionSheet = false">
+                    <div class="action-sheet__icon bg-green-100 text-green-600">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Đánh dấu đã thu phòng...</span>
+                </button>
+                <button class="action-sheet__item"
+                        @click="activeTab = 'bills'; actionSheet = false">
+                    <div class="action-sheet__icon bg-blue-100 text-blue-600">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <span>Xem QR phòng...</span>
+                </button>
+                <button class="action-sheet__item"
+                        @click="activeTab = 'bills'; actionSheet = false">
+                    <div class="action-sheet__icon bg-amber-100 text-amber-600">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <span>Cập nhật số điện</span>
+                </button>
+            </div>
+            <button class="w-full mt-3 py-3 text-sm font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+                    @click="actionSheet = false">Hủy</button>
+        </div>
     </nav>
 
     <!-- ── MAIN ── -->

@@ -14,6 +14,8 @@ from app.core.config import settings
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+_NO_CACHE = {"Cache-Control": "no-store, no-cache, must-revalidate", "Pragma": "no-cache"}
+
 
 @router.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, month: int = None, year: int = None):
@@ -32,10 +34,15 @@ async def read_root(request: Request, month: int = None, year: int = None):
     if year is None:
         year = now.year
     return templates.TemplateResponse(
-        request=request, name="index.html", context={"month": month, "year": year}
+        request=request,
+        name="index.html",
+        context={"month": month, "year": year},
+        headers=_NO_CACHE,
     )
 
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse(request=request, name="login.html")
+    return templates.TemplateResponse(
+        request=request, name="login.html", headers=_NO_CACHE
+    )
