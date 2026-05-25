@@ -39,6 +39,175 @@
     {% include 'components/toast.html' %}
     {% include 'components/modals.html' %}
 
+    <!-- ── REVENUE EXPANDED OVERLAY ── -->
+    <div x-show="revenueExpanded"
+         x-cloak
+         @keydown.escape.window="revenueExpanded = false; document.body.style.overflow = ''"
+         x-transition:enter="transition ease-out duration-500"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-300"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         style="transform-origin: 25% 45%; will-change: transform, opacity;"
+         class="fixed inset-0 z-[9000] overflow-y-auto">
+
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/50"
+             style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"
+             @click="revenueExpanded = false; document.body.style.overflow = ''"></div>
+
+        <!-- Panel -->
+        <div class="relative z-10 flex items-start justify-center p-4 sm:p-8 min-h-full">
+            <div class="w-full max-w-5xl my-4 sm:my-8">
+                <div class="card-static p-5 sm:p-7">
+
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-xl sm:text-2xl font-extrabold"
+                                style="color: var(--color-text-primary)"
+                                x-text="t.chartTitle"></h2>
+                            <p class="text-sm text-gray-400 mt-0.5" x-text="t.chartSubtitle"></p>
+                        </div>
+                        <button @click="revenueExpanded = false; document.body.style.overflow = ''"
+                                class="w-10 h-10 flex items-center justify-center rounded-full transition-colors"
+                                style="background: var(--color-surface-raised); color: var(--color-text-secondary)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Expanded chart (taller) -->
+                    <div class="relative h-64 sm:h-80">
+                        <div class="absolute inset-0 pointer-events-none">
+                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:0"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:25%"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:50%"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:75%"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="bottom:0"></div>
+                        </div>
+                        <div class="flex items-end gap-3 h-full border-b border-gray-200 pb-1">
+                            <template x-if="dashboardChart.length === 0">
+                                <div class="w-full flex flex-col items-center justify-center gap-3 h-full">
+                                    <div class="flex items-end gap-1.5 opacity-25">
+                                        <div class="w-8 h-10 rounded-t" style="background: var(--blue-300)"></div>
+                                        <div class="w-8 h-16 rounded-t" style="background: var(--blue-300)"></div>
+                                        <div class="w-8 h-12 rounded-t" style="background: var(--blue-300)"></div>
+                                        <div class="w-8 h-20 rounded-t" style="background: var(--blue-300)"></div>
+                                        <div class="w-8 h-14 rounded-t" style="background: var(--blue-300)"></div>
+                                        <div class="w-8 h-18 rounded-t" style="background: var(--blue-300)"></div>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-300" x-text="t.noActivity"></p>
+                                </div>
+                            </template>
+                            <template x-for="bar in dashboardChart" :key="bar.label">
+                                <div class="flex flex-col items-center justify-end gap-1.5 flex-1 h-full"
+                                     x-data="{ hovered: false }"
+                                     @mouseenter="hovered = true"
+                                     @mouseleave="hovered = false">
+                                    <span class="text-sm font-bold leading-none"
+                                          :style="bar.current
+                                              ? 'color: var(--color-chart-primary)'
+                                              : 'color: var(--color-text-tertiary)'"
+                                          x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
+                                    <div class="w-full rounded-t-xl"
+                                         :style="{
+                                             height: Math.max(bar.pct, 5) + '%',
+                                             background: bar.current
+                                                 ? 'linear-gradient(to top, var(--blue-600), var(--sky-400))'
+                                                 : hovered
+                                                     ? 'linear-gradient(to top, rgba(37,99,235,0.55), rgba(56,189,248,0.35))'
+                                                     : 'linear-gradient(to top, rgba(37,99,235,0.40), rgba(56,189,248,0.22))',
+                                             boxShadow: bar.current ? 'var(--shadow-glow-violet)' : 'none',
+                                             transform: hovered ? 'scale(1.05)' : 'none',
+                                             transformOrigin: 'bottom center',
+                                             transition: 'all var(--dur-fast) var(--ease-smooth)'
+                                         }"
+                                         :title="formatMoney(bar.v)">
+                                    </div>
+                                    <span class="text-sm font-bold transition-colors"
+                                          :style="bar.current
+                                              ? 'color: var(--color-chart-primary)'
+                                              : 'color: var(--color-text-tertiary)'"
+                                          x-text="bar.label"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="mt-4 flex items-center gap-4 text-xs text-gray-400">
+                        <span class="flex items-center gap-1.5">
+                            <span class="legend-dot" style="background: linear-gradient(to top, var(--blue-600), var(--sky-400))"></span>
+                            <span x-text="t.statThisMonth"></span>
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <span class="legend-dot" style="background: rgba(37,99,235,0.40)"></span>
+                            <span x-text="t.statPrevMonths"></span>
+                        </span>
+                    </div>
+
+                    <!-- Detailed revenue table -->
+                    <div class="mt-8 pt-6 border-t" style="border-color: var(--color-border)">
+                        <h3 class="font-bold mb-4 text-base"
+                            style="color: var(--color-text-primary)"
+                            x-text="t.revenueTitle"></h3>
+                        <div class="overflow-auto rounded-xl border" style="border-color: var(--color-border)">
+                            <table class="w-full text-sm">
+                                <thead class="border-b" style="background: var(--color-surface-raised)">
+                                    <tr>
+                                        <th class="th-cell px-4 py-3 text-left font-semibold" x-text="t.revMonth"></th>
+                                        <th class="th-cell px-4 py-3 text-right font-semibold" x-text="t.electricityFee"></th>
+                                        <th class="th-cell px-4 py-3 text-right font-semibold" x-text="t.serviceFee"></th>
+                                        <th class="th-cell px-4 py-3 text-right font-semibold" x-text="t.rentFee"></th>
+                                        <th class="th-cell px-4 py-3 text-right font-semibold" x-text="t.totalAmount"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    <template x-for="row in revenueSummary" :key="row.month + '-' + row.year">
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-3.5 font-bold text-base"
+                                                style="color: var(--color-text-primary)"
+                                                x-text="row.month + '/' + row.year"></td>
+                                            <td class="px-4 py-3.5 text-right font-semibold"
+                                                style="color: var(--amber-600)"
+                                                x-text="formatMoney(row.total_elec)"></td>
+                                            <td class="px-4 py-3.5 text-right font-semibold"
+                                                style="color: var(--color-text-secondary)"
+                                                x-text="formatMoney(row.total_service)"></td>
+                                            <td class="px-4 py-3.5 text-right font-semibold"
+                                                style="color: var(--color-primary)"
+                                                x-text="formatMoney(row.total_rent)"></td>
+                                            <td class="px-4 py-3.5 text-right font-extrabold text-base"
+                                                style="color: var(--color-primary)"
+                                                x-text="formatMoney(row.total_revenue)"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                            <template x-if="revenueSummary.length === 0">
+                                <div class="empty-state">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                         class="empty-state__icon">
+                                        <line x1="18" y1="20" x2="18" y2="10"/>
+                                        <line x1="12" y1="20" x2="12" y2="4"/>
+                                        <line x1="6" y1="20" x2="6" y2="14"/>
+                                    </svg>
+                                    <p class="empty-state__text" x-text="t.noRevData"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── HEADER ── -->
     <header class="header-root lg-surface-regular lg-with-lensing sticky top-0 z-sticky"
             x-data="{ scrolled: false }"
@@ -63,7 +232,7 @@
 
             <!-- Tab nav (desktop) — Apple-style segmented control -->
             <nav class="hidden md:flex items-center ml-2">
-                <div class="header-nav lg-surface-clear lg-size-pill flex items-center p-1 gap-0.5">
+                <div class="header-nav relative lg-surface-clear lg-size-pill flex items-center p-1 gap-0.5">
                     <template x-for="tab in tabs" :key="tab.id">
                         <button @click="activeTab = tab.id"
                                 :class="activeTab === tab.id ? 'tab-active' : 'tab-btn'"
@@ -75,28 +244,8 @@
 
             <div class="flex-1"></div>
 
-            <!-- Search trigger — .lg-surface-clear pill -->
-            <div class="lg-surface-clear lg-size-pill hover:lg-surface-regular transition-all duration-200 hidden md:flex items-center gap-2 px-4 py-1.5 w-36 lg:w-44 xl:w-52 min-w-0 shrink text-sm cursor-pointer"
-                 @click="window.dispatchEvent(new CustomEvent('rf-search-open'))">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="flex-shrink-0 text-gray-400">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <span class="flex-1 truncate text-gray-500 font-medium"
-                      :class="searchQuery ? 'text-gray-700' : ''"
-                      x-text="searchQuery || t.search"></span>
-                <template x-if="!searchQuery">
-                    <span class="flex-shrink-0 text-[10px] bg-white/40 border border-white/60 rounded px-1.5 font-mono text-gray-400 leading-tight">⌘K</span>
-                </template>
-                <template x-if="searchQuery">
-                    <button @click.stop="searchQuery = ''"
-                            class="flex-shrink-0 hover:text-gray-500 transition-colors">✕</button>
-                </template>
-            </div>
-
             <!-- Month nav — subtle glass -->
-            <div class="month-nav-wrap lg-surface-clear lg-size-pill flex items-center gap-1 p-1"
+            <div class="month-nav-wrap relative lg-surface-clear lg-size-pill flex items-center gap-1 p-1"
                  x-data="{ pop: false, popYear: year }"
                  @click.outside="pop = false">
                 <button @click="prevMonth()" class="month-arrow w-7 h-7 flex items-center justify-center rounded-full">
@@ -107,7 +256,7 @@
                 </button>
                 <div class="relative">
                     <button @click="pop = !pop; popYear = year"
-                            class="month-display lg-surface-regular lg-size-card px-3 py-1 text-center min-w-[110px] cursor-pointer hover:ring-2 hover:ring-violet-200 transition-all">
+                            class="month-display relative lg-surface-regular lg-size-card px-3 py-1 text-center min-w-[110px] cursor-pointer hover:ring-2 hover:ring-violet-200 transition-all">
                         <span class="month-label" x-text="t.dataMonth"></span>
                         <span class="month-value">
                             <span x-text="month"></span> / <span x-text="year"></span>
@@ -131,7 +280,8 @@
                                     <polyline points="15 18 9 12 15 6"/>
                                 </svg>
                             </button>
-                            <span class="font-bold text-gray-800 text-sm" x-text="popYear"></span>
+                            <span class="font-bold text-sm"
+                                  style="color: var(--color-text-primary)" x-text="popYear"></span>
                             <button @click.stop="popYear++"
                                     class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -144,9 +294,10 @@
                             <template x-for="m in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="m">
                                 <button @click="month = m; year = popYear; pop = false; updateUrl(); loadData()"
                                         class="py-1.5 rounded-lg text-sm font-semibold transition-colors"
-                                        :class="m === month && popYear === year
-                                                  ? 'btn--primary text-white'
-                                                  : 'text-gray-700 hover:bg-violet-50'">
+                                        :class="m === month && popYear === year ? 'btn--primary text-white' : ''"
+                                        :style="m === month && popYear === year
+                                                  ? ''
+                                                  : 'color: var(--color-text-primary); background: transparent'">
                                     <span x-text="m"></span>
                                 </button>
                             </template>
@@ -164,9 +315,10 @@
             <!-- Lang switcher -->
             <div class="relative mr-2" x-data="{ open: false }">
                 <button @click="open = !open"
-                        class="lg-surface-clear hover:lg-surface-regular flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-200">
+                        class="lg-surface-clear relative hover:lg-surface-regular flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-200">
                     <span x-text="langFlags[lang]"></span>
-                    <span class="hidden sm:block uppercase text-xs font-bold text-gray-600" x-text="lang"></span>
+                    <span class="hidden sm:block uppercase text-xs font-bold"
+                          style="color: var(--color-text-primary)" x-text="lang"></span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                          class="text-gray-400">
@@ -204,41 +356,6 @@
         </div>
     </header>
 
-    <!-- Search overlay — ⌘K / Ctrl+K -->
-    <div x-data="{ open: false }"
-         @rf-search-open.window="open = true; $nextTick(() => $refs.searchInput.focus())"
-         @keydown.window.meta.k.prevent="open = true; $nextTick(() => $refs.searchInput.focus())"
-         @keydown.window.ctrl.k.prevent="open = true; $nextTick(() => $refs.searchInput.focus())"
-         @keydown.window.escape="open = false">
-        <div x-show="open" x-cloak
-             @click.self="open = false"
-             class="search-overlay"
-             x-transition:enter="transition ease-out duration-150"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-100"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0">
-            <div class="search-overlay__box">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                     class="flex-shrink-0" style="color: var(--color-text-tertiary)">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input x-ref="searchInput"
-                       x-model="searchQuery"
-                       :placeholder="t.search"
-                       class="flex-1 bg-transparent outline-none text-base"
-                       style="color: var(--color-text-primary); font-family: var(--font-body);"
-                       @keydown.escape.stop="open = false">
-                <button @click="open = false"
-                        class="btn btn--ghost text-xs px-2 py-1 rounded">
-                    ESC
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- ── MOBILE BOTTOM NAV ── -->
     <nav class="mobile-nav lg-surface-regular lg-with-lensing fixed bottom-0 left-0 right-0 z-sticky md:hidden"
          x-data="{ actionSheet: false }">
@@ -255,7 +372,7 @@
 
             <!-- Slot 3 — FAB -->
             <div class="flex-1 flex flex-col items-center pb-2.5 pt-0.5">
-                <button @click="actionSheet = true" class="mobile-fab lg-surface-regular">
+                <button @click="actionSheet = true" class="mobile-fab relative lg-surface-regular">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -278,7 +395,7 @@
         <!-- Action sheet backdrop -->
         <div x-show="actionSheet" x-cloak
              @click="actionSheet = false"
-             class="fixed inset-0 bg-black/50 z-40 lg-surface-clear"
+             class="fixed inset-0 bg-black/50 z-[900] lg-surface-clear"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -299,7 +416,7 @@
             <div class="action-sheet__handle"></div>
             <div class="space-y-1">
                 <button class="action-sheet__item"
-                        @click="activeTab = 'bills'; actionSheet = false">
+                        @click="activeTab = 'rooms'; roomView = 'list'; actionSheet = false">
                     <div class="stat-tile__icon tile-icon--success shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -309,7 +426,7 @@
                     <span>Đánh dấu đã thu phòng...</span>
                 </button>
                 <button class="action-sheet__item"
-                        @click="activeTab = 'bills'; actionSheet = false">
+                        @click="activeTab = 'rooms'; roomView = 'list'; actionSheet = false">
                     <div class="stat-tile__icon tile-icon--primary shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -322,7 +439,7 @@
                     <span>Xem QR phòng...</span>
                 </button>
                 <button class="action-sheet__item"
-                        @click="activeTab = 'bills'; actionSheet = false">
+                        @click="activeTab = 'rooms'; roomView = 'list'; actionSheet = false">
                     <div class="stat-tile__icon tile-icon--neutral-strong shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -340,10 +457,110 @@
 
     <!-- ── MAIN ── -->
     <main class="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 pb-20 md:pb-8">
+        <!-- ── ROOMS TOOLBAR (Moved to top) ── -->
+        <div x-show="activeTab === 'rooms'" class="mb-6 space-y-4">
+            <!-- Row 1: Top bar (View toggle + Search) -->
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <!-- View toggle segmented control -->
+                    <div class="flex rounded-lg p-0.5 gap-0.5 header-nav shrink-0">
+                        <button @click="roomView = 'floor'"
+                                :class="roomView === 'floor' ? 'tab-active' : 'tab-btn'"
+                                class="px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                            </svg>
+                            <span x-text="t.viewFloor"></span>
+                        </button>
+                        <button @click="roomView = 'list'; selectedBillId = null"
+                                :class="roomView === 'list' ? 'tab-active' : 'tab-btn'"
+                                class="px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+                                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                                <line x1="8" y1="18" x2="21" y2="18"/>
+                                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+                                <line x1="3" y1="18" x2="3.01" y2="18"/>
+                            </svg>
+                            <span x-text="t.viewList"></span>
+                        </button>
+                    </div>
+
+                    <!-- Room count (Floor view only) -->
+                    <h2 x-show="roomView === 'floor'" class="font-bold shrink-0 hidden sm:block" style="color: var(--color-text-primary)">
+                        <b style="color: var(--color-primary)" x-text="rooms.length"></b>
+                        <span x-text="' ' + t.roomsSubtitle"></span>
+                    </h2>
+                </div>
+
+                <!-- Search -->
+                <div class="relative flex-1 max-w-xs">
+                    <input x-model="searchQuery" :placeholder="t.search" class="input-base w-full">
+                </div>
+            </div>
+
+            <!-- Row 2: Filter bar (Status filters) — List view only -->
+            <div x-show="roomView === 'list'"
+                 x-transition:enter="transition ease-out duration-250"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="flex flex-wrap gap-2">
+                <!-- Filter: All -->
+                <button @click="billTab = 'all'"
+                        :class="billTab === 'all' ? 'tab-active' : 'hover:bg-white/50'"
+                        style="color: var(--color-text-primary)"
+                        class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-none">
+                    <span x-text="t.filterAll"></span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                          :style="billTab === 'all' ? 'background: var(--color-primary-light); color: var(--color-primary)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
+                          x-text="bills.filter(b=>b.is_occupied).length"></span>
+                </button>
+                <!-- Filter: Unpaid -->
+                <button @click="billTab = 'unpaid'"
+                        :class="billTab === 'unpaid' ? '' : 'hover:bg-white/50'"
+                        :style="billTab === 'unpaid'
+                            ? 'background: var(--color-unpaid-bg); border: 1px solid var(--color-unpaid-border); color: var(--color-unpaid); box-shadow: var(--shadow-glass-sm)'
+                            : 'color: var(--color-text-primary)'"
+                        class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-transparent">
+                    <span x-text="t.filterUnpaid"></span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                          :style="billTab === 'unpaid' ? 'background: rgba(220,38,38,0.15); color: var(--color-unpaid)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
+                          x-text="bills.filter(b=>b.status==='unpaid'&&b.is_occupied).length"></span>
+                </button>
+                <!-- Filter: Paid -->
+                <button @click="billTab = 'paid'"
+                        :class="billTab === 'paid' ? '' : 'hover:bg-white/50'"
+                        :style="billTab === 'paid'
+                            ? 'background: var(--color-paid-bg); border: 1px solid var(--color-paid-border); color: var(--color-paid); box-shadow: var(--shadow-glass-sm)'
+                            : 'color: var(--color-text-primary)'"
+                        class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-transparent">
+                    <span x-text="t.filterPaid"></span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                          :style="billTab === 'paid' ? 'background: rgba(22,163,74,0.15); color: var(--color-paid)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
+                          x-text="bills.filter(b=>b.status==='paid').length"></span>
+                </button>
+                <!-- Filter: Prepaid -->
+                <button @click="billTab = 'prepaid'"
+                        :class="billTab === 'prepaid' ? '' : 'hover:bg-white/50'"
+                        :style="billTab === 'prepaid'
+                            ? 'background: var(--color-prepaid-bg); border: 1px solid var(--color-prepaid-border); color: var(--color-prepaid); box-shadow: var(--shadow-glass-sm)'
+                            : 'color: var(--color-text-primary)'"
+                        class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-transparent">
+                    <span x-text="t.filterPrepaid"></span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                          :style="billTab === 'prepaid' ? 'background: rgba(124,58,237,0.15); color: var(--color-prepaid)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
+                          x-text="bills.filter(b=>b.status==='prepaid').length"></span>
+                </button>
+            </div>
+        </div>
+
         {% include 'components/dashboard.html' %}
         {% include 'components/bills.html' %}
         {% include 'components/rooms.html' %}
-        {% include 'components/revenue.html' %}
         {% include 'components/settings.html' %}
     </main>
 {% endblock %}

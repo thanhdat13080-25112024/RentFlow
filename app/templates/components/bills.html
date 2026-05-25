@@ -1,83 +1,38 @@
 <!-- ═══════════════════════════════════════
-     TAB: BILLS (Master / Detail)
+     TAB: ROOMS — List view (Master / Detail)
 ═══════════════════════════════════════ -->
-<div x-show="activeTab === 'bills'" class="space-y-4">
-    <!-- Filter bar -->
-    <div class="card-static px-4 py-3 flex flex-wrap gap-3 items-center">
-        <div class="flex rounded-lg p-1 gap-0.5 bg-gray-100">
-            <button @click="billTab = 'all'"
-                    :class="billTab === 'all' ? 'tab-active' : 'tab-btn'"
-                    class="px-3 py-1 rounded-lg text-sm font-semibold transition">
-                <span x-text="t.filterAll"></span>
-                <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.is_occupied).length"></span>
-            </button>
-            <button @click="billTab = 'unpaid'"
-                    :class="billTab === 'unpaid' ? 'tab-btn' : 'tab-btn'"
-                    :style="billTab === 'unpaid'
-                        ? 'background: var(--color-surface-solid); box-shadow: var(--shadow-glass-xs); color: var(--color-unpaid)'
-                        : ''"
-                    class="px-3 py-1 rounded-lg text-sm font-semibold transition">
-                <span x-text="t.filterUnpaid"></span>
-                <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.status==='unpaid'&&b.is_occupied).length"></span>
-            </button>
-            <button @click="billTab = 'paid'"
-                    :class="billTab === 'paid' ? 'tab-btn' : 'tab-btn'"
-                    :style="billTab === 'paid'
-                        ? 'background: var(--color-surface-solid); box-shadow: var(--shadow-glass-xs); color: var(--color-paid)'
-                        : ''"
-                    class="px-3 py-1 rounded-lg text-sm font-semibold transition">
-                <span x-text="t.filterPaid"></span>
-                <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.status==='paid').length"></span>
-            </button>
-            <button @click="billTab = 'prepaid'"
-                    :class="billTab === 'prepaid' ? 'tab-btn' : 'tab-btn'"
-                    :style="billTab === 'prepaid'
-                        ? 'background: var(--color-surface-solid); box-shadow: var(--shadow-glass-xs); color: var(--color-prepaid)'
-                        : ''"
-                    class="px-3 py-1 rounded-lg text-sm font-semibold transition">
-                <span x-text="t.filterPrepaid"></span>
-                <span class="ml-1 text-xs opacity-60" x-text="bills.filter(b=>b.status==='prepaid').length"></span>
-            </button>
-        </div>
-        <div class="flex-1 min-w-36 md:hidden">
-            <input x-model="searchQuery" :placeholder="t.search" class="input-base">
-        </div>
-    </div>
-
+<div x-show="activeTab === 'rooms' && roomView === 'list'" class="space-y-4">
     <!-- Master / Detail grid -->
     <div class="grid gap-4" :class="!isMobile ? 'grid-cols-[1fr_1.1fr]' : 'grid-cols-1'">
         <!-- List pane -->
         <div x-show="!isMobile || !selectedBillId"
              class="card-static overflow-hidden">
-            <div class="px-4 py-3 border-b grid th-cell"
-                 style="grid-template-columns:56px 1fr 100px 104px; background: var(--color-primary-light)">
-                <span x-text="t.room"></span>
-                <span x-text="t.tenant"></span>
-                <span class="text-right" x-text="t.total"></span>
-                <span class="text-center" x-text="t.status"></span>
-            </div>
             <div class="divide-y divide-gray-50 overflow-y-auto max-h-[70vh]">
                 <template x-for="bill in filteredBills" :key="bill.room_id">
                     <div @click="selectedBillId = bill.room_id"
-                         class="grid px-4 py-3 cursor-pointer transition items-center"
-                         style="grid-template-columns:56px 1fr 100px 104px"
+                         class="flex items-center gap-3 px-4 py-4 cursor-pointer transition"
                          :class="selectedBillId === bill.room_id
                              ? 'border-l-4 border-blue-600'
                              : 'hover:bg-gray-50 border-l-4 border-transparent'"
                          :style="selectedBillId === bill.room_id
                              ? 'background: var(--color-primary-light)'
                              : ''">
-                        <span class="text-lg font-extrabold" :class="getFloorText(bill.room_number)"
+                        <span class="text-lg font-extrabold w-10 shrink-0"
+                              :class="getFloorText(bill.room_number)"
                               x-text="bill.room_number"></span>
-                        <div class="min-w-0">
-                            <p class="font-semibold text-gray-800 text-sm truncate" x-text="bill.contact_info || '—'"></p>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm truncate"
+                               style="color: var(--color-text-primary)"
+                               x-text="bill.contact_info || '—'"></p>
                         </div>
-                        <span class="text-right font-bold text-sm text-gray-800" x-text="formatMoney(bill.total)"></span>
-                        <span class="text-center">
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="font-bold text-sm tabular-nums"
+                                  style="color: var(--color-text-primary)"
+                                  x-text="formatMoney(bill.total)"></span>
                             <span class="badge"
                                   :class="bill.status==='paid' ? 'badge--paid' : bill.status==='prepaid' ? 'badge--prepaid' : 'badge--unpaid'"
                                   x-text="t.status_map[bill.status] || bill.status"></span>
-                        </span>
+                        </div>
                     </div>
                 </template>
                 <template x-if="filteredBills.length === 0">
@@ -96,13 +51,97 @@
         <!-- Detail pane -->
         <div x-show="!isMobile || selectedBillId">
             <template x-if="!selectedBill">
-                <div class="card-static empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                         class="empty-state__icon">
-                        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                    </svg>
-                    <p class="empty-state__text" x-text="t.selectRoom"></p>
+                <div class="card-static overflow-hidden">
+                    <!-- Mini overview header -->
+                    <div class="px-5 py-4 border-b"
+                         style="background: var(--color-primary-light); border-color: var(--color-primary-muted)">
+                        <h3 class="font-extrabold" style="color: var(--color-primary)" x-text="t.tabs.dashboard"></h3>
+                        <p class="text-xs mt-0.5" style="color: var(--color-text-tertiary)">
+                            <span x-text="t.dataMonth + ' ' + month + '/' + year"></span>
+                            · <span x-text="stats.totalRooms + ' ' + t.statRooms"></span>
+                        </p>
+                    </div>
+
+                    <div class="p-5 space-y-5">
+                        <!-- Stat tiles 2x2 -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="rounded-xl p-3.5 border"
+                                 style="background: var(--color-unpaid-bg); border-color: var(--color-unpaid-border)">
+                                <p class="text-xs font-semibold mb-1"
+                                   style="color: var(--color-text-tertiary)" x-text="t.statUnpaid"></p>
+                                <p class="text-3xl font-extrabold"
+                                   style="color: var(--color-unpaid)" x-text="stats.unpaidCount"></p>
+                                <p class="text-xs mt-0.5"
+                                   style="color: var(--color-text-tertiary)" x-text="t.statRooms"></p>
+                            </div>
+                            <div class="rounded-xl p-3.5 border"
+                                 style="background: var(--color-paid-bg); border-color: var(--color-paid-border)">
+                                <p class="text-xs font-semibold mb-1"
+                                   style="color: var(--color-text-tertiary)" x-text="t.statPaid"></p>
+                                <p class="text-3xl font-extrabold"
+                                   style="color: var(--color-paid)"
+                                   x-text="stats.paidCount + stats.prepaidCount"></p>
+                                <p class="text-xs mt-0.5"
+                                   style="color: var(--color-text-tertiary)" x-text="t.statRooms"></p>
+                            </div>
+                            <div class="col-span-2 rounded-xl p-3.5 border"
+                                 style="background: var(--color-surface-solid); border-color: var(--color-border)">
+                                <p class="text-xs font-semibold mb-1"
+                                   style="color: var(--color-text-tertiary)" x-text="t.statCollected"></p>
+                                <p class="text-xl font-extrabold tabular-nums"
+                                   style="color: var(--color-paid)"
+                                   x-text="formatMoney(stats.collectedAmount)"></p>
+                                <p class="text-xs mt-0.5"
+                                   style="color: var(--color-text-tertiary)" x-text="t.statThisMonth"></p>
+                            </div>
+                        </div>
+
+                        <!-- Attention rooms -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-xs font-bold"
+                                   style="color: var(--color-text-secondary)" x-text="t.attentionTitle"></p>
+                                <span class="text-xs"
+                                      style="color: var(--color-text-tertiary)"
+                                      x-text="stats.unpaidCount + ' ' + t.statRooms"></span>
+                            </div>
+                            <template x-if="attentionRooms.length === 0">
+                                <div class="py-4 text-center">
+                                    <span class="text-sm font-semibold"
+                                          style="color: var(--color-paid)"
+                                          x-text="t.dashAllPaid"></span>
+                                </div>
+                            </template>
+                            <div class="space-y-2">
+                                <template x-for="bill in attentionRooms.slice(0, 4)" :key="bill.room_id">
+                                    <div class="flex items-center gap-2.5 p-2.5 rounded-lg border"
+                                         style="background: var(--color-unpaid-bg); border-color: var(--color-unpaid-border)">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                                             :class="getFloorBg(bill.room_number)"
+                                             x-text="bill.room_number"></div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-semibold text-xs truncate"
+                                               style="color: var(--color-text-primary)"
+                                               x-text="bill.contact_info || '—'"></p>
+                                            <p class="text-xs tabular-nums mt-0.5"
+                                               style="color: var(--color-unpaid)"
+                                               x-text="formatMoney(bill.total)"></p>
+                                        </div>
+                                        <button @click="quickCollect(bill)"
+                                                class="btn btn--success shrink-0 text-xs px-2.5 py-1"
+                                                x-text="t.collect"></button>
+                                    </div>
+                                </template>
+                            </div>
+                            <template x-if="stats.unpaidCount > 4">
+                                <p class="text-center text-xs mt-2"
+                                   style="color: var(--color-text-tertiary)">
+                                    + <span x-text="stats.unpaidCount - 4"></span>
+                                    <span x-text="' ' + t.statRooms"></span>
+                                </p>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </template>
             <template x-if="selectedBill">
@@ -126,7 +165,8 @@
                         <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shrink-0"
                              :class="getFloorBg(selectedBill.room_number)" x-text="selectedBill.room_number"></div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-extrabold text-gray-800 text-lg truncate"
+                            <h3 class="font-extrabold text-lg truncate"
+                                style="color: var(--color-text-primary)"
                                 x-text="selectedBill.contact_info || '—'"></h3>
                             <p class="text-xs" style="color: var(--color-text-tertiary)">
                                 <span x-show="selectedBill.move_in_date"
@@ -207,7 +247,7 @@
                             <button @click="toggleStatus(selectedBill)"
                                     x-show="selectedBill.status === 'unpaid'"
                                     class="btn btn--success btn--lg col-span-2">
-                                ✓ <span x-text="t.markPaid"></span>
+                                <span x-text="t.markPaid"></span>
                             </button>
                             <button @click="toggleStatus(selectedBill)"
                                     x-show="selectedBill.status === 'paid'"

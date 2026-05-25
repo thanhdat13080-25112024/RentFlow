@@ -36,6 +36,7 @@ const TRANSLATIONS = {
         prepaidTitle:'Đóng tiền trước', prepaidHint:'Nhập các tháng đóng trước cho phòng',
         confirm:'Xác nhận', cancel:'Hủy',
         search:'Tìm phòng, khách, SĐT...',
+        viewFloor:'Dạng tầng', viewList:'Dạng cột',
         importCSV:'Import CSV',
         greeting_morning:'Chào buổi sáng', greeting_afternoon:'Chào buổi chiều', greeting_evening:'Chào buổi tối',
     },
@@ -76,6 +77,7 @@ const TRANSLATIONS = {
         prepaidTitle:'Mark Prepaid', prepaidHint:'Enter months to mark prepaid for room',
         confirm:'Confirm', cancel:'Cancel',
         search:'Search rooms, tenants...',
+        viewFloor:'Floor View', viewList:'List View',
         importCSV:'Import CSV',
         greeting_morning:'Good morning', greeting_afternoon:'Good afternoon', greeting_evening:'Good evening',
     },
@@ -116,6 +118,7 @@ const TRANSLATIONS = {
         prepaidTitle:'선납 처리', prepaidHint:'선납 월 입력 (방',
         confirm:'확인', cancel:'취소',
         search:'방, 세입자 검색...',
+        viewFloor:'층별 보기', viewList:'목록 보기',
         importCSV:'CSV 가져오기',
         greeting_morning:'좋은 아침', greeting_afternoon:'안녕하세요', greeting_evening:'좋은 저녁',
     },
@@ -156,6 +159,7 @@ const TRANSLATIONS = {
         prepaidTitle:'前払処理', prepaidHint:'前払月を入力 (部屋',
         confirm:'確認', cancel:'キャンセル',
         search:'部屋・入居者検索...',
+        viewFloor:'階層表示', viewList:'リスト表示',
         importCSV:'CSVインポート',
         greeting_morning:'おはようございます', greeting_afternoon:'こんにちは', greeting_evening:'こんばんは',
     },
@@ -196,6 +200,7 @@ const TRANSLATIONS = {
         prepaidTitle:'预付处理', prepaidHint:'输入预付月份 (房间',
         confirm:'确认', cancel:'取消',
         search:'搜索房间、租户...',
+        viewFloor:'楼层视图', viewList:'列表视图',
         importCSV:'导入CSV',
         greeting_morning:'早上好', greeting_afternoon:'下午好', greeting_evening:'晚上好',
     }
@@ -210,12 +215,14 @@ function app(initialMonth, initialYear) {
         billTab: 'all',
         searchQuery: '',
         selectedBillId: null,
+        roomView: 'floor',
         isMobile: false,
 
         bills: [],
         rooms: [],
         settings: {},
         revenueSummary: [],
+        revenueExpanded: false,
 
         toast: { show: false, message: '', type: 'success' },
         editRoomModal: { show: false, room: {} },
@@ -233,8 +240,6 @@ function app(initialMonth, initialYear) {
             return [
                 { id: 'dashboard', label: this.t.tabs.dashboard },
                 { id: 'rooms',     label: this.t.tabs.rooms },
-                { id: 'bills',     label: this.t.tabs.bills },
-                { id: 'revenue',   label: this.t.tabs.revenue },
                 { id: 'settings',  label: this.t.tabs.settings },
             ];
         },
@@ -242,7 +247,6 @@ function app(initialMonth, initialYear) {
             return [
                 { id: 'dashboard', label: this.t.tabs.dashboard, icon: 'fas fa-chart-pie' },
                 { id: 'rooms',     label: this.t.tabs.rooms,     icon: 'fas fa-door-open' },
-                { id: 'bills',     label: this.t.tabs.bills,     icon: 'fas fa-file-invoice' },
                 { id: 'settings',  label: this.t.tabs.settings,  icon: 'fas fa-sliders' },
             ];
         },

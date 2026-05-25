@@ -385,11 +385,20 @@
   --z-base:     0;
   --z-raised:   1;
   --z-dropdown: 10;
-  --z-sticky:   40;
-  --z-modal:    50;
-  --z-toast:    60;
+  --z-sticky:   500;
+  --z-modal:    1000;
+  --z-toast:    2000;
   --z-top:      9999;
 }
+
+/* Z-index Utility Classes */
+.z-base     { z-index: var(--z-base); }
+.z-raised   { z-index: var(--z-raised); }
+.z-dropdown { z-index: var(--z-dropdown); }
+.z-sticky   { z-index: var(--z-sticky); }
+.z-modal    { z-index: var(--z-modal); }
+.z-toast    { z-index: var(--z-toast); }
+.z-top      { z-index: var(--z-top); }
 
 
 /* ================================================================
@@ -512,6 +521,11 @@
    Heading/số lớn dùng --font-display qua class .font-display
    hoặc selector h1-h6.
 ──────────────────────────────────────────────────────────────── */
+html, body {
+  background-color: var(--color-bg);
+  margin: 0;
+}
+
 body {
   font-family: var(--font-body);
   background: linear-gradient(
@@ -1119,6 +1133,63 @@ h1, h2, h3, h4, h5, h6,
   box-shadow: var(--shadow-glow-violet);
 }
 
+/* ── Inline electricity reading input ────────────────────────────
+   Nhỏ gọn, dùng trong electricity row của room card. Nền trong
+   suốt để hòa với glass background; focus thêm viền primary.
+──────────────────────────────────────────────────────────────── */
+.elec-input {
+  background:    rgba(255, 255, 255, 0.55);
+  border:        1px solid transparent;
+  border-radius: var(--radius-xs);
+  color:         var(--color-primary);
+  font-weight:   var(--fw-bold);
+  outline:       none;
+  text-align:    center;
+  transition:
+    border-color var(--dur-micro) var(--ease-smooth),
+    background   var(--dur-micro) var(--ease-smooth);
+}
+
+.elec-input:focus {
+  border-color: var(--color-primary);
+  background:   rgba(255, 255, 255, 0.85);
+}
+
+@media (prefers-color-scheme: dark) {
+  .elec-input {
+    background: rgba(255, 255, 255, 0.10);
+  }
+  .elec-input:focus {
+    background:   rgba(255, 255, 255, 0.16);
+    border-color: var(--color-primary);
+  }
+}
+
+/* ── Ghost icon button ────────────────────────────────────────────
+   Nút icon không viền: tertiary màu mặc định, primary khi hover.
+   Dùng cho QR code, action phụ trong card.
+──────────────────────────────────────────────────────────────── */
+.btn-icon-ghost {
+  color:         var(--color-text-tertiary);
+  background:    transparent;
+  border:        none;
+  cursor:        pointer;
+  border-radius: var(--radius-sm);
+  transition:
+    color       var(--dur-micro) var(--ease-smooth),
+    background  var(--dur-micro) var(--ease-smooth),
+    transform   var(--dur-micro) var(--ease-smooth);
+}
+
+.btn-icon-ghost:hover {
+  color:      var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.btn-icon-ghost:active {
+  transform: scale(0.88);
+}
+
 
 /* ================================================================
    HEADER & NAVIGATION COMPONENTS
@@ -1130,7 +1201,7 @@ h1, h2, h3, h4, h5, h6,
    Sticky Liquid Glass bar — strong blur, rim light, specular top.
 ──────────────────────────────────────────────────────────────── */
 .header-root {
-  background:   rgba(239, 246, 255, 0.92);
+  background:   rgba(239, 246, 255, 0.95) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
     0 1px 0   rgba(255, 255, 255, 0.80) inset,
@@ -1139,7 +1210,7 @@ h1, h2, h3, h4, h5, h6,
 
 @supports (backdrop-filter: blur(1px)) {
   .header-root {
-    background:               rgba(239, 246, 255, 0.78);
+    background:               rgba(239, 246, 255, 0.88) !important;
     backdrop-filter:          blur(48px) saturate(200%);
     -webkit-backdrop-filter:  blur(48px) saturate(200%);
     border-bottom-color:      rgba(255, 255, 255, 0.55);
@@ -1148,12 +1219,12 @@ h1, h2, h3, h4, h5, h6,
 
 @media (prefers-color-scheme: dark) {
   .header-root {
-    background:   rgba(7, 13, 26, 0.88);
+    background:   rgba(7, 13, 26, 0.95) !important;
     border-bottom-color: rgba(255, 255, 255, 0.08);
   }
   @supports (backdrop-filter: blur(1px)) {
     .header-root {
-      background: rgba(7, 13, 26, 0.72);
+      background: rgba(7, 13, 26, 0.88) !important;
     }
   }
 }
@@ -1367,7 +1438,7 @@ h1, h2, h3, h4, h5, h6,
    Apple iOS 26 style: Liquid Glass bar với concentric top corners.
 ──────────────────────────────────────────────────────────────── */
 .mobile-nav {
-  background:     rgba(239, 246, 255, 0.80);
+  background:     rgba(239, 246, 255, 0.95) !important;
   border-radius:  var(--lg-radius-concentric-lg) var(--lg-radius-concentric-lg) 0 0;
   border-top:     1px solid rgba(255, 255, 255, 0.65);
   padding-bottom: env(safe-area-inset-bottom);
@@ -1378,7 +1449,7 @@ h1, h2, h3, h4, h5, h6,
 
 @supports (backdrop-filter: blur(1px)) {
   .mobile-nav {
-    background:              rgba(239, 246, 255, 0.72);
+    background:              rgba(239, 246, 255, 0.88) !important;
     backdrop-filter:         blur(48px) saturate(200%);
     -webkit-backdrop-filter: blur(48px) saturate(200%);
   }
@@ -1386,12 +1457,12 @@ h1, h2, h3, h4, h5, h6,
 
 @media (prefers-color-scheme: dark) {
   .mobile-nav {
-    background:   rgba(7, 13, 26, 0.82);
+    background:   rgba(7, 13, 26, 0.95) !important;
     border-color: rgba(255, 255, 255, 0.08);
   }
   @supports (backdrop-filter: blur(1px)) {
     .mobile-nav {
-      background: rgba(7, 13, 26, 0.70);
+      background: rgba(7, 13, 26, 0.88) !important;
     }
   }
 }
@@ -1445,7 +1516,7 @@ h1, h2, h3, h4, h5, h6,
    Tăng độ đặc của kính khi cuộn.
 ──────────────────────────────────────────────────────────────── */
 .header-scrolled {
-  background: rgba(239, 246, 255, 0.90);
+  background: rgba(239, 246, 255, 1.0) !important;
   box-shadow:
     0 1px 0   rgba(255, 255, 255, 0.80) inset,
     0 6px 24px rgba(7, 23, 58, 0.10);
@@ -1457,7 +1528,7 @@ h1, h2, h3, h4, h5, h6,
 
 @supports (backdrop-filter: blur(1px)) {
   .header-scrolled {
-    background:              rgba(239, 246, 255, 0.82);
+    background:              rgba(239, 246, 255, 1.0) !important;
     backdrop-filter:         blur(64px) saturate(220%);
     -webkit-backdrop-filter: blur(64px) saturate(220%);
   }
@@ -1465,14 +1536,14 @@ h1, h2, h3, h4, h5, h6,
 
 @media (prefers-color-scheme: dark) {
   .header-scrolled {
-    background: rgba(7, 13, 26, 0.90);
+    background: rgba(7, 13, 26, 1.0) !important;
     box-shadow:
       0 1px 0   rgba(255, 255, 255, 0.06) inset,
       0 6px 24px rgba(0, 0, 0, 0.30);
   }
   @supports (backdrop-filter: blur(1px)) {
     .header-scrolled {
-      background: rgba(7, 13, 26, 0.82);
+      background: rgba(7, 13, 26, 1.0) !important;
     }
   }
 }
@@ -1760,7 +1831,6 @@ h1, h2, h3, h4, h5, h6,
    Sử dụng: Card, Panel, Header.
 ──────────────────────────────────────────────────────────────── */
 .lg-surface-regular {
-  position: relative;
   isolation: isolate;
   background: var(--lg-tint-regular);
   backdrop-filter: var(--lg-blur-regular);
@@ -1800,7 +1870,6 @@ h1, h2, h3, h4, h5, h6,
    Sử dụng: Overlay, Tooltip, Control nền trong.
 ──────────────────────────────────────────────────────────────── */
 .lg-surface-clear {
-  position: relative;
   isolation: isolate;
   background: var(--lg-tint-clear);
   backdrop-filter: var(--lg-blur-clear);

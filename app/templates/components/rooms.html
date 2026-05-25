@@ -1,18 +1,9 @@
 <!-- ═══════════════════════════════════════
-     TAB: ROOMS
+     TAB: ROOMS & BILLS (merged)
 ═══════════════════════════════════════ -->
 <div x-show="activeTab === 'rooms'" class="space-y-4">
-    <!-- Sub-header -->
-    <div class="card-static px-5 py-3 flex flex-wrap gap-3 items-center">
-        <h2 class="font-bold text-gray-800">
-            <b style="color: var(--color-primary)" x-text="rooms.length"></b>
-            <span x-text="' ' + t.roomsSubtitle"></span>
-        </h2>
-        <div class="flex-1"></div>
-        <input x-model="searchQuery" :placeholder="t.search" class="input-base w-52">
-    </div>
-
-    <!-- Floors -->
+    <!-- ── Floor view ── -->
+    <div x-show="roomView === 'floor'" class="space-y-4">
     <template x-for="floor in floorGroups" :key="floor.num">
         <div>
             <div class="floor-row">
@@ -62,37 +53,55 @@
                                           x-text="formatMoney(getBillForRoom(room).total)"></span>
                                 </div>
                                 <!-- Electricity mini row -->
-                                <div class="flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs bg-gray-100"
-                                     x-show="!getBillForRoom(room).is_fixed">
-                                    <span style="color: var(--color-text-tertiary)"
-                                          x-text="getBillForRoom(room).old_reading"></span>
-                                    <span class="text-xs" style="color: var(--color-text-tertiary)">→</span>
-                                    <input type="number" :value="getBillForRoom(room).new_reading"
-                                           @click.stop
-                                           @change.stop="updateElectricityByRoom(room, $event.target.value)"
-                                           class="w-14 bg-transparent font-bold outline-none text-center"
-                                           style="color: var(--color-primary)" />
-                                    <span style="color: var(--color-text-tertiary)">|</span>
-                                    <span class="font-semibold"
-                                          style="color: var(--blue-500)"
-                                          x-text="(getBillForRoom(room).new_reading - getBillForRoom(room).old_reading) + 'kWh'"></span>
+                                <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs"
+                                     style="background: var(--color-primary-light); border: 1px solid var(--color-primary-muted)">
+                                    <!-- Old → New readings -->
+                                    <div class="flex items-center gap-1 flex-1 min-w-0">
+                                        <span class="tabular-nums" style="color: #B0B0B0"
+                                              x-text="getBillForRoom(room).old_reading"></span>
+                                        <span style="color: var(--color-primary-muted); font-size: 0.65rem; line-height: 1; flex-shrink: 0">→</span>
+                                        <input type="number" :value="getBillForRoom(room).new_reading"
+                                               @click.stop
+                                               @change.stop="updateElectricityByRoom(room, $event.target.value)"
+                                               class="elec-input w-12 px-1 py-0.5 text-xs" />
+                                    </div>
+                                    <!-- Divider -->
+                                    <div class="w-px h-3 shrink-0" style="background: var(--color-primary); opacity: 0.2"></div>
+                                    <!-- kWh with lightning bolt -->
+                                    <div class="flex items-center gap-0.5 font-bold shrink-0" style="color: var(--cyan-500)">
+                                        <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+                                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                                        </svg>
+                                        <span class="tabular-nums" x-text="(getBillForRoom(room).new_reading - getBillForRoom(room).old_reading)"></span>
+                                        <span class="font-normal" style="font-size: 0.6rem; opacity: 0.75">kWh</span>
+                                    </div>
                                 </div>
                                 <!-- Quick actions -->
-                                <div class="flex gap-2 mt-2">
+                                <div class="flex items-center gap-2 mt-3">
                                     <template x-if="getBillForRoom(room).status === 'unpaid'">
                                         <button @click.stop="quickCollect(getBillForRoom(room))"
                                                 class="btn btn--success flex-1 text-xs py-1.5"
                                                 x-text="t.collect"></button>
                                     </template>
                                     <button @click.stop="showQR(getBillForRoom(room))"
-                                            class="w-8 h-8 flex items-center justify-center rounded-md text-sm bg-gray-100 hover:bg-gray-200 transition-colors shrink-0">▣</button>
+                                            class="btn-icon-ghost ml-auto w-8 h-8 flex items-center justify-center shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect width="5" height="5" x="3" y="3" rx="1"/>
+                                            <rect width="5" height="5" x="16" y="3" rx="1"/>
+                                            <rect width="5" height="5" x="3" y="16" rx="1"/>
+                                            <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
+                                            <path d="M21 21v.01"/>
+                                            <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
+                                            <path d="M3 12h.01"/>
+                                            <path d="M12 3h.01"/>
+                                            <path d="M12 16v.01"/>
+                                            <path d="M16 12h1"/>
+                                            <path d="M21 12v.01"/>
+                                            <path d="M12 21v-1"/>
+                                        </svg>
+                                    </button>
                                 </div>
-                            </div>
-                        </template>
-                        <template x-if="!room.is_occupied">
-                            <div class="text-center mt-2">
-                                <span class="badge badge--neutral" style="border-style: dashed"
-                                      x-text="t.vacantRoom"></span>
                             </div>
                         </template>
                     </div>
@@ -100,4 +109,5 @@
             </div>
         </div>
     </template>
+    </div><!-- end floor view -->
 </div>

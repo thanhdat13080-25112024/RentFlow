@@ -175,30 +175,43 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
         unit_price_setting = db.query(Setting).filter(Setting.key == "electricity_unit_price").first()
         unit_price = int(unit_price_setting.value) if unit_price_setting else 4000
 
+        def get_val(row, keys, default=None):
+            for k in keys:
+                if k in row: return row[k]
+            return default
+
         import_count = 0
         for row in reader:
-            room_number = row.get("Phòng")
-            month = int(row.get("Tháng", 0))
-            year = int(row.get("Năm", 0))
+            room_number = get_val(row, ["Phòng", "Phong", "Room", "room"])
+            month_val = get_val(row, ["Tháng", "Thang", "Month", "month"])
+            year_val = get_val(row, ["Năm", "Nam", "Year", "year"])
             
-            if not room_number or not month or not year:
+            if not room_number or not month_val or not year_val:
                 continue
+            
+            month = int(month_val)
+            year = int(year_val)
                 
             room = db.query(Room).filter(Room.room_number == room_number).first()
             if not room:
                 continue
 
-            room.contact_info = row.get("Khách Thuê", room.contact_info)
-            room.move_in_date = row.get("Ngày Vào", room.move_in_date)
-            room.rent_price = int(row.get("Tiền Phòng", room.rent_price))
-            room.service_fee = int(row.get("Dịch Vụ", room.service_fee))
+            room.contact_info = get_val(row, ["Khách Thuê", "Khach Thue", "Tenant", "tenant"], room.contact_info)
+            room.move_in_date = get_val(row, ["Ngày Vào", "Ngay Vao", "Move In", "date"], room.move_in_date)
+            
+            rent_val = get_val(row, ["Tiền Phòng", "Tien Phong", "Rent", "rent"])
+            if rent_val is not None: room.rent_price = int(rent_val)
+            
+            service_val = get_val(row, ["Dịch Vụ", "Dich Vu", "Service", "service"])
+            if service_val is not None: room.service_fee = int(service_val)
+            
             room.is_occupied = True if (room.rent_price + room.service_fee > 0) else False
             
-            old_r = row.get("Điện Cũ")
-            new_r = row.get("Điện Mới")
+            old_r = get_val(row, ["Điện Cũ", "Dien Cu", "Old Reading", "old"])
+            new_r = get_val(row, ["Điện Mới", "Dien Moi", "New Reading", "new"])
             elec_fee = 0
             
-            if old_r is not None and new_r is not None and old_r != "" and new_r != "":
+            if old_r is not None and new_r is not None and str(old_r).strip() != "" and str(new_r).strip() != "":
                 old_r = int(old_r)
                 new_r = int(new_r)
                 elec_fee = (new_r - old_r) * unit_price
@@ -220,8 +233,12 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
             elif room.electricity_type == "fixed":
                 elec_fee = room.fixed_electricity_fee
 
-            status_map = {"Da thu": "paid", "Chua thu": "unpaid", "Dong truoc": "prepaid"}
-            raw_status = row.get("Trạng Thái", "Chua thu")
+            status_map = {
+                "Da thu": "paid", "Đã thu": "paid", "Paid": "paid",
+                "Chua thu": "unpaid", "Chưa thu": "unpaid", "Unpaid": "unpaid",
+                "Dong truoc": "prepaid", "Đóng trước": "prepaid", "Prepaid": "prepaid"
+            }
+            raw_status = get_val(row, ["Trạng Thái", "Trang Thai", "Status", "status"], "Chua thu")
             status = status_map.get(raw_status, "unpaid")
             
             bill = db.query(MonthlyBill).filter(
