@@ -160,7 +160,7 @@
     {% block head %}{% endblock %}
 </head>
 <body class="min-h-screen text-gray-900 overflow-x-hidden"
-      x-data="app()" x-init="init()" x-cloak
+      x-data="app({{ month }}, {{ year }})" x-init="init()" x-cloak
       @keydown.window="handleKeydown($event)">
 
     {% include 'components/_lg_filters.html' %}

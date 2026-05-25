@@ -427,7 +427,7 @@ function app(initialMonth, initialYear) {
 
         async loadData() {
             const res = await fetch(`/api/bills?month=${this.month}&year=${this.year}`);
-            if (res.status === 401) { window.location.href = '/login'; return; }
+            if (res.status === 401) return;
             this.bills = await res.json();
             if (this.selectedBillId && !this.bills.find(b => b.room_id === this.selectedBillId))
                 this.selectedBillId = null;
@@ -681,6 +681,19 @@ function app(initialMonth, initialYear) {
                 '6': 'text-cyan-500',
                 '7': 'text-violet-700',
             }[f] || 'text-gray-500';
+        },
+
+        getFloorBorder(roomNumber) {
+            const f = (roomNumber || '?')[0];
+            return {
+                '1': 'border-violet-600',
+                '2': 'border-indigo-600',
+                '3': 'border-cyan-600',
+                '4': 'border-violet-500',
+                '5': 'border-indigo-500',
+                '6': 'border-cyan-500',
+                '7': 'border-violet-700',
+            }[f] || 'border-gray-500';
         },
 
         formatMoney(amount) { return new Intl.NumberFormat('vi-VN').format(amount || 0) + 'đ'; },
