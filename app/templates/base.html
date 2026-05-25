@@ -35,6 +35,28 @@
               800: 'var(--violet-800)',
               900: 'var(--violet-900)',
             },
+            blue: {
+              50:  'var(--blue-50)',
+              100: 'var(--blue-100)',
+              200: 'var(--blue-200)',
+              300: 'var(--blue-300)',
+              400: 'var(--blue-400)',
+              500: 'var(--blue-500)',
+              600: 'var(--blue-600)',
+              700: 'var(--blue-700)',
+              800: 'var(--blue-800)',
+              900: 'var(--blue-900)',
+            },
+            sky: {
+              50:  'var(--sky-50)',
+              100: 'var(--sky-100)',
+              200: 'var(--sky-200)',
+              300: 'var(--sky-300)',
+              400: 'var(--sky-400)',
+              500: 'var(--sky-500)',
+              600: 'var(--sky-600)',
+              700: 'var(--sky-700)',
+            },
             indigo: {
               50:  'var(--indigo-50)',
               100: 'var(--indigo-100)',
@@ -135,9 +157,11 @@
     </style>
     {% block head %}{% endblock %}
 </head>
-<body class="min-h-screen text-gray-900"
+<body class="min-h-screen text-gray-900 overflow-x-hidden"
       x-data="app()" x-init="init()" x-cloak
       @keydown.window="handleKeydown($event)">
+
+    {% include 'components/_lg_filters.html' %}
 
     {% block content %}{% endblock %}
 

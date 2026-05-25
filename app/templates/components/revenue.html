@@ -14,14 +14,14 @@
                 <div class="flex flex-col items-center justify-end gap-1 flex-1 h-full">
                     <span class="text-xs"
                           :style="bar.current
-                              ? 'color: var(--violet-600)'
+                              ? 'color: var(--color-chart-primary)'
                               : 'color: var(--color-text-tertiary)'"
                           x-text="(bar.v/1e6).toFixed(0)+'M'"></span>
                     <div class="w-full rounded-t-lg bar-segment"
-                         :style="'height:' + Math.max(bar.pct, 4) + '%; background:' + (bar.current ? 'var(--violet-600)' : 'var(--violet-200)')"></div>
+                         :style="'height:' + Math.max(bar.pct, 4) + '%; background:' + (bar.current ? 'var(--color-chart-primary)' : 'rgba(37,99,235,0.35)')"></div>
                     <span class="text-xs font-semibold"
                           :style="bar.current
-                              ? 'color: var(--violet-600)'
+                              ? 'color: var(--color-chart-primary)'
                               : 'color: var(--color-text-tertiary)'"
                           x-text="bar.label"></span>
                 </div>
@@ -32,7 +32,7 @@
     <!-- Revenue table -->
     <div class="card-static overflow-hidden">
         <table class="w-full text-sm">
-            <thead class="border-b bg-gray-50">
+            <thead class="border-b" style="background: var(--color-surface-raised)">
                 <tr>
                     <th class="th-cell px-5 py-3 text-left" x-text="t.revMonth"></th>
                     <th class="th-cell px-5 py-3 text-right" x-text="t.electricityFee"></th>
@@ -44,7 +44,8 @@
             <tbody class="divide-y divide-gray-50">
                 <template x-for="row in revenueSummary" :key="row.month + '-' + row.year">
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-5 py-4 font-bold text-gray-800 text-lg"
+                        <td class="px-5 py-4 font-bold text-lg"
+                            style="color: var(--color-text-primary)"
                             x-text="row.month + '/' + row.year"></td>
                         <td class="px-5 py-4 text-right font-semibold"
                             style="color: var(--amber-600)"
@@ -56,7 +57,7 @@
                             style="color: var(--color-primary)"
                             x-text="formatMoney(row.total_rent)"></td>
                         <td class="px-5 py-4 text-right font-extrabold text-lg"
-                            style="color: var(--violet-700)"
+                            style="color: var(--color-primary)"
                             x-text="formatMoney(row.total_revenue)"></td>
                     </tr>
                 </template>

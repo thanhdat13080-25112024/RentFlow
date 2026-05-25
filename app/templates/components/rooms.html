@@ -25,6 +25,7 @@
                 <template x-for="room in floor.rooms" :key="room.id">
                     <div class="card-base p-4 cursor-pointer"
                          :class="!room.is_occupied ? 'room-card--vacant' : ''"
+                         :style="room.is_occupied ? 'border-color: rgba(124, 58, 237, 0.12)' : ''"
                          @click="openRoomEdit(room)">
                         <!-- Room number + status badge -->
                         <div class="flex justify-between items-start mb-2">
@@ -43,17 +44,21 @@
                         </div>
                         <!-- Tenant -->
                         <div class="mb-3 min-h-[2.5rem]">
-                            <p class="font-semibold text-gray-800 text-sm truncate"
+                            <p class="font-semibold text-sm truncate"
+                               style="color: var(--color-text-primary)"
                                x-text="room.contact_info || t.status_map.empty"></p>
-                            <p class="text-xs text-gray-400" x-show="room.is_occupied"
+                            <p class="text-xs" x-show="room.is_occupied"
+                               style="color: var(--color-text-secondary)"
                                x-text="formatMoney(room.rent_price) + '/th'"></p>
                         </div>
                         <!-- Bill total row -->
                         <template x-if="getBillForRoom(room) && room.is_occupied">
                             <div>
                                 <div class="flex justify-between text-xs mb-2">
-                                    <span class="text-gray-400" x-text="'T' + month"></span>
-                                    <span class="font-bold text-gray-800"
+                                    <span x-text="'T' + month"
+                                          style="color: var(--color-text-secondary)"></span>
+                                    <span class="font-bold"
+                                          style="color: var(--color-text-primary)"
                                           x-text="formatMoney(getBillForRoom(room).total)"></span>
                                 </div>
                                 <!-- Electricity mini row -->
@@ -69,7 +74,7 @@
                                            style="color: var(--color-primary)" />
                                     <span style="color: var(--color-text-tertiary)">|</span>
                                     <span class="font-semibold"
-                                          style="color: var(--violet-500)"
+                                          style="color: var(--blue-500)"
                                           x-text="(getBillForRoom(room).new_reading - getBillForRoom(room).old_reading) + 'kWh'"></span>
                                 </div>
                                 <!-- Quick actions -->

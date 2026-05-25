@@ -6,7 +6,7 @@
     <!-- Greeting + actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-extrabold text-gray-800">
+            <h1 class="text-2xl font-extrabold" style="color: var(--color-text-primary)">
                 <span x-text="getGreeting()"></span>
                 <template x-if="settings.account_holder">
                     <span style="color: var(--color-primary)">, <span x-text="settings.account_holder"></span></span>
@@ -141,7 +141,7 @@
         <div class="lg:col-span-2 card-static p-5">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="font-bold text-gray-800" x-text="t.chartTitle"></h3>
+                    <h3 class="font-bold" style="color: var(--color-text-primary)" x-text="t.chartTitle"></h3>
                     <p class="text-xs text-gray-400" x-text="t.chartSubtitle"></p>
                 </div>
             </div>
@@ -157,12 +157,12 @@
                     <template x-if="dashboardChart.length === 0">
                         <div class="w-full flex flex-col items-center justify-center gap-3 h-full">
                             <div class="flex items-end gap-1 opacity-25">
-                                <div class="w-4 h-5 rounded-t" style="background: var(--violet-300)"></div>
-                                <div class="w-4 h-9 rounded-t" style="background: var(--violet-300)"></div>
-                                <div class="w-4 h-6 rounded-t" style="background: var(--violet-300)"></div>
-                                <div class="w-4 h-11 rounded-t" style="background: var(--violet-300)"></div>
-                                <div class="w-4 h-7 rounded-t" style="background: var(--violet-300)"></div>
-                                <div class="w-4 h-8 rounded-t" style="background: var(--violet-300)"></div>
+                                <div class="w-4 h-5 rounded-t" style="background: var(--blue-300)"></div>
+                                <div class="w-4 h-9 rounded-t" style="background: var(--blue-300)"></div>
+                                <div class="w-4 h-6 rounded-t" style="background: var(--blue-300)"></div>
+                                <div class="w-4 h-11 rounded-t" style="background: var(--blue-300)"></div>
+                                <div class="w-4 h-7 rounded-t" style="background: var(--blue-300)"></div>
+                                <div class="w-4 h-8 rounded-t" style="background: var(--blue-300)"></div>
                             </div>
                             <p class="text-xs font-medium text-gray-300" x-text="t.noActivity"></p>
                         </div>
@@ -181,10 +181,10 @@
                                  :style="{
                                      height: Math.max(bar.pct, 5) + '%',
                                      background: bar.current
-                                         ? 'linear-gradient(to top, var(--violet-600), var(--indigo-500))'
+                                         ? 'linear-gradient(to top, var(--blue-600), var(--sky-400))'
                                          : hovered
-                                             ? 'linear-gradient(to top, var(--violet-300), var(--violet-200))'
-                                             : 'linear-gradient(to top, var(--violet-200), var(--violet-100))',
+                                             ? 'linear-gradient(to top, rgba(37,99,235,0.55), rgba(56,189,248,0.35))'
+                                             : 'linear-gradient(to top, rgba(37,99,235,0.40), rgba(56,189,248,0.22))',
                                      boxShadow: bar.current ? 'var(--shadow-glow-violet)' : 'none',
                                      transform: hovered ? 'scale(1.05)' : 'none',
                                      transformOrigin: 'bottom center',
@@ -203,11 +203,11 @@
             </div>
             <div class="mt-3 flex items-center gap-4 text-xs text-gray-400">
                 <span class="flex items-center gap-1.5">
-                    <span class="legend-dot" style="background: var(--violet-600)"></span>
+                    <span class="legend-dot" style="background: linear-gradient(to top, var(--blue-600), var(--sky-400))"></span>
                     <span x-text="t.statThisMonth"></span>
                 </span>
                 <span class="flex items-center gap-1.5">
-                    <span class="legend-dot" style="background: var(--violet-200)"></span>
+                    <span class="legend-dot" style="background: rgba(37,99,235,0.40)"></span>
                     <span x-text="t.statPrevMonths"></span>
                 </span>
             </div>
@@ -215,7 +215,7 @@
 
         <!-- Donut -->
         <div class="card-static p-5" x-data="{ highlightedSegment: null }">
-            <h3 class="font-bold text-gray-800 mb-4" x-text="t.donutTitle + ' ' + month + '/' + year"></h3>
+            <h3 class="font-bold mb-4" style="color: var(--color-text-primary)" x-text="t.donutTitle + ' ' + month + '/' + year"></h3>
             <div class="flex items-center gap-6">
                 <div class="relative shrink-0">
                     <svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90">
@@ -253,10 +253,13 @@
                                     :style="{ opacity: highlightedSegment && highlightedSegment !== 'unpaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
                         </g>
                     </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center rotate-90">
-                        <span class="text-xl font-extrabold text-gray-800 leading-none" x-text="donut.paidPct + '%'"></span>
-                        <span class="text-xs text-gray-400 font-semibold mt-0.5" x-text="t.statPaid"></span>
-                        <span class="text-xs text-gray-400 mt-0.5"
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-xl font-extrabold leading-none"
+                              style="color: var(--color-text-primary)" x-text="donut.paidPct + '%'"></span>
+                        <span class="text-xs font-semibold mt-0.5"
+                              style="color: var(--color-text-secondary)" x-text="t.statPaid"></span>
+                        <span class="text-xs mt-0.5"
+                              style="color: var(--color-text-secondary)"
                               x-text="(donut.paidCount + donut.prepaidCount) + ' / ' + (donut.paidCount + donut.prepaidCount + donut.unpaidCount) + ' ' + t.statRooms"></span>
                     </div>
                 </div>
@@ -272,8 +275,8 @@
                              : ''"
                          @click="highlightedSegment = highlightedSegment === 'paid' ? null : 'paid'">
                         <span class="legend-dot shrink-0" style="background: var(--color-paid)"></span>
-                        <span class="text-sm flex-1" x-text="t.statPaid"></span>
-                        <b class="text-lg font-extrabold text-gray-800" x-text="donut.paidCount"></b>
+                        <span class="text-sm flex-1" style="color: var(--color-text-primary)" x-text="t.statPaid"></span>
+                        <b class="text-lg font-extrabold" style="color: var(--color-text-primary)" x-text="donut.paidCount"></b>
                     </div>
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
@@ -286,8 +289,8 @@
                              : ''"
                          @click="highlightedSegment = highlightedSegment === 'unpaid' ? null : 'unpaid'">
                         <span class="legend-dot shrink-0" style="background: var(--color-unpaid)"></span>
-                        <span class="text-sm flex-1" x-text="t.statUnpaid"></span>
-                        <b class="text-lg font-extrabold text-gray-800" x-text="donut.unpaidCount"></b>
+                        <span class="text-sm flex-1" style="color: var(--color-text-primary)" x-text="t.statUnpaid"></span>
+                        <b class="text-lg font-extrabold" style="color: var(--color-text-primary)" x-text="donut.unpaidCount"></b>
                     </div>
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
@@ -300,8 +303,8 @@
                              : ''"
                          @click="highlightedSegment = highlightedSegment === 'prepaid' ? null : 'prepaid'">
                         <span class="legend-dot shrink-0" style="background: var(--color-prepaid)"></span>
-                        <span class="text-sm flex-1" x-text="t.statPrepaid"></span>
-                        <b class="text-lg font-extrabold text-gray-800" x-text="donut.prepaidCount"></b>
+                        <span class="text-sm flex-1" style="color: var(--color-text-primary)" x-text="t.statPrepaid"></span>
+                        <b class="text-lg font-extrabold" style="color: var(--color-text-primary)" x-text="donut.prepaidCount"></b>
                     </div>
                 </div>
             </div>
@@ -313,7 +316,7 @@
         <!-- Rooms needing attention -->
         <div class="card-static p-5">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-gray-800" x-text="t.attentionTitle"></h3>
+                <h3 class="font-bold" style="color: var(--color-text-primary)" x-text="t.attentionTitle"></h3>
                 <span class="text-xs text-gray-400" x-text="stats.unpaidCount + ' ' + t.statRooms"></span>
             </div>
             <template x-if="attentionRooms.length === 0">
@@ -334,7 +337,7 @@
                         <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                              :class="getFloorBg(bill.room_number)" x-text="bill.room_number"></div>
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-gray-800 text-sm truncate" x-text="bill.contact_info || '—'"></p>
+                            <p class="font-semibold text-sm truncate" style="color: var(--color-text-primary)" x-text="bill.contact_info || '—'"></p>
                             <p class="text-xs text-gray-400" x-text="formatMoney(bill.total)"></p>
                         </div>
                         <button @click="quickCollect(bill)"
@@ -353,7 +356,7 @@
 
         <!-- Recent activity -->
         <div class="card-static p-5">
-            <h3 class="font-bold text-gray-800 mb-4" x-text="t.activityTitle"></h3>
+            <h3 class="font-bold mb-4" style="color: var(--color-text-primary)" x-text="t.activityTitle"></h3>
             <template x-if="recentActivity.length === 0">
                 <div class="py-8 text-center text-sm text-gray-300" x-text="t.noActivity"></div>
             </template>
@@ -368,7 +371,7 @@
                                      : 'background: var(--color-warning)'">
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-700">
+                            <p class="text-sm" style="color: var(--color-text-secondary)">
                                 <b x-text="'P.' + act.room"></b>
                                 <span x-text="' ' + (act.type === 'paid' ? t.actPaid : t.actPrepaid)"></span>
                                 <b style="color: var(--color-chart-primary)"

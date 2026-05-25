@@ -292,10 +292,24 @@ function app(initialMonth, initialYear) {
         },
 
         get dashboardChart() {
-            const recent = [...this.revenueSummary].reverse().slice(-6);
-            if (!recent.length) return [];
-            const max = Math.max(...recent.map(r => r.total_revenue), 1);
-            return recent.map(r => ({
+            // Build a fixed 6-slot window (5 months ago → current month).
+            // Slots without real data get zero so the chart always shows 6 bars.
+            const slots = [];
+            for (let i = 5; i >= 0; i--) {
+                let m = this.month - i;
+                let y = this.year;
+                if (m <= 0) { m += 12; y--; }
+                slots.push({ month: m, year: y });
+            }
+            const rows = slots.map(s => {
+                const found = this.revenueSummary.find(
+                    r => r.month === s.month && r.year === s.year
+                );
+                return { month: s.month, year: s.year, total_revenue: found ? found.total_revenue : 0 };
+            });
+            if (!rows.some(r => r.total_revenue > 0)) return [];
+            const max = Math.max(...rows.map(r => r.total_revenue), 1);
+            return rows.map(r => ({
                 label: 'T' + r.month,
                 v: r.total_revenue,
                 pct: Math.round((r.total_revenue / max) * 90),
@@ -362,6 +376,23 @@ function app(initialMonth, initialYear) {
             window.addEventListener('resize', () => { this.isMobile = window.innerWidth < 768; });
             await Promise.all([this.loadData(), this.loadSettings(), this.loadRooms()]);
             this.loadRevenueSummary();
+            this.initLiquidLight();
+        },
+
+        initLiquidLight() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (!window.matchMedia('(hover: hover)').matches) return;
+
+            document.addEventListener('mousemove', (e) => {
+                const targets = document.querySelectorAll('.lg-surface-regular');
+                targets.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    el.style.setProperty('--lg-light-x', `${x}%`);
+                    el.style.setProperty('--lg-light-y', `${y}%`);
+                });
+            }, { passive: true });
         },
 
         setLang(l) { this.lang = l; localStorage.setItem('qlTroLang', l); },
@@ -558,10 +589,16 @@ function app(initialMonth, initialYear) {
         },
 
         showQR(bill) {
+            if (!bill) return;
             this.qrModal = {
-                show: true, room: bill.room_number, amount: bill.total, room_id: bill.room_id,
-                rent_fee: bill.rent_fee, service_fee: bill.service_fee, elec_fee: bill.electricity_fee,
-                elec_usage: bill.is_fixed ? 0 : (bill.new_reading - bill.old_reading || 0)
+                show: true,
+                room: bill.room_number,
+                room_id: bill.room_id,
+                amount: bill.total || 0,
+                rent_fee: bill.rent_fee || 0,
+                service_fee: bill.service_fee || 0,
+                elec_fee: bill.electricity_fee || 0,
+                elec_usage: bill.is_fixed ? 0 : ((bill.new_reading || 0) - (bill.old_reading || 0))
             };
         },
 
@@ -656,6 +693,13 @@ function app(initialMonth, initialYear) {
             if (v.length > 4) return v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
             if (v.length > 2) return v.slice(0,2) + '/' + v.slice(2);
             return v;
+        },
+
+        displayDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
         },
 
         fixDate(room) {

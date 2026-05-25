@@ -1,0 +1,84 @@
+<!--
+  Liquid Glass SVG filter definitions — shared, render-once, zero layout cost.
+
+  Usage (CSS):
+    .lg-lens-strong { filter: url(#lg-lensing-strong); }
+    .lg-lens-soft   { filter: url(#lg-lensing-soft);   }
+    .lg-lens-edge   { filter: url(#lg-lensing-edge);   }
+    .lg-specular    { filter: url(#lg-specular-highlight); }
+
+  Guard (only apply when supported):
+    @supports (filter: url(#x)) { .lg-lens-strong { filter: url(#lg-lensing-strong); } }
+
+  Accessibility (required — add alongside any filter rule):
+    @media (prefers-reduced-transparency: reduce) { [class*="lg-lens"], .lg-specular { filter: none; } }
+
+  Filters do NOT render when the browser blocks same-origin SVG filter references.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="0" height="0"
+     style="position:absolute;overflow:hidden;pointer-events:none"
+     aria-hidden="true" focusable="false">
+  <defs>
+
+    <!-- ── #lg-lensing-strong ─────────────────────────────────────────
+         Strong khúc xạ: scale 70 — hero panels, modals, drawers.    -->
+    <filter id="lg-lensing-strong"
+            x="-10%" y="-10%" width="120%" height="120%"
+            color-interpolation-filters="sRGB">
+      <feTurbulence type="turbulence" baseFrequency="0.008" numOctaves="2" seed="1" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise"
+                         scale="70" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- ── #lg-lensing-soft ───────────────────────────────────────────
+         Gentle khúc xạ: scale 25 — header, nav, tab bar.            -->
+    <filter id="lg-lensing-soft"
+            x="-5%" y="-5%" width="110%" height="110%"
+            color-interpolation-filters="sRGB">
+      <feTurbulence type="turbulence" baseFrequency="0.008" numOctaves="2" seed="1" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise"
+                         scale="25" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- ── #lg-lensing-edge ───────────────────────────────────────────
+         Rim refraction: scale 40, chỉ ở vùng biên (mask erode).
+         Mô phỏng "rim refraction" của kính vật lý — giống Apple.    -->
+    <filter id="lg-lensing-edge"
+            x="-5%" y="-5%" width="110%" height="110%"
+            color-interpolation-filters="sRGB">
+      <feTurbulence type="turbulence" baseFrequency="0.008" numOctaves="2" seed="2" result="noise"/>
+      <!-- Erode alpha → interior region (no displacement inside) -->
+      <feMorphology in="SourceAlpha" operator="erode" radius="10" result="interior"/>
+      <!-- Full displacement pass -->
+      <feDisplacementMap in="SourceGraphic" in2="noise"
+                         scale="40" xChannelSelector="R" yChannelSelector="G" result="distorted"/>
+      <!-- Center: original, clipped to interior -->
+      <feComposite in="SourceGraphic" in2="interior" operator="in" result="center"/>
+      <!-- Rim: displaced, clipped to edge band (out = full − interior) -->
+      <feComposite in="distorted" in2="interior" operator="out" result="rim"/>
+      <feMerge><feMergeNode in="rim"/><feMergeNode in="center"/></feMerge>
+    </filter>
+
+    <!-- ── #lg-specular-highlight ────────────────────────────────────
+         Điểm sáng phía trên-trái (135°): fePointLight tại x=-100,y=-100.
+         SourceAlpha làm height-map → specular → screen blend.       -->
+    <filter id="lg-specular-highlight"
+            x="0%" y="0%" width="100%" height="100%"
+            color-interpolation-filters="sRGB">
+      <!-- Smooth alpha edge → height map -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <!-- Point light: 135° upper-left (x<0, y<0), z=200 toward viewer -->
+      <feSpecularLighting in="blur"
+                          surfaceScale="4" specularConstant="1.2" specularExponent="50"
+                          lighting-color="white" result="specular">
+        <fePointLight x="-100" y="-100" z="200"/>
+      </feSpecularLighting>
+      <!-- Clip specular to element silhouette -->
+      <feComposite in="specular" in2="SourceAlpha" operator="in" result="clipped"/>
+      <!-- Screen-blend highlight over original content -->
+      <feBlend in="SourceGraphic" in2="clipped" mode="screen"/>
+    </filter>
+
+  </defs>
+</svg>
