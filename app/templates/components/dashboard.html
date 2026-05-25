@@ -9,29 +9,36 @@
             <h1 class="text-2xl font-extrabold text-gray-800">
                 <span x-text="getGreeting()"></span>
                 <template x-if="settings.account_holder">
-                    <span class="text-blue-600">, <span x-text="settings.account_holder"></span></span>
+                    <span style="color: var(--color-primary)">, <span x-text="settings.account_holder"></span></span>
                 </template>
                 <span> 👋</span>
             </h1>
             <p class="text-sm text-gray-400 mt-1">
                 <span x-text="todayStr()"></span> —
                 <template x-if="stats.unpaidCount > 0">
-                    <span><b class="text-red-600" x-text="stats.unpaidCount"></b> <span x-text="t.dashUnpaidNote"></span></span>
+                    <span><b style="color: var(--color-unpaid)" x-text="stats.unpaidCount"></b> <span x-text="t.dashUnpaidNote"></span></span>
                 </template>
                 <template x-if="stats.unpaidCount === 0">
-                    <span class="text-green-600 font-semibold" x-text="t.dashAllPaid"></span>
+                    <span class="font-semibold" style="color: var(--color-paid)" x-text="t.dashAllPaid"></span>
                 </template>
             </p>
         </div>
         <div class="flex gap-2">
-            <button @click="$refs.csvFile.click()"
-                    class="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-semibold text-gray-600 transition">
-                <i class="fas fa-file-import text-emerald-500"></i>
+            <button @click="$refs.csvFile.click()" class="btn btn--ghost">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                     style="color: var(--color-paid)">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
                 <span class="hidden sm:block" x-text="t.importCSV"></span>
             </button>
-            <button @click="activeTab = 'revenue'"
-                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
-                <i class="fas fa-chart-line"></i>
+            <button @click="activeTab = 'revenue'" class="btn btn--primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                    <polyline points="16 7 22 7 22 13"/>
+                </svg>
                 <span class="hidden sm:block" x-text="t.tabs.revenue"></span>
             </button>
         </div>
@@ -39,10 +46,13 @@
 
     <!-- 6 stat tiles -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <!-- Tổng phòng — neutral -->
         <div class="stat-tile">
             <div class="stat-tile__icon tile-icon--neutral">
-                <i class="fas fa-door-open"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statTotalRooms"></p>
@@ -50,10 +60,12 @@
                 <p class="stat-tile__sub" x-text="stats.occupiedCount + ' ' + t.statOccupied + ' · ' + stats.emptyCount + ' ' + t.statEmpty"></p>
             </div>
         </div>
-        <!-- Chưa thu — danger -->
         <div class="stat-tile">
             <div class="stat-tile__icon tile-icon--danger">
-                <i class="fas fa-clock"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statUnpaid"></p>
@@ -61,10 +73,13 @@
                 <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
-        <!-- Đã thu — success -->
         <div class="stat-tile">
             <div class="stat-tile__icon tile-icon--success">
-                <i class="fas fa-circle-check"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statPaid"></p>
@@ -72,10 +87,15 @@
                 <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
-        <!-- Đóng trước — primary -->
         <div class="stat-tile">
             <div class="stat-tile__icon tile-icon--primary">
-                <i class="fas fa-calendar-check"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                    <polyline points="9 16 11 18 15 14"/>
+                </svg>
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statPrepaid"></p>
@@ -83,10 +103,14 @@
                 <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
-        <!-- Đã thu tháng này — success-soft -->
         <div class="stat-tile stat-tile--success-soft">
             <div class="stat-tile__icon tile-icon--success">
-                <i class="fas fa-wallet"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>
+                </svg>
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statCollected"></p>
@@ -94,10 +118,14 @@
                 <p class="stat-tile__sub" x-text="t.statThisMonth"></p>
             </div>
         </div>
-        <!-- Tiền cọc — neutral-strong -->
         <div class="stat-tile">
             <div class="stat-tile__icon tile-icon--neutral-strong">
-                <i class="fas fa-coins"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="8" cy="8" r="6"/>
+                    <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+                    <path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>
+                </svg>
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statDeposit"></p>
@@ -107,17 +135,16 @@
         </div>
     </div>
 
-    <!-- Charts + attention row -->
+    <!-- Charts row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Bar chart -->
-        <div class="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="lg:col-span-2 card-static p-5">
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="font-bold text-gray-800" x-text="t.chartTitle"></h3>
                     <p class="text-xs text-gray-400" x-text="t.chartSubtitle"></p>
                 </div>
             </div>
-            <!-- Chart area: grid lines sit behind the bars via absolute positioning -->
             <div class="relative h-44">
                 <div class="absolute inset-0 pointer-events-none">
                     <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:0"></div>
@@ -130,12 +157,12 @@
                     <template x-if="dashboardChart.length === 0">
                         <div class="w-full flex flex-col items-center justify-center gap-3 h-full">
                             <div class="flex items-end gap-1 opacity-25">
-                                <div class="w-4 h-5 bg-blue-300 rounded-t"></div>
-                                <div class="w-4 h-9 bg-blue-300 rounded-t"></div>
-                                <div class="w-4 h-6 bg-blue-300 rounded-t"></div>
-                                <div class="w-4 h-11 bg-blue-300 rounded-t"></div>
-                                <div class="w-4 h-7 bg-blue-300 rounded-t"></div>
-                                <div class="w-4 h-8 bg-blue-300 rounded-t"></div>
+                                <div class="w-4 h-5 rounded-t" style="background: var(--violet-300)"></div>
+                                <div class="w-4 h-9 rounded-t" style="background: var(--violet-300)"></div>
+                                <div class="w-4 h-6 rounded-t" style="background: var(--violet-300)"></div>
+                                <div class="w-4 h-11 rounded-t" style="background: var(--violet-300)"></div>
+                                <div class="w-4 h-7 rounded-t" style="background: var(--violet-300)"></div>
+                                <div class="w-4 h-8 rounded-t" style="background: var(--violet-300)"></div>
                             </div>
                             <p class="text-xs font-medium text-gray-300" x-text="t.noActivity"></p>
                         </div>
@@ -145,28 +172,30 @@
                              x-data="{ hovered: false }"
                              @mouseenter="hovered = true"
                              @mouseleave="hovered = false">
-                            <span class="text-[10px] font-semibold leading-none"
-                                  :class="bar.current ? 'text-blue-600' : 'text-gray-400'"
+                            <span class="text-xs font-semibold leading-none"
+                                  :style="bar.current
+                                      ? 'color: var(--color-chart-primary)'
+                                      : 'color: var(--color-text-tertiary)'"
                                   x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
                             <div class="w-full rounded-t-lg"
                                  :style="{
                                      height: Math.max(bar.pct, 5) + '%',
                                      background: bar.current
-                                         ? 'linear-gradient(to top, var(--color-primary), var(--blue-400))'
+                                         ? 'linear-gradient(to top, var(--violet-600), var(--indigo-500))'
                                          : hovered
-                                             ? 'linear-gradient(to top, var(--blue-300), var(--blue-200))'
-                                             : 'linear-gradient(to top, var(--blue-200), var(--blue-100))',
-                                     boxShadow: bar.current
-                                         ? (hovered ? '0 0 18px rgba(37,99,235,0.5)' : '0 0 10px rgba(37,99,235,0.3)')
-                                         : 'none',
+                                             ? 'linear-gradient(to top, var(--violet-300), var(--violet-200))'
+                                             : 'linear-gradient(to top, var(--violet-200), var(--violet-100))',
+                                     boxShadow: bar.current ? 'var(--shadow-glow-violet)' : 'none',
                                      transform: hovered ? 'scale(1.05)' : 'none',
                                      transformOrigin: 'bottom center',
-                                     transition: 'all 0.18s ease'
+                                     transition: 'all var(--dur-fast) var(--ease-smooth)'
                                  }"
                                  :title="formatMoney(bar.v)">
                             </div>
-                            <span class="text-[10px] font-semibold transition-colors"
-                                  :class="bar.current ? 'text-blue-600' : 'text-gray-400'"
+                            <span class="text-xs font-semibold transition-colors"
+                                  :style="bar.current
+                                      ? 'color: var(--color-chart-primary)'
+                                      : 'color: var(--color-text-tertiary)'"
                                   x-text="bar.label"></span>
                         </div>
                     </template>
@@ -174,89 +203,103 @@
             </div>
             <div class="mt-3 flex items-center gap-4 text-xs text-gray-400">
                 <span class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded inline-block" style="background:linear-gradient(to right,var(--color-primary),var(--blue-400))"></span>
+                    <span class="legend-dot" style="background: var(--violet-600)"></span>
                     <span x-text="t.statThisMonth"></span>
                 </span>
                 <span class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded inline-block" style="background:linear-gradient(to right,var(--blue-200),var(--blue-100))"></span>
+                    <span class="legend-dot" style="background: var(--violet-200)"></span>
                     <span x-text="t.statPrevMonths"></span>
                 </span>
             </div>
         </div>
 
         <!-- Donut -->
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5"
-             x-data="{ highlightedSegment: null }">
+        <div class="card-static p-5" x-data="{ highlightedSegment: null }">
             <h3 class="font-bold text-gray-800 mb-4" x-text="t.donutTitle + ' ' + month + '/' + year"></h3>
             <div class="flex items-center gap-6">
                 <div class="relative shrink-0">
                     <svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90">
                         <defs>
-                            <filter id="dsf-green" x="-30%" y="-30%" width="160%" height="160%">
+                            <filter id="dsf-paid" x="-30%" y="-30%" width="160%" height="160%">
                                 <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#16a34a" flood-opacity="0.45"/>
                             </filter>
-                            <filter id="dsf-blue" x="-30%" y="-30%" width="160%" height="160%">
-                                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#2563eb" flood-opacity="0.45"/>
+                            <filter id="dsf-prepaid" x="-30%" y="-30%" width="160%" height="160%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#8B5CF6" flood-opacity="0.45"/>
                             </filter>
-                            <filter id="dsf-red" x="-30%" y="-30%" width="160%" height="160%">
-                                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#ef4444" flood-opacity="0.45"/>
+                            <filter id="dsf-unpaid" x="-30%" y="-30%" width="160%" height="160%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="1.2" flood-color="#DC2626" flood-opacity="0.45"/>
                             </filter>
                         </defs>
                         <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f3f4f6" stroke-width="5"/>
-                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#16a34a" stroke-width="5"
-                                filter="url(#dsf-green)"
-                                :stroke-dasharray="donut.paid + ' 100'"
-                                stroke-dashoffset="0"
-                                :style="{ opacity: highlightedSegment && highlightedSegment !== 'paid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
-                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#2563eb" stroke-width="5"
-                                filter="url(#dsf-blue)"
-                                :stroke-dasharray="donut.prepaid + ' 100'"
-                                :stroke-dashoffset="-donut.paidOffset"
-                                :style="{ opacity: highlightedSegment && highlightedSegment !== 'prepaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
-                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#ef4444" stroke-width="5"
-                                filter="url(#dsf-red)"
-                                :stroke-dasharray="donut.unpaid + ' 100'"
-                                :stroke-dashoffset="-donut.unpaidOffset"
-                                :style="{ opacity: highlightedSegment && highlightedSegment !== 'unpaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                        <g style="color: var(--color-paid)">
+                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor" stroke-width="5"
+                                    filter="url(#dsf-paid)"
+                                    :stroke-dasharray="donut.paid + ' 100'"
+                                    stroke-dashoffset="0"
+                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'paid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                        </g>
+                        <g style="color: var(--color-prepaid)">
+                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor" stroke-width="5"
+                                    filter="url(#dsf-prepaid)"
+                                    :stroke-dasharray="donut.prepaid + ' 100'"
+                                    :stroke-dashoffset="-donut.paidOffset"
+                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'prepaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                        </g>
+                        <g style="color: var(--color-unpaid)">
+                            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor" stroke-width="5"
+                                    filter="url(#dsf-unpaid)"
+                                    :stroke-dasharray="donut.unpaid + ' 100'"
+                                    :stroke-dashoffset="-donut.unpaidOffset"
+                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'unpaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                        </g>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center rotate-90">
                         <span class="text-xl font-extrabold text-gray-800 leading-none" x-text="donut.paidPct + '%'"></span>
-                        <span class="text-[10px] text-gray-400 font-semibold mt-0.5" x-text="t.statPaid"></span>
-                        <span class="text-[9px] text-gray-400 mt-0.5"
+                        <span class="text-xs text-gray-400 font-semibold mt-0.5" x-text="t.statPaid"></span>
+                        <span class="text-xs text-gray-400 mt-0.5"
                               x-text="(donut.paidCount + donut.prepaidCount) + ' / ' + (donut.paidCount + donut.prepaidCount + donut.unpaidCount) + ' ' + t.statRooms"></span>
                     </div>
                 </div>
                 <div class="space-y-1.5 flex-1">
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
-                             'bg-green-50 ring-1 ring-green-200': highlightedSegment === 'paid',
+                             'ring-1': highlightedSegment === 'paid',
                              'hover:bg-gray-50': highlightedSegment !== 'paid',
                              'opacity-35': highlightedSegment && highlightedSegment !== 'paid'
                          }"
+                         :style="highlightedSegment === 'paid'
+                             ? 'background: var(--color-paid-bg); ring-color: var(--color-paid-border)'
+                             : ''"
                          @click="highlightedSegment = highlightedSegment === 'paid' ? null : 'paid'">
-                        <span class="w-3 h-3 rounded-full bg-green-600 shrink-0"></span>
+                        <span class="legend-dot shrink-0" style="background: var(--color-paid)"></span>
                         <span class="text-sm flex-1" x-text="t.statPaid"></span>
                         <b class="text-lg font-extrabold text-gray-800" x-text="donut.paidCount"></b>
                     </div>
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
-                             'bg-red-50 ring-1 ring-red-200': highlightedSegment === 'unpaid',
+                             'ring-1': highlightedSegment === 'unpaid',
                              'hover:bg-gray-50': highlightedSegment !== 'unpaid',
                              'opacity-35': highlightedSegment && highlightedSegment !== 'unpaid'
                          }"
+                         :style="highlightedSegment === 'unpaid'
+                             ? 'background: var(--color-unpaid-bg)'
+                             : ''"
                          @click="highlightedSegment = highlightedSegment === 'unpaid' ? null : 'unpaid'">
-                        <span class="w-3 h-3 rounded-full bg-red-500 shrink-0"></span>
+                        <span class="legend-dot shrink-0" style="background: var(--color-unpaid)"></span>
                         <span class="text-sm flex-1" x-text="t.statUnpaid"></span>
                         <b class="text-lg font-extrabold text-gray-800" x-text="donut.unpaidCount"></b>
                     </div>
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
-                             'bg-blue-50 ring-1 ring-blue-200': highlightedSegment === 'prepaid',
+                             'ring-1': highlightedSegment === 'prepaid',
                              'hover:bg-gray-50': highlightedSegment !== 'prepaid',
                              'opacity-35': highlightedSegment && highlightedSegment !== 'prepaid'
                          }"
+                         :style="highlightedSegment === 'prepaid'
+                             ? 'background: var(--color-prepaid-bg)'
+                             : ''"
                          @click="highlightedSegment = highlightedSegment === 'prepaid' ? null : 'prepaid'">
-                        <span class="w-3 h-3 rounded-full bg-blue-600 shrink-0"></span>
+                        <span class="legend-dot shrink-0" style="background: var(--color-prepaid)"></span>
                         <span class="text-sm flex-1" x-text="t.statPrepaid"></span>
                         <b class="text-lg font-extrabold text-gray-800" x-text="donut.prepaidCount"></b>
                     </div>
@@ -268,20 +311,26 @@
     <!-- Attention + Activity -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Rooms needing attention -->
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="card-static p-5">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold text-gray-800" x-text="t.attentionTitle"></h3>
                 <span class="text-xs text-gray-400" x-text="stats.unpaidCount + ' ' + t.statRooms"></span>
             </div>
             <template x-if="attentionRooms.length === 0">
                 <div class="py-8 text-center text-gray-400">
-                    <i class="fas fa-party-horn text-3xl text-green-300 mb-2 block"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                         class="mx-auto mb-2 opacity-30" style="color: var(--color-paid)">
+                        <path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/>
+                        <circle cx="17" cy="7" r="5"/>
+                    </svg>
                     <span class="text-sm font-semibold" x-text="t.dashAllPaid"></span>
                 </div>
             </template>
             <div class="space-y-3">
                 <template x-for="bill in attentionRooms" :key="bill.room_id">
-                    <div class="flex items-center gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
+                    <div class="flex items-center gap-3 p-3 rounded-lg border"
+                         style="background: var(--color-unpaid-bg); border-color: var(--color-unpaid-border)">
                         <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                              :class="getFloorBg(bill.room_number)" x-text="bill.room_number"></div>
                         <div class="flex-1 min-w-0">
@@ -289,33 +338,41 @@
                             <p class="text-xs text-gray-400" x-text="formatMoney(bill.total)"></p>
                         </div>
                         <button @click="quickCollect(bill)"
-                                class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition shrink-0" x-text="t.collect"></button>
+                                class="btn btn--success shrink-0 text-xs px-3 py-1.5"
+                                x-text="t.collect"></button>
                     </div>
                 </template>
             </div>
             <template x-if="stats.unpaidCount > 3">
                 <button @click="activeTab = 'bills'"
-                        class="mt-3 w-full text-center text-sm text-blue-600 font-semibold hover:underline"
+                        class="mt-3 w-full text-center text-sm font-semibold hover:underline"
+                        style="color: var(--color-primary)"
                         x-text="t.viewAll + ' ' + stats.unpaidCount + ' →'"></button>
             </template>
         </div>
 
         <!-- Recent activity -->
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="card-static p-5">
             <h3 class="font-bold text-gray-800 mb-4" x-text="t.activityTitle"></h3>
             <template x-if="recentActivity.length === 0">
-                <div class="py-8 text-center text-gray-300 text-sm" x-text="t.noActivity"></div>
+                <div class="py-8 text-center text-sm text-gray-300" x-text="t.noActivity"></div>
             </template>
             <div class="space-y-3">
                 <template x-for="(act, i) in recentActivity" :key="i">
                     <div class="flex items-center gap-3">
                         <div class="w-2 h-2 rounded-full shrink-0"
-                             :class="act.type === 'paid' ? 'bg-green-500' : act.type === 'prepaid' ? 'bg-blue-500' : 'bg-amber-400'"></div>
+                             :style="act.type === 'paid'
+                                 ? 'background: var(--color-paid)'
+                                 : act.type === 'prepaid'
+                                     ? 'background: var(--color-prepaid)'
+                                     : 'background: var(--color-warning)'">
+                        </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm text-gray-700">
                                 <b x-text="'P.' + act.room"></b>
                                 <span x-text="' ' + (act.type === 'paid' ? t.actPaid : t.actPrepaid)"></span>
-                                <b class="text-blue-600" x-text="' ' + formatMoney(act.amount)"></b>
+                                <b style="color: var(--color-chart-primary)"
+                                   x-text="' ' + formatMoney(act.amount)"></b>
                             </p>
                         </div>
                         <span class="text-xs text-gray-400 shrink-0" x-text="act.when"></span>

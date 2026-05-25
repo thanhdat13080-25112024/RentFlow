@@ -618,12 +618,28 @@ function app(initialMonth, initialYear) {
 
         getFloorBg(roomNumber) {
             const f = (roomNumber || '?')[0];
-            return { '1':'bg-blue-600','2':'bg-cyan-500','3':'bg-teal-500','4':'bg-emerald-500','5':'bg-amber-500','6':'bg-orange-500','7':'bg-red-600' }[f] || 'bg-gray-600';
+            return {
+                '1': 'bg-violet-600',
+                '2': 'bg-indigo-600',
+                '3': 'bg-cyan-600',
+                '4': 'bg-violet-500',
+                '5': 'bg-indigo-500',
+                '6': 'bg-cyan-500',
+                '7': 'bg-violet-700',
+            }[f] || 'bg-gray-500';
         },
 
         getFloorText(roomNumber) {
             const f = (roomNumber || '?')[0];
-            return { '1':'text-blue-600','2':'text-cyan-500','3':'text-teal-500','4':'text-emerald-500','5':'text-amber-500','6':'text-orange-500','7':'text-red-600' }[f] || 'text-gray-600';
+            return {
+                '1': 'text-violet-600',
+                '2': 'text-indigo-600',
+                '3': 'text-cyan-600',
+                '4': 'text-violet-500',
+                '5': 'text-indigo-500',
+                '6': 'text-cyan-500',
+                '7': 'text-violet-700',
+            }[f] || 'text-gray-500';
         },
 
         formatMoney(amount) { return new Intl.NumberFormat('vi-VN').format(amount || 0) + 'đ'; },

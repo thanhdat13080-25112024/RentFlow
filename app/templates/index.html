@@ -16,47 +16,43 @@
             @scroll.window="scrolled = window.scrollY > 8"
             :class="scrolled && 'header-scrolled'">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+
             <!-- Logo -->
             <div class="flex items-center gap-2.5 shrink-0 group cursor-default select-none">
-                <div class="logo-icon w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-150 ease-out group-hover:-translate-y-0.5">
-                    <i class="fas fa-house-chimney-user text-white text-sm transition-transform duration-150 ease-out group-hover:scale-110"></i>
+                <div class="logo-icon w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-150 group-hover:-translate-y-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                         class="transition-transform duration-150 group-hover:scale-110">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
                 </div>
-                <span class="font-extrabold text-gray-800 tracking-tight hidden lg:block transition-opacity duration-150 group-hover:opacity-70" x-text="t.appName"></span>
+                <span class="font-display font-extrabold text-gray-800 tracking-tight hidden lg:block transition-opacity duration-150 group-hover:opacity-70"
+                      x-text="t.appName"></span>
             </div>
 
-            <!-- Tab nav (desktop) — sliding underline indicator -->
-            <nav class="hidden md:flex items-center relative ml-2 pb-px"
-                 x-data="{
-                   ind: { x: 0, w: 80 },
-                   sync() {
-                     const btns = $el.querySelectorAll('button');
-                     const idx  = tabs.findIndex(t => t.id === activeTab);
-                     if (btns[idx]) {
-                       const nr = $el.getBoundingClientRect();
-                       const ar = btns[idx].getBoundingClientRect();
-                       ind.x = ar.left - nr.left;
-                       ind.w = ar.width;
-                     }
-                   }
-                 }"
-                 x-init="$nextTick(sync)"
-                 @click="$nextTick(sync)">
-                <div class="tab-underline-indicator"
-                     :style="{ transform: 'translateX(' + ind.x + 'px)', width: ind.w + 'px' }"></div>
-                <template x-for="tab in tabs" :key="tab.id">
-                    <button @click="activeTab = tab.id"
-                            :class="activeTab === tab.id ? 'text-blue-600 font-semibold' : 'text-gray-400 hover:text-gray-800'"
-                            class="px-4 py-2 text-sm font-medium transition-colors duration-100 whitespace-nowrap relative"
-                            x-text="tab.label"></button>
-                </template>
+            <!-- Tab nav (desktop) — pill style -->
+            <nav class="hidden md:flex items-center ml-2">
+                <div class="header-nav flex items-center rounded-xl p-1 gap-0.5">
+                    <template x-for="tab in tabs" :key="tab.id">
+                        <button @click="activeTab = tab.id"
+                                :class="activeTab === tab.id ? 'tab-active' : 'tab-btn'"
+                                class="px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap"
+                                x-text="tab.label"></button>
+                    </template>
+                </div>
             </nav>
 
             <div class="flex-1"></div>
 
-            <!-- Search trigger — ⌘K / Ctrl+K opens full overlay -->
+            <!-- Search trigger — ⌘K / Ctrl+K -->
             <div class="search-box hidden md:flex items-center gap-2 rounded-lg px-3 py-1.5 w-52 text-sm cursor-pointer"
                  @click="window.dispatchEvent(new CustomEvent('rf-search-open'))">
-                <i class="fas fa-magnifying-glass text-xs flex-shrink-0"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                     class="flex-shrink-0">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
                 <span class="flex-1 truncate"
                       :class="searchQuery ? 'text-gray-700' : ''"
                       x-text="searchQuery || t.search"></span>
@@ -65,28 +61,29 @@
                 </template>
                 <template x-if="searchQuery">
                     <button @click.stop="searchQuery = ''"
-                            class="flex-shrink-0 hover:text-gray-500 transition-colors">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
+                            class="flex-shrink-0 hover:text-gray-500 transition-colors">✕</button>
                 </template>
             </div>
 
-            <!-- Month nav + month picker popover -->
+            <!-- Month nav + popover -->
             <div class="month-nav-wrap flex items-center gap-1 rounded-xl p-1"
                  x-data="{ pop: false, popYear: year }"
                  @click.outside="pop = false">
                 <button @click="prevMonth()" class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
-                    <i class="fas fa-chevron-left text-xs"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
                 </button>
                 <div class="relative">
                     <button @click="pop = !pop; popYear = year"
-                            class="month-display px-3 py-1 rounded-lg text-center min-w-[110px] cursor-pointer hover:ring-2 hover:ring-blue-200 transition-shadow">
+                            class="month-display px-3 py-1 rounded-lg text-center min-w-[110px] cursor-pointer hover:ring-2 hover:ring-violet-200 transition-shadow">
                         <span class="month-label" x-text="t.dataMonth"></span>
                         <span class="month-value">
                             <span x-text="month"></span> / <span x-text="year"></span>
                         </span>
                     </button>
-                    <!-- Month picker popover (3×4 grid + year arrows) -->
+                    <!-- Month picker popover -->
                     <div x-show="pop" x-cloak
                          x-transition:enter="transition ease-out duration-150"
                          x-transition:enter-start="opacity-0 scale-95"
@@ -95,27 +92,31 @@
                          x-transition:leave-start="opacity-100 scale-100"
                          x-transition:leave-end="opacity-0 scale-95"
                          style="transform-origin: top center;"
-                         class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-50 w-60">
-                        <!-- Year navigation -->
+                         class="absolute top-full mt-2 left-1/2 -translate-x-1/2 card-static p-3 z-50 w-60">
                         <div class="flex items-center justify-between mb-3">
                             <button @click.stop="popYear--"
-                                    class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
-                                <i class="fas fa-chevron-left text-xs"></i>
+                                    class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"/>
+                                </svg>
                             </button>
                             <span class="font-bold text-gray-800 text-sm" x-text="popYear"></span>
                             <button @click.stop="popYear++"
-                                    class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
-                                <i class="fas fa-chevron-right text-xs"></i>
+                                    class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"/>
+                                </svg>
                             </button>
                         </div>
-                        <!-- Month grid 3×4 -->
                         <div class="grid grid-cols-3 gap-1">
                             <template x-for="m in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="m">
                                 <button @click="month = m; year = popYear; pop = false; updateUrl(); loadData()"
                                         class="py-1.5 rounded-lg text-sm font-semibold transition-colors"
                                         :class="m === month && popYear === year
-                                                  ? 'bg-blue-600 text-white'
-                                                  : 'text-gray-700 hover:bg-blue-50'">
+                                                  ? 'btn--primary text-white'
+                                                  : 'text-gray-700 hover:bg-violet-50'">
                                     <span x-text="m"></span>
                                 </button>
                             </template>
@@ -123,7 +124,10 @@
                     </div>
                 </div>
                 <button @click="nextMonth()" class="month-arrow w-7 h-7 flex items-center justify-center rounded-lg">
-                    <i class="fas fa-chevron-right text-xs"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
                 </button>
             </div>
 
@@ -133,7 +137,11 @@
                         class="lang-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg">
                     <span x-text="langFlags[lang]"></span>
                     <span class="hidden sm:block uppercase" x-text="lang"></span>
-                    <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="text-gray-400">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
                 </button>
                 <div x-show="open" @click.outside="open = false" x-cloak
                      x-transition:enter="transition ease-out duration-150"
@@ -150,7 +158,12 @@
                                 :class="lang === l ? 'lang-option--active' : ''">
                             <span x-text="langFlags[l]"></span>
                             <span x-text="langNames[l]"></span>
-                            <i x-show="lang === l" class="fas fa-check ml-auto text-xs" style="color: var(--color-primary)"></i>
+                            <svg x-show="lang === l" xmlns="http://www.w3.org/2000/svg" width="10" height="10"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                 stroke-linecap="round" stroke-linejoin="round" class="ml-auto"
+                                 style="color: var(--color-primary)">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
                         </button>
                     </template>
                 </div>
@@ -161,7 +174,7 @@
         </div>
     </header>
 
-    <!-- Search overlay — ⌘K / Ctrl+K (body-level để tránh stacking context header) -->
+    <!-- Search overlay — ⌘K / Ctrl+K -->
     <div x-data="{ open: false }"
          @rf-search-open.window="open = true; $nextTick(() => $refs.searchInput.focus())"
          @keydown.window.meta.k.prevent="open = true; $nextTick(() => $refs.searchInput.focus())"
@@ -177,14 +190,19 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0">
             <div class="search-overlay__box">
-                <i class="fas fa-magnifying-glass text-gray-400 flex-shrink-0"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                     class="flex-shrink-0" style="color: var(--color-text-tertiary)">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
                 <input x-ref="searchInput"
                        x-model="searchQuery"
                        :placeholder="t.search"
-                       class="flex-1 bg-transparent outline-none text-gray-800 text-base"
+                       class="flex-1 bg-transparent outline-none text-base"
+                       style="color: var(--color-text-primary); font-family: var(--font-body);"
                        @keydown.escape.stop="open = false">
                 <button @click="open = false"
-                        class="flex-shrink-0 text-xs text-gray-400 border border-gray-200 rounded px-2 py-1 hover:bg-gray-50 transition-colors">
+                        class="btn btn--ghost text-xs px-2 py-1 rounded">
                     ESC
                 </button>
             </div>
@@ -204,13 +222,18 @@
                     <span class="mobile-tab__label" x-text="tab.label"></span>
                 </button>
             </template>
-            <!-- Slot 3 — FAB (Quick action) -->
+
+            <!-- Slot 3 — FAB -->
             <div class="flex-1 flex flex-col items-center pb-1.5 pt-0.5">
                 <button @click="actionSheet = true" class="mobile-fab">
-                    <i class="fas fa-plus text-base"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
                 </button>
-                <span class="mobile-tab__label text-gray-400 mt-0.5">Nhanh</span>
+                <span class="mobile-tab__label mt-0.5" style="color: var(--color-text-tertiary)">Nhanh</span>
             </div>
+
             <!-- Slots 4–5 -->
             <template x-for="tab in mobileTabs.slice(2)" :key="tab.id">
                 <button @click="activeTab = tab.id"
@@ -221,6 +244,7 @@
                 </button>
             </template>
         </div>
+
         <!-- Action sheet backdrop -->
         <div x-show="actionSheet" x-cloak
              @click="actionSheet = false"
@@ -233,7 +257,8 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0">
         </div>
-        <!-- Action sheet panel — trượt từ dưới lên -->
+
+        <!-- Action sheet panel -->
         <div x-show="actionSheet" x-cloak
              class="action-sheet"
              x-transition:enter="transition ease-out duration-250"
@@ -246,27 +271,40 @@
             <div class="space-y-1">
                 <button class="action-sheet__item"
                         @click="activeTab = 'bills'; actionSheet = false">
-                    <div class="action-sheet__icon bg-green-100 text-green-600">
-                        <i class="fas fa-check"></i>
+                    <div class="stat-tile__icon tile-icon--success shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
                     </div>
                     <span>Đánh dấu đã thu phòng...</span>
                 </button>
                 <button class="action-sheet__item"
                         @click="activeTab = 'bills'; actionSheet = false">
-                    <div class="action-sheet__icon bg-blue-100 text-blue-600">
-                        <i class="fas fa-qrcode"></i>
+                    <div class="stat-tile__icon tile-icon--primary shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/>
+                            <rect x="7" y="14" width="3" height="3"/>
+                            <path d="M14 14h3v3h-3z" fill="currentColor" stroke="none"/>
+                        </svg>
                     </div>
                     <span>Xem QR phòng...</span>
                 </button>
                 <button class="action-sheet__item"
                         @click="activeTab = 'bills'; actionSheet = false">
-                    <div class="action-sheet__icon bg-amber-100 text-amber-600">
-                        <i class="fas fa-bolt"></i>
+                    <div class="stat-tile__icon tile-icon--neutral-strong shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
                     </div>
                     <span>Cập nhật số điện</span>
                 </button>
             </div>
-            <button class="w-full mt-3 py-3 text-sm font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+            <button class="w-full mt-3 py-3 text-sm font-semibold transition-colors"
+                    style="color: var(--color-text-tertiary)"
                     @click="actionSheet = false">Hủy</button>
         </div>
     </nav>
@@ -283,9 +321,6 @@
 
 {% block scripts %}
 <script>
-    // Truyền tham số tháng/năm từ server vào app factory (app.js)
-    // Dùng IIFE để capture window.app gốc trước khi ghi đè,
-    // tránh đệ quy vô hạn khi function declaration bị hoisted
     ;(function () {
         var _factory = window.app;
         window.app = function () {

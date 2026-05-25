@@ -178,6 +178,12 @@
   --aurora-glow:
     0 0 0 3px  rgba(124, 58, 237, 0.18),
     0 8px 24px rgba(124, 58, 237, 0.14);
+
+  /* ── Chart ───────────────────────────────────────────────────── */
+  /* Indigo palette — phân biệt với brand violet, đủ contrast */
+  --color-chart-primary: var(--indigo-600);  /* cột tháng hiện tại */
+  --color-chart-muted:   var(--indigo-200);  /* cột tháng trước */
+  --color-chart-hover:   var(--indigo-300);  /* hover state */
 }
 
 
@@ -253,6 +259,7 @@
   --radius-md:   0.875rem; /* 14px — button, input, dropdown item */
   --radius-lg:   1.25rem;  /* 20px — card, panel, dropdown wrapper */
   --radius-xl:   2rem;     /* 32px — modal, hero glass sheet */
+  --radius-2xl:  var(--radius-xl); /* alias — backward-compat, = 32px */
   --radius-full: 9999px;   /* pill — chỉ cho avatar / dot */
 }
 
@@ -1119,6 +1126,175 @@ h1, h2, h3, h4, h5, h6,
   line-height: 1;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   OVERLAYS & FLOATING UI
+   Classes cho các lớp float: header scroll state, search overlay,
+   mobile FAB, bottom action sheet.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Header scrolled state ────────────────────────────────────────
+   Thêm shadow khi user scroll xuống — kết hợp với .header-root.
+──────────────────────────────────────────────────────────────── */
+.header-scrolled {
+  box-shadow:          var(--shadow-glass-sm);
+  border-bottom-color: var(--color-border);
+  transition:
+    box-shadow   var(--dur-fast) var(--ease-smooth),
+    border-color var(--dur-fast) var(--ease-smooth);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .header-scrolled {
+    backdrop-filter:         blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+  }
+}
+
+/* ── Search overlay (⌘K) ──────────────────────────────────────────
+   Fullscreen glass backdrop — phủ toàn màn hình, tối + blur.
+   Box input nổi trên nền, glass surface mạnh.
+──────────────────────────────────────────────────────────────── */
+.search-overlay {
+  position:                fixed;
+  inset:                   0;
+  z-index:                 var(--z-modal);
+  background:              rgba(15, 10, 40, 0.50);
+  display:                 flex;
+  align-items:             flex-start;
+  justify-content:         center;
+  padding-top:             20vh;
+  backdrop-filter:         blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.search-overlay__box {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--space-3);
+  width:         min(600px, calc(100vw - 2rem));
+  padding:       var(--space-4);
+  background:    var(--color-surface-solid);
+  border:        1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow:    var(--shadow-overlay);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .search-overlay__box {
+    background:              var(--color-surface-overlay);
+    backdrop-filter:         blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-color:            var(--color-border-glass);
+  }
+}
+
+/* ── Mobile FAB ───────────────────────────────────────────────────
+   Aurora gradient, circular. Glow shadow khi hover.
+──────────────────────────────────────────────────────────────── */
+.mobile-fab {
+  width:           3rem;
+  height:          3rem;
+  border-radius:   var(--radius-full);
+  background:      var(--aurora-gradient);
+  color:           var(--color-text-inverse);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  box-shadow:      var(--shadow-glow-violet);
+  transition:
+    transform  var(--dur-micro) var(--ease-spring),
+    box-shadow var(--dur-micro) var(--ease-spring);
+}
+
+.mobile-fab:hover {
+  transform:  translateY(-2px);
+  box-shadow: var(--aurora-glow);
+}
+
+.mobile-fab:active {
+  transform: scale(0.92);
+}
+
+/* ── Action sheet ─────────────────────────────────────────────────
+   Bottom sheet trượt từ dưới lên — glass, radius lớn ở trên.
+   Safe-area-inset-bottom hỗ trợ iPhone notch.
+──────────────────────────────────────────────────────────────── */
+.action-sheet {
+  position:      fixed;
+  bottom:        0;
+  left:          0;
+  right:         0;
+  z-index:       calc(var(--z-modal) + 1);
+  background:    var(--color-surface-solid);
+  border-top:    1px solid var(--color-border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  box-shadow:    var(--shadow-overlay);
+  padding:
+    var(--space-3)
+    var(--space-4)
+    calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .action-sheet {
+    background:              var(--color-surface-overlay);
+    backdrop-filter:         blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top-color:        var(--color-border-subtle);
+  }
+}
+
+.action-sheet__handle {
+  width:         2.5rem;
+  height:        0.25rem;
+  border-radius: var(--radius-full);
+  background:    var(--color-border);
+  margin:        0 auto var(--space-4);
+}
+
+.action-sheet__item {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--space-3);
+  width:         100%;
+  padding:       var(--space-3);
+  border-radius: var(--radius-md);
+  font-size:     var(--text-sm);
+  font-weight:   var(--fw-semibold);
+  color:         var(--color-text-primary);
+  transition:    background var(--dur-micro) var(--ease-smooth);
+  text-align:    left;
+}
+
+.action-sheet__item:hover {
+  background: var(--color-primary-light);
+}
+
+.action-sheet__icon {
+  width:           2.5rem;
+  height:          2.5rem;
+  border-radius:   var(--radius-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           var(--color-text-inverse);
+  flex-shrink:     0;
+}
+
+/* ── Tab underline indicator ──────────────────────────────────────
+   Aurora gradient bar — trượt dưới tab active (desktop nav).
+──────────────────────────────────────────────────────────────── */
+.tab-underline-indicator {
+  position:      absolute;
+  bottom:        0;
+  height:        2px;
+  background:    var(--aurora-gradient);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  transition:
+    transform var(--dur-fast) var(--ease-smooth),
+    width     var(--dur-fast) var(--ease-smooth);
+}
+
 
 /* ================================================================
    BẢNG SO SÁNH TRƯỚC / SAU
@@ -1190,6 +1366,11 @@ h1, h2, h3, h4, h5, h6,
    empty-state__icon, empty-state__text, section-header,
    section-title, th-cell, floor-row, floor-row__*, room-card--vacant,
    legend-dot, divider, focus-ring
+
+   CLASSES MỚI (OVERLAYS & FLOATING UI):
+   header-scrolled, search-overlay, search-overlay__box,
+   mobile-fab, action-sheet, action-sheet__handle,
+   action-sheet__item, action-sheet__icon, tab-underline-indicator
 
    TOKEN ALIASES (backward-compat, trỏ vào token mới):
    --shadow-xs  → --shadow-glass-xs
