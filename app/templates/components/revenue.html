@@ -41,9 +41,9 @@
                     <th class="th-cell px-5 py-3 text-right" x-text="t.totalAmount"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
+            <tbody class="divide-y table-divider">
                 <template x-for="row in revenueSummary" :key="row.month + '-' + row.year">
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="table-row-hover transition-colors">
                         <td class="px-5 py-4 font-bold text-lg"
                             style="color: var(--color-text-primary)"
                             x-text="row.month + '/' + row.year"></td>

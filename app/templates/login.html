@@ -76,9 +76,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/tokens.css?v=4">
+    <link rel="stylesheet" href="/static/css/tokens.css?v=6">
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Aurora background -->
+    <div aria-hidden="true"
+         style="position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none">
+        <div class="aurora-orb"
+             style="width:min(800px,90vw);height:min(800px,90vw);top:-30%;left:-20%;
+                    background:radial-gradient(circle,rgba(37,99,235,0.55) 0%,rgba(56,189,248,0.20) 42%,transparent 68%);
+                    filter:blur(70px);
+                    animation:aurora-drift-1 22s ease-in-out infinite alternate;"></div>
+        <div class="aurora-orb"
+             style="width:min(700px,80vw);height:min(700px,80vw);bottom:-25%;right:-20%;
+                    background:radial-gradient(circle,rgba(124,58,237,0.35) 0%,rgba(139,92,246,0.13) 42%,transparent 68%);
+                    filter:blur(70px);
+                    animation:aurora-drift-2 30s ease-in-out infinite alternate;"></div>
+        <div class="aurora-orb"
+             style="width:min(600px,68vw);height:min(600px,68vw);top:30%;right:-15%;
+                    background:radial-gradient(circle,rgba(14,165,233,0.30) 0%,rgba(6,182,212,0.10) 42%,transparent 68%);
+                    filter:blur(65px);
+                    animation:aurora-drift-3 36s ease-in-out infinite alternate-reverse;"></div>
+        <div class="aurora-orb"
+             style="width:min(520px,56vw);height:min(520px,56vw);bottom:-10%;left:-10%;
+                    background:radial-gradient(circle,rgba(236,72,153,0.22) 0%,transparent 65%);
+                    filter:blur(60px);
+                    animation:aurora-drift-4 42s ease-in-out infinite alternate;"></div>
+    </div>
+
     <div class="max-w-md w-full" x-data="login()">
 
         <!-- Logo -->

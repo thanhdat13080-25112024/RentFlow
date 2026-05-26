@@ -7,10 +7,10 @@
         <!-- List pane -->
         <div x-show="!isMobile || !selectedBillId"
              class="card-static overflow-hidden">
-            <div class="divide-y divide-gray-50 overflow-y-auto max-h-[70vh]">
+            <div class="divide-y table-divider overflow-y-auto max-h-[70vh]">
                 <template x-for="bill in filteredBills" :key="bill.room_id">
                     <div @click="selectedBillId = bill.room_id"
-                         class="flex items-center gap-3 px-4 py-4 cursor-pointer transition hover:bg-gray-50/50"
+                         class="flex items-center gap-3 px-4 py-4 cursor-pointer transition hover:bg-white/5"
                          :style="selectedBillId === bill.room_id
                              ? 'background: var(--color-primary-light)'
                              : ''">
@@ -182,12 +182,12 @@
                             <p class="th-cell block mb-3" x-text="t.electricity + ' ' + t.month + ' ' + month"></p>
                             <div class="flex items-center gap-4">
                                 <div class="flex-1 text-center">
-                                    <p class="text-xs text-gray-400 mb-1" x-text="t.oldReading"></p>
-                                    <p class="text-2xl font-extrabold text-gray-400" x-text="selectedBill.old_reading"></p>
+                                    <p class="text-xs mb-1" style="color: var(--color-text-tertiary)" x-text="t.oldReading"></p>
+                                    <p class="text-2xl font-extrabold" style="color: var(--color-text-tertiary)" x-text="selectedBill.old_reading"></p>
                                 </div>
-                                <span class="text-gray-300">→</span>
+                                <span style="color: var(--color-border)">→</span>
                                 <div class="flex-1 text-center">
-                                    <p class="text-xs text-gray-400 mb-1" x-text="t.newReading"></p>
+                                    <p class="text-xs mb-1" style="color: var(--color-text-tertiary)" x-text="t.newReading"></p>
                                     <input type="number" x-model.number="selectedBill.new_reading"
                                            @change="updateElectricity(selectedBill)"
                                            :disabled="selectedBill.status !== 'unpaid'"
@@ -203,7 +203,7 @@
                                            }">
                                 </div>
                                 <div class="flex-1 text-center">
-                                    <p class="text-xs text-gray-400 mb-1" x-text="t.usage"></p>
+                                    <p class="text-xs mb-1" style="color: var(--color-text-tertiary)" x-text="t.usage"></p>
                                     <p class="text-2xl font-extrabold"
                                        style="color: var(--color-chart-primary)"
                                        x-text="(selectedBill.new_reading - selectedBill.old_reading || 0)"></p>

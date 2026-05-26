@@ -7,33 +7,51 @@
 {% endblock %}
 
 {% block content %}
-    <!-- ── AURORA BACKGROUND LAYER — Blue Ocean ── -->
+    <!-- ── AURORA BACKGROUND LAYER — Liquid Glass Dark ── -->
     <div aria-hidden="true"
          style="position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none">
-        <!-- Blue orb — upper left, dominant -->
+        <!-- Primary blue orb — upper left, dominant anchor -->
         <div class="aurora-orb"
-             style="width:min(900px,90vw);height:min(900px,90vw);top:-22%;left:-20%;
-                    background:radial-gradient(circle,rgba(37,99,235,0.40) 0%,rgba(56,189,248,0.16) 45%,transparent 70%);
+             style="width:min(1000px,100vw);height:min(1000px,100vw);top:-28%;left:-24%;
+                    background:radial-gradient(circle,rgba(37,99,235,0.55) 0%,rgba(56,189,248,0.22) 40%,transparent 68%);
+                    filter:blur(70px);
+                    animation:aurora-drift-1 24s ease-in-out infinite alternate;"></div>
+        <!-- Cyan/Sky orb — upper right, cool refraction -->
+        <div class="aurora-orb"
+             style="width:min(860px,88vw);height:min(860px,88vw);top:-18%;right:-22%;
+                    background:radial-gradient(circle,rgba(14,165,233,0.48) 0%,rgba(6,182,212,0.18) 42%,transparent 68%);
+                    filter:blur(65px);
+                    animation:aurora-drift-2 30s ease-in-out infinite alternate;"></div>
+        <!-- Rose/Magenta orb — bottom left, warm contrast -->
+        <div class="aurora-orb"
+             style="width:min(760px,78vw);height:min(760px,78vw);bottom:-20%;left:-14%;
+                    background:radial-gradient(circle,rgba(236,72,153,0.36) 0%,rgba(244,114,182,0.14) 42%,transparent 68%);
+                    filter:blur(70px);
+                    animation:aurora-drift-4 38s ease-in-out infinite alternate;"></div>
+        <!-- Violet/Purple orb — center, deep glow -->
+        <div class="aurora-orb"
+             style="width:min(680px,70vw);height:min(680px,70vw);top:28%;left:28%;
+                    background:radial-gradient(circle,rgba(124,58,237,0.28) 0%,rgba(139,92,246,0.10) 42%,transparent 68%);
+                    filter:blur(80px);
+                    animation:aurora-drift-3 44s ease-in-out infinite alternate-reverse;"></div>
+        <!-- Emerald/Teal orb — mid right, cool depth -->
+        <div class="aurora-orb"
+             style="width:min(580px,60vw);height:min(580px,60vw);top:45%;right:-8%;
+                    background:radial-gradient(circle,rgba(16,185,129,0.20) 0%,rgba(20,184,166,0.08) 42%,transparent 68%);
                     filter:blur(60px);
-                    animation:aurora-drift-1 22s ease-in-out infinite alternate;"></div>
-        <!-- Cyan/Sky orb — upper right -->
+                    animation:aurora-drift-2 46s ease-in-out infinite alternate-reverse;"></div>
+        <!-- Indigo/Cobalt orb — bottom right, secondary anchor -->
         <div class="aurora-orb"
-             style="width:min(780px,80vw);height:min(780px,80vw);top:-15%;right:-20%;
-                    background:radial-gradient(circle,rgba(14,165,233,0.34) 0%,rgba(6,182,212,0.14) 45%,transparent 70%);
-                    filter:blur(60px);
-                    animation:aurora-drift-2 28s ease-in-out infinite alternate;"></div>
-        <!-- Cyan accent orb — bottom center -->
+             style="width:min(720px,74vw);height:min(720px,74vw);bottom:-18%;right:-16%;
+                    background:radial-gradient(circle,rgba(79,70,229,0.30) 0%,rgba(99,102,241,0.12) 42%,transparent 68%);
+                    filter:blur(70px);
+                    animation:aurora-drift-5 32s ease-in-out infinite alternate;"></div>
+        <!-- Sky micro-orb — upper center, specular catch -->
         <div class="aurora-orb"
-             style="width:min(850px,88vw);height:min(850px,88vw);bottom:-25%;left:20%;
-                    background:radial-gradient(circle,rgba(6,182,212,0.32) 0%,rgba(56,189,248,0.12) 45%,transparent 70%);
-                    filter:blur(60px);
-                    animation:aurora-drift-3 34s ease-in-out infinite alternate;"></div>
-        <!-- Indigo accent orb — mid right -->
-        <div class="aurora-orb"
-             style="width:min(520px,56vw);height:min(520px,56vw);top:42%;right:-10%;
-                    background:radial-gradient(circle,rgba(79,70,229,0.16) 0%,transparent 70%);
+             style="width:min(400px,42vw);height:min(400px,42vw);top:-8%;left:38%;
+                    background:radial-gradient(circle,rgba(56,189,248,0.22) 0%,transparent 65%);
                     filter:blur(50px);
-                    animation:aurora-drift-2 40s ease-in-out infinite alternate-reverse;"></div>
+                    animation:aurora-drift-1 52s ease-in-out infinite alternate-reverse;"></div>
     </div>
 
     {% include 'components/toast.html' %}
@@ -83,13 +101,13 @@
                     <!-- Expanded chart (taller) -->
                     <div class="relative h-64 sm:h-80">
                         <div class="absolute inset-0 pointer-events-none">
-                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:0"></div>
-                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:25%"></div>
-                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:50%"></div>
-                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="top:75%"></div>
-                            <div class="absolute inset-x-0 border-t border-dashed border-gray-100" style="bottom:0"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed chart-grid-line" style="top:0"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed chart-grid-line" style="top:25%"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed chart-grid-line" style="top:50%"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed chart-grid-line" style="top:75%"></div>
+                            <div class="absolute inset-x-0 border-t border-dashed chart-grid-line" style="bottom:0"></div>
                         </div>
-                        <div class="flex items-end gap-3 h-full border-b border-gray-200 pb-1">
+                        <div class="flex items-end gap-3 h-full chart-axis-line border-b pb-1">
                             <template x-if="dashboardChart.length === 0">
                                 <div class="w-full flex flex-col items-center justify-center gap-3 h-full">
                                     <div class="flex items-end gap-1.5 opacity-25">
@@ -100,7 +118,7 @@
                                         <div class="w-8 h-14 rounded-t" style="background: var(--blue-300)"></div>
                                         <div class="w-8 h-18 rounded-t" style="background: var(--blue-300)"></div>
                                     </div>
-                                    <p class="text-sm font-medium text-gray-300" x-text="t.noActivity"></p>
+                                    <p class="text-sm font-medium" style="color: var(--color-text-tertiary)" x-text="t.noActivity"></p>
                                 </div>
                             </template>
                             <template x-for="bar in dashboardChart" :key="bar.label">
@@ -157,7 +175,7 @@
                             x-text="t.revenueTitle"></h3>
                         <div class="overflow-auto rounded-xl border" style="border-color: var(--color-border)">
                             <table class="w-full text-sm">
-                                <thead class="border-b" style="background: var(--color-surface-raised)">
+                                <thead class="border-b table-head-dark">
                                     <tr>
                                         <th class="th-cell px-4 py-3 text-left font-semibold" x-text="t.revMonth"></th>
                                         <th class="th-cell px-4 py-3 text-right font-semibold" x-text="t.electricityFee"></th>
@@ -166,9 +184,9 @@
                                         <th class="th-cell px-4 py-3 text-right font-semibold" x-text="t.totalAmount"></th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-50">
+                                <tbody class="divide-y table-divider">
                                     <template x-for="row in revenueSummary" :key="row.month + '-' + row.year">
-                                        <tr class="hover:bg-gray-50 transition-colors">
+                                        <tr class="table-row-hover transition-colors">
                                             <td class="px-4 py-3.5 font-bold text-base"
                                                 style="color: var(--color-text-primary)"
                                                 x-text="row.month + '/' + row.year"></td>
