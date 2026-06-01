@@ -6,13 +6,7 @@
     <!-- Greeting + actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-extrabold" style="color: var(--color-text-primary)">
-                <span x-text="getGreeting()"></span>
-                <template x-if="settings.account_holder">
-                    <span style="color: var(--color-primary)">, <span x-text="settings.account_holder"></span></span>
-                </template>
-                <span> 👋</span>
-            </h1>
+            <h1 class="text-2xl font-extrabold" style="color: var(--color-text-primary)"><span x-text="getGreeting()"></span><template x-if="settings.account_holder"><span><span style="color:var(--color-text-secondary)">, </span><span style="color:var(--color-primary)" x-text="settings.account_holder"></span></span></template> 👋</h1>
             <p class="text-sm text-gray-400 mt-1">
                 <span x-text="todayStr()"></span> —
                 <template x-if="stats.unpaidCount > 0">
@@ -52,7 +46,7 @@
                 <p class="stat-tile__sub" x-text="stats.occupiedCount + ' ' + t.statOccupied + ' · ' + stats.emptyCount + ' ' + t.statEmpty"></p>
             </div>
         </div>
-        <div class="stat-tile">
+        <div class="stat-tile stat-tile--danger-soft">
             <div class="stat-tile__icon tile-icon--danger">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -176,7 +170,7 @@
                             <span class="text-xs font-semibold leading-none"
                                   :style="bar.current
                                       ? 'color: var(--color-chart-primary)'
-                                      : 'color: var(--color-text-tertiary)'"
+                                      : 'color: rgba(148,180,215,0.80)'"
                                   x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
                             <div class="w-full rounded-t-lg"
                                  :style="{
@@ -184,8 +178,8 @@
                                      background: bar.current
                                          ? 'linear-gradient(to top, var(--blue-600), var(--sky-400))'
                                          : hovered
-                                             ? 'linear-gradient(to top, rgba(37,99,235,0.55), rgba(56,189,248,0.35))'
-                                             : 'linear-gradient(to top, rgba(37,99,235,0.40), rgba(56,189,248,0.22))',
+                                             ? 'linear-gradient(to top, rgba(37,99,235,0.72), rgba(56,189,248,0.52))'
+                                             : 'linear-gradient(to top, rgba(37,99,235,0.52), rgba(56,189,248,0.34))',
                                      boxShadow: bar.current ? 'var(--shadow-glow-violet)' : 'none',
                                      transform: hovered ? 'scale(1.05)' : 'none',
                                      transformOrigin: 'bottom center',
@@ -196,7 +190,7 @@
                             <span class="text-xs font-semibold transition-colors"
                                   :style="bar.current
                                       ? 'color: var(--color-chart-primary)'
-                                      : 'color: var(--color-text-tertiary)'"
+                                      : 'color: rgba(148,180,215,0.75)'"
                                   x-text="bar.label"></span>
                         </div>
                     </template>

@@ -16,7 +16,11 @@
                 <template x-for="room in floor.rooms" :key="room.id">
                     <div class="card-base p-4 cursor-pointer"
                          :class="!room.is_occupied ? 'room-card--vacant' : ''"
-                         :style="room.is_occupied ? 'border-color: rgba(124, 58, 237, 0.12)' : ''"
+                         :style="getBillForRoom(room)
+                             ? (getBillForRoom(room).status==='paid'    ? 'border-color:rgba(22,163,74,0.30)'
+                             : getBillForRoom(room).status==='prepaid' ? 'border-color:rgba(124,58,237,0.32)'
+                             :                                            'border-color:rgba(220,38,38,0.28)')
+                             : ''"
                          @click="openRoomEdit(room)">
                         <!-- Room number + status badge -->
                         <div class="flex justify-between items-start mb-2">
@@ -54,7 +58,7 @@
                                 </div>
                                 <!-- Electricity mini row -->
                                 <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs"
-                                     style="background: var(--color-primary-light); border: 1px solid var(--color-primary-muted)">
+                                     style="background: rgba(37,99,235,0.18); border: 1px solid rgba(37,99,235,0.32)">
                                     <!-- Old → New readings -->
                                     <div class="flex items-center gap-1 flex-1 min-w-0">
                                         <span class="tabular-nums" style="color: #B0B0B0"

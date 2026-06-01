@@ -617,7 +617,7 @@ function app(initialMonth, initialYear) {
             const element = document.getElementById('invoice-content');
             this.showToast('Đang tạo ảnh hóa đơn...');
             try {
-                const canvas = await html2canvas(element, { useCORS: true, scale: 3, backgroundColor: '#ffffff', logging: false, width: 800 });
+                const canvas = await html2canvas(element, { useCORS: true, scale: 2, backgroundColor: '#ffffff', logging: false });
                 const link = document.createElement('a');
                 link.download = `HoaDon_Phong${this.qrModal.room}_Thang${this.month}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);

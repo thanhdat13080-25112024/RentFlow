@@ -455,6 +455,31 @@
     --color-prepaid-border: rgba(124, 58, 237, 0.35);
     --color-prepaid-text:   #c4b5fd;   /* violet-300 — WCAG AA trên nền navy */
   }
+
+  /* Invoice always renders on white — reset all semantic tokens to light mode */
+  #invoice-content {
+    --color-bg:              #EFF6FF;
+    --color-surface:         rgba(255, 255, 255, 0.82);
+    --color-surface-raised:  rgba(255, 255, 255, 0.88);
+    --color-border:          var(--neutral-200);
+    --color-border-subtle:   rgba(255, 255, 255, 0.58);
+    --color-text-primary:    var(--neutral-900);
+    --color-text-secondary:  var(--neutral-600);
+    --color-text-tertiary:   var(--neutral-400);
+    --color-text-disabled:   var(--neutral-300);
+    --color-text-inverse:    #FFFFFF;
+    --color-primary:         var(--blue-600);
+    --color-primary-hover:   var(--blue-700);
+    --color-primary-light:   var(--blue-50);
+    --color-primary-muted:   var(--blue-100);
+    --color-primary-text:    var(--blue-600);
+    --color-prepaid:         var(--violet-500);
+    --color-prepaid-bg:      rgba(124, 58, 237, 0.16);
+    --color-prepaid-border:  rgba(124, 58, 237, 0.24);
+    --color-prepaid-text:    var(--violet-900);
+    --color-input-bg:        rgba(255, 255, 255, 0.72);
+    --color-input-border:    rgba(255, 255, 255, 0.62);
+  }
 }
 
 
@@ -522,12 +547,11 @@
    hoặc selector h1-h6.
 ──────────────────────────────────────────────────────────────── */
 html, body {
-  background-color: var(--color-bg);
   margin: 0;
 }
 
-body {
-  font-family: var(--font-body);
+html {
+  background-color: var(--color-bg);
   background: linear-gradient(
     148deg,
     #050c18 0%,
@@ -538,6 +562,11 @@ body {
     #050c18 100%
   );
   background-attachment: fixed;
+}
+
+body {
+  font-family: var(--font-body);
+  background: transparent;
 }
 
 /* Light mode body override removed — dark is always the default */
@@ -683,6 +712,12 @@ h1, h2, h3, h4, h5, h6,
   border-color: rgba(22, 163, 74, 0.22);
 }
 
+/* Variant: tile "Chưa thu" — red alert tint */
+.stat-tile--danger-soft {
+  background:   rgba(220, 38, 38, 0.10);
+  border-color: rgba(220, 38, 38, 0.24);
+}
+
 @media (prefers-color-scheme: dark) {
   .stat-tile {
     background:   rgba(10, 20, 48, 0.78);
@@ -747,7 +782,7 @@ h1, h2, h3, h4, h5, h6,
 
 /* Giá trị tiền — nhỏ hơn chút tránh tràn với số nhiều chữ số */
 .stat-tile__value--money {
-  font-size: clamp(0.8rem, 1.8vw, 1.25rem);
+  font-size: clamp(0.6rem, 1.2vw, 1rem);
 }
 
 .stat-tile__sub {
@@ -2187,6 +2222,10 @@ h1, h2, h3, h4, h5, h6,
   background:   rgba(34, 197, 94, 0.07);
   border-color: rgba(34, 197, 94, 0.18);
 }
+.stat-tile--danger-soft {
+  background:   rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.22);
+}
 .input-base {
   background:   var(--color-input-bg);
   border-color: var(--color-input-border);
@@ -2208,10 +2247,11 @@ h1, h2, h3, h4, h5, h6,
 }
 .header-root {
   background:            rgba(6, 12, 24, 0.94) !important;
-  border-bottom-color:   rgba(255, 255, 255, 0.07);
+  border-bottom-color:   rgba(255, 255, 255, 0.13);
   box-shadow:
-    0 1px 0   rgba(255, 255, 255, 0.06) inset,
-    0 4px 20px rgba(0, 0, 0, 0.30);
+    0 1px 0   rgba(255, 255, 255, 0.08) inset,
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    0 1px 0   rgba(255, 255, 255, 0.13);
 }
 @supports (backdrop-filter: blur(1px)) {
   .header-root {
@@ -2221,11 +2261,11 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 .tab-active {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.14);
   color:      var(--color-primary);
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.10) inset,
-    0 2px 8px rgba(0,0,0,0.18);
+    0 1px 0 rgba(255,255,255,0.18) inset,
+    0 2px 10px rgba(0,0,0,0.22);
 }
 .header-nav {
   background:  rgba(37, 99, 235, 0.08);
@@ -2301,6 +2341,21 @@ h1, h2, h3, h4, h5, h6,
   color:        var(--color-text-secondary);
 }
 
+/* ── Floor row — dark mode contrast fix ─────────────────────────── */
+.floor-row__label {
+  color: rgba(185,215,255,0.95);
+  letter-spacing: 0.025em;
+}
+.floor-row__count { color: rgba(139,184,240,0.65); }
+.floor-row__line  {
+  background: linear-gradient(to right, rgba(255,255,255,0.16), transparent);
+}
+
+/* ── Vacant room card — dark mode dashed border ─────────────────── */
+.room-card--vacant {
+  border-color: rgba(255,255,255,0.18) !important;
+}
+
 /* ── Table, dividers, hover states for dark mode ────────────────── */
 .table-row-hover:hover { background: rgba(255,255,255,0.04); }
 .table-divider > * + * { border-color: rgba(255,255,255,0.06); }
@@ -2312,3 +2367,47 @@ h1, h2, h3, h4, h5, h6,
 .chart-axis-line { border-color: rgba(255, 255, 255, 0.09) !important; }
 
 /* Dark mode is always active — no light mode restore */
+
+
+/* ================================================================
+   SECTION 14 — GRAINY NOISE OVERLAY
+   Film grain mỏng (opacity 0.035) phủ toàn màn hình qua body::before.
+
+   Kỹ thuật SVG data URI:
+   • feTurbulence type="fractalNoise" → noise hữu cơ, giống phim analog
+   • baseFrequency=0.75 → hạt mịn (finer grain trên nền tối)
+   • numOctaves=4 → 4 lớp noise chồng nhau → kết cấu tự nhiên hơn
+   • stitchTiles="stitch" → tile 200×200px liền mạch, không thấy đường ghép
+
+   Stacking order (từ dưới lên):
+     [1] body gradient (Aurora dark) — background của html/viewport
+     [2] body::before z-index:-1  ← GRAIN LAYER (section này)
+     [3] Aurora orbs (position:absolute, will-change:transform)
+     [4] Cards / stat-tiles / header (content bình thường)
+     [5] Modals, dropdowns (z-index: 10 → 2000)
+
+   Tại sao z-index:-1 tối ưu cho Glassmorphism:
+   • Cards có backdrop-filter:blur(32px) lấy mẫu từ các lớp DƯỚI chúng
+     → grain bị làm mờ tự nhiên sau lớp kính, không lộ hạt qua glass
+   • Vùng nền trống (không có card): grain hiện đủ opacity → nền có chiều sâu
+   • Hiệu suất: will-change:transform tạo GPU composite layer riêng
+     → grain không join repaint cycle khi cuộn → zero scroll lag
+   ================================================================ */
+
+body::before {
+  content:           "";
+  position:          fixed;
+  inset:             0;
+  z-index:           -1;
+  pointer-events:    none;
+  will-change:       transform;
+  opacity:           0.06;
+  background-image:  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size:   200px 200px;
+}
+
+/* Tắt grain khi người dùng bật "Reduce Transparency" (accessibility) */
+@media (prefers-reduced-transparency: reduce) {
+  body::before { display: none; }
+}
