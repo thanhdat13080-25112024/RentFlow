@@ -2,13 +2,15 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
 
 
 def seed_initial_data(db: Session):
+    up = settings.DEFAULT_ELECTRICITY_UNIT_PRICE
     # 1. Cài đặt mặc định
     default_settings = [
-        {"key": "electricity_unit_price", "value": "3500"},
+        {"key": "electricity_unit_price", "value": str(up)},
         {"key": "bank_account", "value": "1028711116666"},
         {"key": "bank_name", "value": "MB"},
         {"key": "account_holder", "value": "NGUYEN VAN ADMIN"}
@@ -60,12 +62,12 @@ def seed_initial_data(db: Session):
                 old_r = 100 + (i * 50)
                 new_r = old_r + 40 + (room.id % 20)
                 usage = new_r - old_r
-                elec_fee = usage * 3500 if room.electricity_type == "meter" else (room.fixed_electricity_fee or 0)
-                
+                elec_fee = usage * up if room.electricity_type == "meter" else (room.fixed_electricity_fee or 0)
+
                 # Lưu số điện
                 reading = ElectricityReading(
                     room_id=room.id, month=m, year=y,
-                    old_reading=old_r, new_reading=new_r, unit_price=3500
+                    old_reading=old_r, new_reading=new_r, unit_price=up
                 )
                 db.add(reading)
                 

@@ -1,19 +1,19 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class BillPaidUpdate(BaseModel):
-    room_id: int
-    month: int
-    year: int
+    room_id: int = Field(ge=1)
+    month: int = Field(ge=1, le=12)
+    year: int = Field(ge=2000, le=2100)
 
 
 class BillPrepaidUpdate(BaseModel):
-    room_id: int
-    months: List[int]
-    year: int
+    room_id: int = Field(ge=1)
+    months: List[Annotated[int, Field(ge=1, le=12)]] = Field(min_length=1)
+    year: int = Field(ge=2000, le=2100)
 
 
 class BillRead(BaseModel):

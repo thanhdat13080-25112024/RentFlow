@@ -38,8 +38,9 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "admin123" # Khuyên dùng đổi qua .env
 
-    # Electricity settings
-    DEFAULT_ELECTRICITY_UNIT_PRICE: int = 4000
+    # Electricity settings — giá điện mặc định khi bảng settings chưa có
+    # (seeder cũng dùng đúng giá trị này để đồng bộ một nguồn duy nhất).
+    DEFAULT_ELECTRICITY_UNIT_PRICE: int = 3500
 
     # Bank settings
     BANK_NAME: str = "MB"

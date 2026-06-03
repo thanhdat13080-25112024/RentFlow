@@ -54,7 +54,8 @@ app/
 
 ## Commit SQLAlchemy — cạm bẫy quan trọng
 
-- `update_bill(db, room, month, year)` trong `services/billing.py` **TỰ gọi `db.commit()`** ở cuối (KHÁC với mô tả "caller phải commit" trong CLAUDE.md cũ). Khi gọi `update_bill` nhiều lần trong vòng lặp (vd `/api/bills/`, `/revenue/summary`), nó commit từng lần — chấp nhận được nhưng cần biết.
+- `update_bill(db, room, month, year)` trong `services/billing.py` **TỰ gọi `db.commit()`** ở cuối. Chỉ gọi từ **luồng GHI** (mark-paid, nhập điện, sửa phòng). Các endpoint **GET KHÔNG gọi** `update_bill` nữa — chúng tính ảo bằng `compute_bill_fields(room, reading)` (thuần, không ghi DB) để GET không tạo bill/commit khi chỉ xem.
+- Giá điện mặc định: dùng `get_unit_price(db)` (đọc Setting → fallback `config.DEFAULT_ELECTRICITY_UNIT_PRICE`). Không hardcode 4000/3500 trong endpoint.
 - Trong handler tự sửa dữ liệu (không qua `update_bill`): nhớ tự `db.commit()`. Dùng `db.flush()` khi cần id/giá trị trước khi commit (xem `rooms.py` update_room).
 - Khối `import-csv` (bills.py) dùng try/except + `db.rollback()` khi lỗi — theo pattern này cho thao tác ghi hàng loạt.
 

@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SettingUpdate(BaseModel):
-    key: str
+    key: str = Field(min_length=1)
     value: str
 
 

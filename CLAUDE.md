@@ -56,9 +56,9 @@ Auth is cookie-based JWT. `get_current_user` in `app/core/security.py` reads the
 1. Looks up `ElectricityReading` for the room+month
 2. Calculates `electricity_fee` (meter: `usage × unit_price`, fixed: `room.fixed_electricity_fee`)
 3. Creates or updates a `MonthlyBill` record — **only updates if `status == "unpaid"`**, never overwrites paid/prepaid bills
-4. Calls `db.commit()` itself (so when called in a loop, e.g. `/api/bills/`, it commits per iteration)
+4. Calls `db.commit()` itself
 
-This function is called from GET endpoints (`/api/bills/`) to auto-create bills on first access.
+`update_bill()` is called **only from write paths** (mark-paid, electricity reading, room update). The GET endpoints (`/api/bills/`, `/revenue/summary`) are **read-only**: they compute amounts virtually via `compute_bill_fields(room, reading)` (pure, no DB) and never write. `/revenue/summary` aggregates only `is_occupied` rooms. The shared default electricity price comes from `get_unit_price(db)` (Setting → `config.DEFAULT_ELECTRICITY_UNIT_PRICE` fallback).
 
 ### Frontend
 

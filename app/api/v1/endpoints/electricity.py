@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
-from app.models import ElectricityReading, Room, Setting
+from app.models import ElectricityReading, Room
 from app.schemas import ElectricityReadingCreate
-from app.services.billing import update_bill
+from app.services.billing import get_unit_price, update_bill
 
 router = APIRouter()
 
@@ -17,8 +17,7 @@ async def update_electricity(data: ElectricityReadingCreate, db: Session = Depen
     if room.electricity_type == "fixed":
         return {"message": "Phòng này sử dụng điện khoán"}
 
-    unit_price_setting = db.query(Setting).filter(Setting.key == "electricity_unit_price").first()
-    unit_price = int(unit_price_setting.value) if unit_price_setting else 4000
+    unit_price = get_unit_price(db)
 
     old_reading = 0
     last_reading = db.query(ElectricityReading).filter(
