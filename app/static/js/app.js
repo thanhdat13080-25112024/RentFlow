@@ -41,6 +41,9 @@ const TRANSLATIONS = {
         greeting_morning:'Chào buổi sáng', greeting_afternoon:'Chào buổi chiều', greeting_evening:'Chào buổi tối',
         settingOk:'Đã lưu cài đặt!', confirmCollect:'Thu tiền phòng',
         quick:'Thao tác', logout:'Đăng xuất',
+        exportCSV:'Xuất CSV', debt:'Công nợ', remindTitle:'Nhắc thu tiền', remindMsgLabel:'Nội dung nhắc',
+        copyBtn:'Sao chép', copied:'Đã sao chép!', sendSms:'Gửi SMS', moveOut:'Trả phòng',
+        confirmMoveOut:'Trả phòng này về trạng thái trống? Khách hiện tại sẽ được xoá (lịch sử hoá đơn vẫn giữ).',
         actionMarkPaid:'Đánh dấu đã thu phòng...', actionViewQR:'Xem QR phòng...', actionUpdateElec:'Cập nhật số điện', actionCancel:'Hủy',
     },
     en: {
@@ -85,6 +88,9 @@ const TRANSLATIONS = {
         greeting_morning:'Good morning', greeting_afternoon:'Good afternoon', greeting_evening:'Good evening',
         settingOk:'Settings saved!', confirmCollect:'Collect payment',
         quick:'Quick', logout:'Sign out',
+        exportCSV:'Export CSV', debt:'Receivables', remindTitle:'Payment Reminder', remindMsgLabel:'Reminder message',
+        copyBtn:'Copy', copied:'Copied!', sendSms:'Send SMS', moveOut:'Move out',
+        confirmMoveOut:'Mark this room as vacant? The current tenant will be cleared (bill history is kept).',
         actionMarkPaid:'Mark room as paid...', actionViewQR:'View QR code...', actionUpdateElec:'Update meter reading', actionCancel:'Cancel',
     },
     ko: {
@@ -129,6 +135,9 @@ const TRANSLATIONS = {
         greeting_morning:'좋은 아침', greeting_afternoon:'안녕하세요', greeting_evening:'좋은 저녁',
         settingOk:'설정 저장 완료!', confirmCollect:'수납 처리',
         quick:'빠른 작업', logout:'로그아웃',
+        exportCSV:'CSV 내보내기', debt:'미수금 합계', remindTitle:'납부 알림', remindMsgLabel:'알림 내용',
+        copyBtn:'복사', copied:'복사됨!', sendSms:'SMS 보내기', moveOut:'퇴실',
+        confirmMoveOut:'이 방을 공실로 처리할까요? 현재 세입자 정보가 삭제됩니다(청구 이력은 유지).',
         actionMarkPaid:'수납 완료 처리...', actionViewQR:'QR 코드 보기...', actionUpdateElec:'전기 검침 입력', actionCancel:'취소',
     },
     ja: {
@@ -173,6 +182,9 @@ const TRANSLATIONS = {
         greeting_morning:'おはようございます', greeting_afternoon:'こんにちは', greeting_evening:'こんばんは',
         settingOk:'設定を保存しました!', confirmCollect:'収納処理',
         quick:'クイック', logout:'ログアウト',
+        exportCSV:'CSV出力', debt:'未収金', remindTitle:'支払い催促', remindMsgLabel:'催促メッセージ',
+        copyBtn:'コピー', copied:'コピーしました!', sendSms:'SMS送信', moveOut:'退去',
+        confirmMoveOut:'この部屋を空室にしますか？現在の入居者情報は削除されます（請求履歴は保持）。',
         actionMarkPaid:'収納済にする...', actionViewQR:'QRコード表示...', actionUpdateElec:'検針入力', actionCancel:'キャンセル',
     },
     zh: {
@@ -217,6 +229,9 @@ const TRANSLATIONS = {
         greeting_morning:'早上好', greeting_afternoon:'下午好', greeting_evening:'晚上好',
         settingOk:'设置已保存!', confirmCollect:'收款处理',
         quick:'快捷操作', logout:'退出登录',
+        exportCSV:'导出CSV', debt:'欠款合计', remindTitle:'催款提醒', remindMsgLabel:'提醒内容',
+        copyBtn:'复制', copied:'已复制!', sendSms:'发送短信', moveOut:'退租',
+        confirmMoveOut:'将此房间设为空置？当前租户信息将被清除（账单历史保留）。',
         actionMarkPaid:'标记已收款...', actionViewQR:'查看QR码...', actionUpdateElec:'更新电表读数', actionCancel:'取消',
     }
 };
@@ -238,6 +253,7 @@ function app(initialMonth, initialYear) {
         settings: {},
         revenueSummary: [],
         revenueExpanded: false,
+        receivables: { total: 0, count: 0, rooms: [] },
 
         toast: { show: false, message: '', type: 'success' },
         editRoomModal: { show: false, room: {} },
@@ -245,6 +261,7 @@ function app(initialMonth, initialYear) {
         qrModal: { show: false, room: '', amount: 0, room_id: 0, rent_fee: 0, service_fee: 0, elec_fee: 0, elec_usage: 0 },
         confirmModal: { show: false, title: '', message: '', callback: null },
         prepaidModal: { show: false, room_id: 0, room_number: '', months: '' },
+        remindModal: { show: false, room_number: '', tenant_name: '', amount: 0, phone: '', message: '' },
 
         langFlags: { vi:'🇻🇳', en:'🇺🇸', ko:'🇰🇷', ja:'🇯🇵', zh:'🇨🇳' },
         langNames: { vi:'Tiếng Việt', en:'English', ko:'한국어', ja:'日本語', zh:'中文' },
@@ -396,6 +413,7 @@ function app(initialMonth, initialYear) {
             window.addEventListener('resize', () => { this.isMobile = window.innerWidth < 768; });
             await Promise.all([this.loadData(), this.loadSettings(), this.loadRooms()]);
             this.loadRevenueSummary();
+            this.loadReceivables();
             this.initLiquidLight();
         },
 
@@ -466,6 +484,73 @@ function app(initialMonth, initialYear) {
             const res = await fetch('/api/bills/revenue/summary');
             if (res.status === 401) return;
             this.revenueSummary = (await res.json()).reverse();
+        },
+
+        async loadReceivables() {
+            const res = await fetch('/api/bills/receivables');
+            if (res.status === 401) return;
+            this.receivables = await res.json();
+        },
+
+        // ── C4: Export hoá đơn tháng hiện tại ra CSV ──
+        exportCSV() {
+            // Content-Disposition: attachment → trình duyệt tải file, không rời SPA.
+            window.location.href = `/api/bills/export?month=${this.month}&year=${this.year}`;
+        },
+
+        // ── C1: Nhắc thu tiền ──
+        extractPhone(contact) {
+            const m = (contact || '').match(/\d[\d\s.\-]{7,}\d/);
+            return m ? m[0].replace(/\D/g, '') : '';
+        },
+        openRemind(bill) {
+            if (!bill) return;
+            const bank = this.settings.bank_name || '';
+            const acc = this.settings.bank_account || '';
+            const holder = this.settings.account_holder || '';
+            const msg = `Chào ${bill.contact_info || ''}, tiền phòng ${bill.room_number} tháng ${this.month}/${this.year} là ${this.formatMoney(bill.total)}.`
+                + ` Vui lòng thanh toán giúp mình nhé. Chuyển khoản: ${bank} ${acc} (${holder}).`
+                + ` Nội dung: PHONG ${bill.room_number} THANG ${this.month}. Cảm ơn!`;
+            this.remindModal = {
+                show: true,
+                room_number: bill.room_number,
+                tenant_name: bill.contact_info || '',
+                amount: bill.total || 0,
+                phone: this.extractPhone(bill.contact_info),
+                message: msg,
+            };
+        },
+        async copyRemind() {
+            try {
+                await navigator.clipboard.writeText(this.remindModal.message);
+                this.showToast(this.t.copied || 'Đã sao chép!');
+            } catch (e) {
+                this.showToast('Không sao chép được', 'error');
+            }
+        },
+        remindSmsUrl() {
+            return `sms:${this.remindModal.phone}?&body=${encodeURIComponent(this.remindModal.message)}`;
+        },
+
+        // ── C3: Trả phòng (dọn phòng) ──
+        moveOut(room) {
+            this.confirmModal = {
+                show: true,
+                title: this.t.moveOut || 'Trả phòng',
+                message: this.t.confirmMoveOut,
+                callback: async () => {
+                    const res = await fetch(`/api/rooms/${room.id}/move-out`, { method: 'POST' });
+                    if (res.ok) {
+                        this.showToast(`Đã trả phòng ${room.room_number}`);
+                        this.editRoomModal.show = false;
+                        await this.loadData();
+                        await this.loadRooms();
+                        this.loadReceivables();
+                    } else {
+                        this.showToast('Lỗi khi trả phòng', 'error');
+                    }
+                }
+            };
         },
 
         getBillForRoom(room) {
@@ -589,6 +674,7 @@ function app(initialMonth, initialYear) {
                     });
                     this.showToast(`Đã thu tiền phòng ${bill.room_number}`);
                     await this.loadData();
+                    this.loadReceivables();
                 }
             };
         },
@@ -607,6 +693,7 @@ function app(initialMonth, initialYear) {
             this.prepaidModal.show = false;
             this.showToast('Đã lưu đóng tiền trước!');
             await this.loadData();
+            this.loadReceivables();
         },
 
         showQR(bill) {

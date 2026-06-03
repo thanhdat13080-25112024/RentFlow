@@ -27,6 +27,15 @@
                 </svg>
                 <span class="hidden sm:block" x-text="t.importCSV"></span>
             </button>
+            <button @click="exportCSV()" class="btn btn--ghost" :title="t.exportCSV">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                     style="color: var(--color-primary)">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span class="hidden sm:block" x-text="t.exportCSV"></span>
+            </button>
         </div>
     </div>
 
@@ -312,7 +321,12 @@
         <div class="card-static p-5">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold" style="color: var(--color-text-primary)" x-text="t.attentionTitle"></h3>
-                <span class="text-xs" style="color: var(--color-text-tertiary)" x-text="stats.unpaidCount + ' ' + t.statRooms"></span>
+                <span class="text-xs font-semibold" style="color: var(--color-unpaid)"
+                      x-show="receivables.total > 0"
+                      x-text="t.debt + ': ' + formatMoney(receivables.total)"></span>
+                <span class="text-xs" style="color: var(--color-text-tertiary)"
+                      x-show="receivables.total === 0"
+                      x-text="stats.unpaidCount + ' ' + t.statRooms"></span>
             </div>
             <template x-if="attentionRooms.length === 0">
                 <div class="py-8 text-center text-gray-400">
@@ -335,9 +349,14 @@
                             <p class="font-semibold text-sm truncate" style="color: var(--color-text-primary)" x-text="bill.contact_info || '—'"></p>
                             <p class="text-xs text-gray-400" x-text="formatMoney(bill.total)"></p>
                         </div>
-                        <button @click="quickCollect(bill)"
-                                class="btn btn--success shrink-0 text-xs px-3 py-1.5"
-                                x-text="t.collect"></button>
+                        <div class="flex gap-2 shrink-0">
+                            <button @click="openRemind(bill)"
+                                    class="btn btn--ghost text-xs px-3 py-1.5"
+                                    x-text="t.remind"></button>
+                            <button @click="quickCollect(bill)"
+                                    class="btn btn--success text-xs px-3 py-1.5"
+                                    x-text="t.collect"></button>
+                        </div>
                     </div>
                 </template>
             </div>

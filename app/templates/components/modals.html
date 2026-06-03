@@ -68,6 +68,10 @@
             <button @click="showHistory(editRoomModal.room)" class="btn btn--ghost">
                 ⟳ <span x-text="t.history"></span>
             </button>
+            <button x-show="editRoomModal.room.is_occupied"
+                    @click="moveOut(editRoomModal.room)" class="btn btn--ghost"
+                    style="color: var(--color-unpaid)"
+                    x-text="t.moveOut"></button>
             <button @click="saveQuickEdit()" class="btn btn--primary flex-1"
                     x-text="t.saveChanges"></button>
         </div>
@@ -294,6 +298,48 @@
             <button @click="confirmModal.show = false"
                     class="btn btn--ghost flex-1"
                     x-text="t.cancel"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: REMIND (nhắc thu tiền) ── -->
+<div x-show="remindModal.show" x-cloak
+     class="fixed inset-0 z-[1000] flex items-center justify-center px-4 lg-surface-clear"
+     style="background: rgba(15,10,40,0.50)">
+    <div class="card-static w-full max-w-md p-6 slide-up">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg shrink-0"
+                     style="background: var(--color-warning-bg); color: var(--color-warning)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold" style="color: var(--color-text-primary)" x-text="t.remindTitle"></h3>
+                    <p class="text-xs" style="color: var(--color-text-secondary)">
+                        <span x-text="'P.' + remindModal.room_number"></span>
+                        <span x-show="remindModal.phone" x-text="' · ' + remindModal.phone"></span>
+                    </p>
+                </div>
+            </div>
+            <button @click="remindModal.show = false"
+                    class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white/10 transition-colors"
+                    style="color: var(--color-text-tertiary)">✕</button>
+        </div>
+        <label class="th-cell block mb-1.5" x-text="t.remindMsgLabel"></label>
+        <textarea x-model="remindModal.message" rows="5"
+                  class="input-base w-full text-sm" style="resize: vertical"></textarea>
+        <div class="flex gap-3 mt-5">
+            <button @click="copyRemind()" class="btn btn--primary flex-1">
+                ⧉ <span x-text="t.copyBtn"></span>
+            </button>
+            <a x-show="remindModal.phone" :href="remindSmsUrl()"
+               class="btn btn--ghost flex-1 text-center"
+               style="display:flex; align-items:center; justify-content:center"
+               x-text="t.sendSms"></a>
         </div>
     </div>
 </div>
