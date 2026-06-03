@@ -24,7 +24,8 @@ async def login(response: Response, data: LoginRequest):
         value=access_token,
         httponly=True,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite="lax"
+        samesite="lax",
+        secure=settings.ENVIRONMENT == "production",
     )
     return {"message": "Login successful"}
 

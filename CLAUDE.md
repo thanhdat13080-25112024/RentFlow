@@ -30,14 +30,14 @@ alembic downgrade -1                                    # Roll back one migratio
 
 ```
 Browser → FastAPI (app/main.py)
-  ├── GET /  → renders index.html (web router, app/api/web.py)
-  ├── GET /login → renders login.html
+  ├── GET /       → index.html if logged in, else redirect → /login (app/api/web.py)
+  ├── GET /login  → renders login.html (redirects → / if already logged in)
   └── /api/* → api_router (app/api/v1/router.py)
-       ├── /auth  → endpoints/auth.py
-       └── /rooms, /bills, /electricity, /settings → endpoints/*.py
+       ├── /auth  → endpoints/auth.py  (public: login/logout)
+       └── /rooms, /bills, /electricity, /settings → endpoints/*.py  (require JWT cookie)
 ```
 
-Auth is cookie-based JWT. `get_current_user` in `app/core/security.py` reads the `access_token` cookie. **Note (verify before relying on it):** in the current `app/api/v1/router.py`, the rooms/bills/electricity/settings routers are registered under a `# Public routes` comment **without** `dependencies=[Depends(get_current_user)]` — i.e. they are not auth-gated right now. Add the dependency to a router/`include_router` if you need to protect an endpoint.
+Auth is cookie-based JWT. `get_current_user` in `app/core/security.py` reads the `access_token` cookie (and the non-raising `get_subject_from_token` helper is shared with the web routes). In `app/api/v1/router.py` the rooms/bills/electricity/settings routers are registered with `dependencies=[Depends(get_current_user)]`, so they return 401 without a valid cookie. `GET /` and `GET /login` enforce the same check at the page level via `app/api/web.py`. The frontend treats 401 by not rendering data; an expired session is fully resolved by reloading `/` (which redirects to `/login`).
 
 ### Key files
 

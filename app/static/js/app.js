@@ -39,6 +39,9 @@ const TRANSLATIONS = {
         viewFloor:'Dạng tầng', viewList:'Dạng cột',
         importCSV:'Import CSV',
         greeting_morning:'Chào buổi sáng', greeting_afternoon:'Chào buổi chiều', greeting_evening:'Chào buổi tối',
+        settingOk:'Đã lưu cài đặt!', confirmCollect:'Thu tiền phòng',
+        quick:'Thao tác', logout:'Đăng xuất',
+        actionMarkPaid:'Đánh dấu đã thu phòng...', actionViewQR:'Xem QR phòng...', actionUpdateElec:'Cập nhật số điện', actionCancel:'Hủy',
     },
     en: {
         appName:'Rent Manager', dataMonth:'Month',
@@ -80,6 +83,9 @@ const TRANSLATIONS = {
         viewFloor:'Floor View', viewList:'List View',
         importCSV:'Import CSV',
         greeting_morning:'Good morning', greeting_afternoon:'Good afternoon', greeting_evening:'Good evening',
+        settingOk:'Settings saved!', confirmCollect:'Collect payment',
+        quick:'Quick', logout:'Sign out',
+        actionMarkPaid:'Mark room as paid...', actionViewQR:'View QR code...', actionUpdateElec:'Update meter reading', actionCancel:'Cancel',
     },
     ko: {
         appName:'임대 관리', dataMonth:'월',
@@ -121,6 +127,9 @@ const TRANSLATIONS = {
         viewFloor:'층별 보기', viewList:'목록 보기',
         importCSV:'CSV 가져오기',
         greeting_morning:'좋은 아침', greeting_afternoon:'안녕하세요', greeting_evening:'좋은 저녁',
+        settingOk:'설정 저장 완료!', confirmCollect:'수납 처리',
+        quick:'빠른 작업', logout:'로그아웃',
+        actionMarkPaid:'수납 완료 처리...', actionViewQR:'QR 코드 보기...', actionUpdateElec:'전기 검침 입력', actionCancel:'취소',
     },
     ja: {
         appName:'賃貸管理', dataMonth:'月',
@@ -162,6 +171,9 @@ const TRANSLATIONS = {
         viewFloor:'階層表示', viewList:'リスト表示',
         importCSV:'CSVインポート',
         greeting_morning:'おはようございます', greeting_afternoon:'こんにちは', greeting_evening:'こんばんは',
+        settingOk:'設定を保存しました!', confirmCollect:'収納処理',
+        quick:'クイック', logout:'ログアウト',
+        actionMarkPaid:'収納済にする...', actionViewQR:'QRコード表示...', actionUpdateElec:'検針入力', actionCancel:'キャンセル',
     },
     zh: {
         appName:'租金管理', dataMonth:'月',
@@ -203,6 +215,9 @@ const TRANSLATIONS = {
         viewFloor:'楼层视图', viewList:'列表视图',
         importCSV:'导入CSV',
         greeting_morning:'早上好', greeting_afternoon:'下午好', greeting_evening:'晚上好',
+        settingOk:'设置已保存!', confirmCollect:'收款处理',
+        quick:'快捷操作', logout:'退出登录',
+        actionMarkPaid:'标记已收款...', actionViewQR:'查看QR码...', actionUpdateElec:'更新电表读数', actionCancel:'取消',
     }
 };
 
@@ -291,6 +306,7 @@ function app(initialMonth, initialYear) {
         get recentActivity() {
             return this.bills
                 .filter(b => (b.status === 'paid' || b.status === 'prepaid') && b.paid_at)
+                .sort((a, b) => new Date(b.paid_at) - new Date(a.paid_at))
                 .map(b => ({ room: b.room_number, type: b.status, amount: b.total, when: this.relativeTime(b.paid_at) }))
                 .slice(0, 5);
         },
@@ -322,7 +338,7 @@ function app(initialMonth, initialYear) {
         },
 
         get revChartData() {
-            const recent = [...this.revenueSummary].reverse().slice(-12);
+            const recent = [...this.revenueSummary].slice(-12);
             if (!recent.length) return [];
             const max = Math.max(...recent.map(r => r.total_revenue), 1);
             return recent.map(r => ({
@@ -409,7 +425,8 @@ function app(initialMonth, initialYear) {
         },
 
         todayStr() {
-            return new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+            const localeMap = { vi: 'vi-VN', en: 'en-US', ko: 'ko-KR', ja: 'ja-JP', zh: 'zh-CN' };
+            return new Date().toLocaleDateString(localeMap[this.lang] || 'vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
         },
 
         relativeTime(ts) {
@@ -706,6 +723,7 @@ function app(initialMonth, initialYear) {
         parseInput(val) { return parseInt((val || '').toString().replace(/\./g, '')) || 0; },
 
         formatDate(val) {
+            if (!val) return '';
             let v = val.replace(/\D/g, '').slice(0, 8);
             if (v.length > 4) return v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
             if (v.length > 2) return v.slice(0,2) + '/' + v.slice(2);

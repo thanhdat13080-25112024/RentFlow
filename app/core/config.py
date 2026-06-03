@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "RentFlow"
     SQLALCHEMY_DATABASE_URL: str = "sqlite:///./rentflow.db"
 
+    # Môi trường chạy: "development" (mặc định) hoặc "production".
+    # production → cookie auth bật secure=True (yêu cầu HTTPS).
+    ENVIRONMENT: str = "development"
+
     # Server settings
     HOST: str = "127.0.0.1"
     PORT: int = 8000

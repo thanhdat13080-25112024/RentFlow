@@ -26,26 +26,24 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-async def get_current_user(request: Request):
-    token = request.cookies.get("access_token")
+def get_subject_from_token(token: Optional[str]) -> Optional[str]:
+    """Giải mã JWT từ cookie, trả về 'sub' (username) nếu hợp lệ, ngược lại None.
+
+    Không ném lỗi — dùng được cả cho API guard (get_current_user) lẫn trang web
+    (web.py quyết định redirect thay vì trả 401)."""
     if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-        )
+        return None
     try:
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-        token_data = payload.get("sub")
-        if token_data is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-            )
-        return token_data
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload.get("sub")
     except Exception:
+        return None
+
+async def get_current_user(request: Request):
+    subject = get_subject_from_token(request.cookies.get("access_token"))
+    if subject is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
+    return subject
