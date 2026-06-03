@@ -28,7 +28,9 @@ async def update_room(data: RoomUpdate, db: Session = Depends(get_db)):
     room.move_in_date = data.move_in_date
     room.electricity_type = data.electricity_type
     room.fixed_electricity_fee = data.fixed_electricity_fee
-    room.is_occupied = True if (data.rent_price + data.service_fee > 0) else False
+    # B3: occupancy gắn với việc CÓ KHÁCH (contact_info), không phải có giá phòng.
+    # Trước đây "rent + service > 0" khiến phòng trống đã cấu hình giá bị tính là đang thuê.
+    room.is_occupied = bool(data.contact_info and str(data.contact_info).strip())
     
     if data.month and data.year:
         if data.old_reading is not None:
@@ -54,6 +56,20 @@ async def update_room(data: RoomUpdate, db: Session = Depends(get_db)):
             
     db.commit()
     return {"message": "Cập nhật thông tin thành công"}
+
+@router.post("/{room_id}/move-out")
+async def move_out(room_id: int, db: Session = Depends(get_db)):
+    """Dọn phòng: chuyển về trạng thái trống, xoá thông tin khách hiện tại.
+    Hoá đơn lịch sử giữ nguyên (tenant_name đã được snapshot trên từng bill)."""
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    room.is_occupied = False
+    room.contact_info = None
+    room.move_in_date = None
+    db.commit()
+    return {"message": f"Đã dọn phòng {room.room_number}"}
+
 
 @router.get("/{room_id}/history", response_model=List[RoomHistoryRead])
 async def get_room_history(room_id: int, db: Session = Depends(get_db)):

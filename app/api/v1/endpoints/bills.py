@@ -3,6 +3,7 @@ import io
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
@@ -47,10 +48,10 @@ async def get_revenue_summary(db: Session = Depends(get_db)):
 
     return results
 
-@router.get("/")
-async def get_bills(month: int, year: int, db: Session = Depends(get_db)):
+def _collect_bills(db: Session, month: int, year: int):
     # Chỉ ĐỌC: dùng bill đã lưu nếu có, ngược lại tính ảo (không ghi DB).
     # Bill được tạo/ghi ở các luồng GHI (nhập điện, thu tiền, sửa phòng), không ở đây.
+    # Dùng chung cho GET /api/bills/ và GET /api/bills/export.
     rooms = db.query(Room).all()
     results = []
 
@@ -112,6 +113,72 @@ async def get_bills(month: int, year: int, db: Session = Depends(get_db)):
         })
 
     return results
+
+
+@router.get("/")
+async def get_bills(month: int, year: int, db: Session = Depends(get_db)):
+    return _collect_bills(db, month, year)
+
+
+@router.get("/receivables")
+async def get_receivables(db: Session = Depends(get_db)):
+    """Công nợ: tổng tiền các hoá đơn CHƯA THU của phòng đang thuê, gộp theo phòng.
+
+    Chỉ tính bill đã ghi (status='unpaid') — bill được ghi khi nhập điện / sửa phòng,
+    nên phản ánh các tháng đã phát sinh nhưng chưa thu."""
+    occupied = {r.id: r for r in db.query(Room).filter(Room.is_occupied == True).all()}  # noqa: E712
+    if not occupied:
+        return {"total": 0, "count": 0, "rooms": []}
+
+    unpaid = db.query(MonthlyBill).filter(
+        MonthlyBill.status == "unpaid",
+        MonthlyBill.room_id.in_(list(occupied.keys())),
+    ).all()
+
+    by_room = {}
+    for b in unpaid:
+        e = by_room.setdefault(b.room_id, {"amount": 0, "months": 0})
+        e["amount"] += b.total or 0
+        e["months"] += 1
+
+    rooms = [
+        {
+            "room_id": rid,
+            "room_number": occupied[rid].room_number,
+            "tenant_name": occupied[rid].contact_info,
+            "months": e["months"],
+            "amount": e["amount"],
+        }
+        for rid, e in by_room.items()
+    ]
+    rooms.sort(key=lambda x: x["amount"], reverse=True)
+    return {"total": sum(x["amount"] for x in rooms), "count": len(rooms), "rooms": rooms}
+
+
+@router.get("/export")
+async def export_bills(month: int, year: int, db: Session = Depends(get_db)):
+    """Xuất hoá đơn của 1 tháng ra CSV (định dạng tương thích với import-csv)."""
+    status_vi = {"unpaid": "Chưa thu", "paid": "Đã thu", "prepaid": "Đóng trước"}
+    out = io.StringIO()
+    out.write("﻿")  # BOM để Excel mở đúng tiếng Việt
+    writer = csv.writer(out)
+    writer.writerow([
+        "Phòng", "Khách Thuê", "Tháng", "Năm", "Tiền Phòng", "Dịch Vụ",
+        "Điện Cũ", "Điện Mới", "Tiền Điện", "Tổng", "Trạng Thái",
+    ])
+    for r in _collect_bills(db, month, year):
+        if not r["is_occupied"]:
+            continue
+        writer.writerow([
+            r["room_number"], r.get("contact_info") or "", month, year,
+            r["rent_fee"], r["service_fee"], r["old_reading"], r["new_reading"],
+            r["electricity_fee"], r["total"], status_vi.get(r["status"], r["status"]),
+        ])
+    return Response(
+        content=out.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="hoadon_{month}_{year}.csv"'},
+    )
 
 @router.post("/mark-paid")
 async def mark_paid(data: BillPaidUpdate, db: Session = Depends(get_db)):
@@ -218,7 +285,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
                 service_val = get_val(row, ["Dịch Vụ", "Dich Vu", "Service", "service"])
                 if service_val is not None: room.service_fee = int(service_val)
 
-                room.is_occupied = True if (room.rent_price + room.service_fee > 0) else False
+                room.is_occupied = bool(room.contact_info and str(room.contact_info).strip())
 
                 old_r = get_val(row, ["Điện Cũ", "Dien Cu", "Old Reading", "old"])
                 new_r = get_val(row, ["Điện Mới", "Dien Moi", "New Reading", "new"])
