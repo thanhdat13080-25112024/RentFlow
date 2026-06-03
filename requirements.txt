@@ -8,3 +8,7 @@ pydantic-settings
 alembic
 python-jose[cryptography]
 passlib[bcrypt]
+
+# Dev / test
+pytest
+httpx
