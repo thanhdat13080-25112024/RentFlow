@@ -1,10 +1,14 @@
 <!-- ═══════════════════════════════════════
      TAB: DASHBOARD
 ═══════════════════════════════════════ -->
-<div x-show="activeTab === 'dashboard'" class="space-y-6">
+<div x-show="activeTab === 'dashboard'"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 translate-y-1"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     class="space-y-6">
 
     <!-- Greeting + actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 fade-in-up">
         <div>
             <h1 class="text-2xl font-extrabold" style="color: var(--color-text-primary)"><span x-text="getGreeting()"></span><template x-if="settings.account_holder"><span><span style="color:var(--color-text-secondary)">, </span><span style="color:var(--color-primary)" x-text="settings.account_holder"></span></span></template> 👋</h1>
             <p class="text-sm text-gray-400 mt-1">
@@ -47,7 +51,11 @@
     </div>
 
     <!-- 6 stat tiles -->
-    <div x-show="!loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div x-show="!loading"
+         x-transition:enter="transition ease-out duration-500"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="stat-tile">
             <div class="stat-tile__icon tile-icon--neutral">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -150,7 +158,7 @@
     </div>
 
     <!-- Charts row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in-up" style="animation-delay:80ms">
         <!-- Bar chart -->
         <div class="lg:col-span-2 card-static p-5">
             <div class="flex items-center justify-between mb-4">
@@ -159,7 +167,7 @@
                     <p class="text-xs text-gray-400" x-text="t.chartSubtitle"></p>
                 </div>
                 <button @click="revenueExpanded = true; document.body.style.overflow = 'hidden'"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-white/10"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
                         style="color: var(--color-text-tertiary)"
                         :title="t.revenueTitle">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
@@ -192,26 +200,27 @@
                     </template>
                     <template x-for="bar in dashboardChart" :key="bar.label">
                         <div class="flex flex-col items-center justify-end gap-1 flex-1 h-full"
-                             x-data="{ hovered: false }"
+                             x-data="{ hovered: false, h: 0 }"
+                             x-init="$nextTick(() => h = Math.max(bar.pct, 5))"
                              @mouseenter="hovered = true"
                              @mouseleave="hovered = false">
                             <span class="text-xs font-semibold leading-none"
                                   :style="bar.current
                                       ? 'color: var(--color-chart-primary)'
-                                      : 'color: rgba(148,180,215,0.80)'"
+                                      : 'color: var(--color-text-tertiary)'"
                                   x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
                             <div class="w-full rounded-t-lg"
                                  :style="{
-                                     height: Math.max(bar.pct, 5) + '%',
+                                     height: h + '%',
                                      background: bar.current
                                          ? 'linear-gradient(to top, var(--blue-600), var(--sky-400))'
                                          : hovered
-                                             ? 'linear-gradient(to top, rgba(37,99,235,0.72), rgba(56,189,248,0.52))'
-                                             : 'linear-gradient(to top, rgba(37,99,235,0.52), rgba(56,189,248,0.34))',
-                                     boxShadow: bar.current ? 'var(--shadow-glow-violet)' : 'none',
+                                             ? 'linear-gradient(to top, rgba(70,107,83,0.72), rgba(124,169,140,0.52))'
+                                             : 'linear-gradient(to top, rgba(70,107,83,0.50), rgba(124,169,140,0.32))',
+                                     boxShadow: bar.current ? '0 4px 14px rgba(70,107,83,0.35)' : 'none',
                                      transform: hovered ? 'scale(1.05)' : 'none',
                                      transformOrigin: 'bottom center',
-                                     transition: 'all var(--dur-fast) var(--ease-smooth)'
+                                     transition: 'height .7s cubic-bezier(.4,0,.2,1), transform .15s ease, box-shadow .25s ease'
                                  }"
                                  :title="formatMoney(bar.v)">
                             </div>
@@ -259,21 +268,21 @@
                                     filter="url(#dsf-paid)"
                                     :stroke-dasharray="donut.paid + ' 100'"
                                     stroke-dashoffset="0"
-                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'paid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'paid' ? 0.18 : 1, transition: 'opacity 0.2s ease, stroke-dasharray 0.9s cubic-bezier(.4,0,.2,1)' }"/>
                         </g>
                         <g style="color: var(--color-prepaid)">
                             <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor" stroke-width="3.5"
                                     filter="url(#dsf-prepaid)"
                                     :stroke-dasharray="donut.prepaid + ' 100'"
                                     :stroke-dashoffset="-donut.paidOffset"
-                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'prepaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'prepaid' ? 0.18 : 1, transition: 'opacity 0.2s ease, stroke-dasharray 0.9s cubic-bezier(.4,0,.2,1)' }"/>
                         </g>
                         <g style="color: var(--color-unpaid)">
                             <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor" stroke-width="3.5"
                                     filter="url(#dsf-unpaid)"
                                     :stroke-dasharray="donut.unpaid + ' 100'"
                                     :stroke-dashoffset="-donut.unpaidOffset"
-                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'unpaid' ? 0.18 : 1, transition: 'opacity 0.2s ease' }"/>
+                                    :style="{ opacity: highlightedSegment && highlightedSegment !== 'unpaid' ? 0.18 : 1, transition: 'opacity 0.2s ease, stroke-dasharray 0.9s cubic-bezier(.4,0,.2,1)' }"/>
                         </g>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
@@ -290,7 +299,7 @@
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
                              'ring-1': highlightedSegment === 'paid',
-                             'hover:bg-white/5': highlightedSegment !== 'paid',
+                             'hover:bg-gray-100': highlightedSegment !== 'paid',
                              'opacity-35': highlightedSegment && highlightedSegment !== 'paid'
                          }"
                          :style="highlightedSegment === 'paid'
@@ -304,7 +313,7 @@
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
                              'ring-1': highlightedSegment === 'unpaid',
-                             'hover:bg-white/5': highlightedSegment !== 'unpaid',
+                             'hover:bg-gray-100': highlightedSegment !== 'unpaid',
                              'opacity-35': highlightedSegment && highlightedSegment !== 'unpaid'
                          }"
                          :style="highlightedSegment === 'unpaid'
@@ -318,7 +327,7 @@
                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer select-none transition-all duration-150"
                          :class="{
                              'ring-1': highlightedSegment === 'prepaid',
-                             'hover:bg-white/5': highlightedSegment !== 'prepaid',
+                             'hover:bg-gray-100': highlightedSegment !== 'prepaid',
                              'opacity-35': highlightedSegment && highlightedSegment !== 'prepaid'
                          }"
                          :style="highlightedSegment === 'prepaid'
@@ -335,7 +344,7 @@
     </div>
 
     <!-- Attention + Activity -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in-up" style="animation-delay:160ms">
         <!-- Rooms needing attention -->
         <div class="card-static p-5">
             <div class="flex items-center justify-between mb-4">
@@ -359,9 +368,10 @@
                 </div>
             </template>
             <div class="space-y-3">
-                <template x-for="bill in attentionRooms" :key="bill.room_id">
-                    <div class="flex items-center gap-3 p-3 rounded-lg border"
-                         style="background: var(--color-unpaid-bg); border-color: var(--color-unpaid-border)">
+                <template x-for="(bill, ai) in attentionRooms" :key="bill.room_id">
+                    <div class="flex items-center gap-3 p-3 rounded-lg border fade-in-up"
+                         style="background: var(--color-unpaid-bg); border-color: var(--color-unpaid-border)"
+                         :style="'animation-delay:' + (ai * 50) + 'ms'">
                         <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                              :class="getFloorBg(bill.room_number)" x-text="bill.room_number"></div>
                         <div class="flex-1 min-w-0">
@@ -395,7 +405,7 @@
             </template>
             <div class="space-y-3">
                 <template x-for="(act, i) in recentActivity" :key="i">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 fade-in-up" :style="'animation-delay:' + (i * 50) + 'ms'">
                         <div class="w-2 h-2 rounded-full shrink-0"
                              :style="act.type === 'paid'
                                  ? 'background: var(--color-paid)'

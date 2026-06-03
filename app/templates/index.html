@@ -76,7 +76,8 @@
                             </template>
                             <template x-for="bar in dashboardChart" :key="bar.label">
                                 <div class="flex flex-col items-center justify-end gap-1.5 flex-1 h-full"
-                                     x-data="{ hovered: false }"
+                                     x-data="{ hovered: false, h: 0 }"
+                                     x-init="$nextTick(() => h = Math.max(bar.pct, 5))"
                                      @mouseenter="hovered = true"
                                      @mouseleave="hovered = false">
                                     <span class="text-sm font-bold leading-none"
@@ -86,16 +87,16 @@
                                           x-text="(bar.v/1e6).toFixed(1)+'M'"></span>
                                     <div class="w-full rounded-t-xl"
                                          :style="{
-                                             height: Math.max(bar.pct, 5) + '%',
+                                             height: h + '%',
                                              background: bar.current
                                                  ? 'linear-gradient(to top, var(--blue-600), var(--sky-400))'
                                                  : hovered
-                                                     ? 'linear-gradient(to top, rgba(37,99,235,0.55), rgba(56,189,248,0.35))'
-                                                     : 'linear-gradient(to top, rgba(37,99,235,0.40), rgba(56,189,248,0.22))',
-                                             boxShadow: bar.current ? 'var(--shadow-glow-violet)' : 'none',
+                                                     ? 'linear-gradient(to top, rgba(70,107,83,0.55), rgba(124,169,140,0.35))'
+                                                     : 'linear-gradient(to top, rgba(70,107,83,0.40), rgba(124,169,140,0.22))',
+                                             boxShadow: bar.current ? '0 4px 14px rgba(70,107,83,0.35)' : 'none',
                                              transform: hovered ? 'scale(1.05)' : 'none',
                                              transformOrigin: 'bottom center',
-                                             transition: 'all var(--dur-fast) var(--ease-smooth)'
+                                             transition: 'height .7s cubic-bezier(.4,0,.2,1), transform .15s ease, box-shadow .25s ease'
                                          }"
                                          :title="formatMoney(bar.v)">
                                     </div>
@@ -495,7 +496,7 @@
                  class="flex flex-wrap gap-2">
                 <!-- Filter: All -->
                 <button @click="billTab = 'all'"
-                        :class="billTab === 'all' ? 'tab-active' : 'hover:bg-white/50'"
+                        :class="billTab === 'all' ? 'tab-active' : 'hover:bg-gray-100'"
                         style="color: var(--color-text-primary)"
                         class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-none">
                     <span x-text="t.filterAll"></span>
@@ -505,7 +506,7 @@
                 </button>
                 <!-- Filter: Unpaid -->
                 <button @click="billTab = 'unpaid'"
-                        :class="billTab === 'unpaid' ? '' : 'hover:bg-white/50'"
+                        :class="billTab === 'unpaid' ? '' : 'hover:bg-gray-100'"
                         :style="billTab === 'unpaid'
                             ? 'background: var(--color-unpaid-bg); border: 1px solid var(--color-unpaid-border); color: var(--color-unpaid); box-shadow: var(--shadow-glass-sm)'
                             : 'color: var(--color-text-primary)'"
@@ -517,7 +518,7 @@
                 </button>
                 <!-- Filter: Paid -->
                 <button @click="billTab = 'paid'"
-                        :class="billTab === 'paid' ? '' : 'hover:bg-white/50'"
+                        :class="billTab === 'paid' ? '' : 'hover:bg-gray-100'"
                         :style="billTab === 'paid'
                             ? 'background: var(--color-paid-bg); border: 1px solid var(--color-paid-border); color: var(--color-paid); box-shadow: var(--shadow-glass-sm)'
                             : 'color: var(--color-text-primary)'"
@@ -529,7 +530,7 @@
                 </button>
                 <!-- Filter: Prepaid -->
                 <button @click="billTab = 'prepaid'"
-                        :class="billTab === 'prepaid' ? '' : 'hover:bg-white/50'"
+                        :class="billTab === 'prepaid' ? '' : 'hover:bg-gray-100'"
                         :style="billTab === 'prepaid'
                             ? 'background: var(--color-prepaid-bg); border: 1px solid var(--color-prepaid-border); color: var(--color-prepaid); box-shadow: var(--shadow-glass-sm)'
                             : 'color: var(--color-text-primary)'"

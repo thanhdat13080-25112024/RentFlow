@@ -1,19 +1,23 @@
 <!-- ═══════════════════════════════════════
      TAB: ROOMS — List view (Master / Detail)
 ═══════════════════════════════════════ -->
-<div x-show="activeTab === 'rooms' && roomView === 'list'" class="space-y-4">
+<div x-show="activeTab === 'rooms' && roomView === 'list'"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 translate-y-1"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     class="space-y-4">
     <!-- Master / Detail grid -->
     <div class="grid gap-4" :class="!isMobile ? 'grid-cols-[1fr_1.1fr]' : 'grid-cols-1'">
         <!-- List pane -->
         <div x-show="!isMobile || !selectedBillId"
              class="card-static overflow-hidden">
             <div class="divide-y table-divider overflow-y-auto max-h-[70vh]">
-                <template x-for="bill in filteredBills" :key="bill.room_id">
+                <template x-for="(bill, bi) in filteredBills" :key="bill.room_id">
                     <div @click="selectedBillId = bill.room_id"
-                         class="flex items-center gap-3 px-4 py-4 cursor-pointer transition hover:bg-white/5"
-                         :style="selectedBillId === bill.room_id
+                         class="flex items-center gap-3 px-4 py-4 cursor-pointer transition hover:bg-gray-100 hover:translate-x-0.5 fade-in-up"
+                         :style="(selectedBillId === bill.room_id
                              ? 'background: var(--color-primary-light)'
-                             : ''">
+                             : '') + ';animation-delay:' + (bi * 30) + 'ms'">
                         <span class="text-lg font-extrabold w-10 shrink-0"
                               :class="getFloorText(bill.room_number)"
                               x-text="bill.room_number"></span>

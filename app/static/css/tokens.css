@@ -45,6 +45,13 @@
   --danger:       #AE453B;  --danger-tint:  #F3E1DE;
   --info:         #3F6B86;  --info-tint:    #E2ECF1;
 
+  /* Aliases cho màu biểu đồ (trước đây dùng nhưng chưa định nghĩa khi theme
+     chuyển sang xanh lá) — map về bảng màu accent để nhất quán. */
+  --blue-600: var(--accent);
+  --blue-300: var(--accent-tint);
+  --sky-400:  #7CA98B;
+  --cyan-500: var(--info);
+
   --r-xs: 6px;
   --r-sm: 10px;
   --r-md: 14px;
