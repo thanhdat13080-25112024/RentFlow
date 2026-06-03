@@ -247,6 +247,7 @@ function app(initialMonth, initialYear) {
         selectedBillId: null,
         roomView: 'floor',
         isMobile: false,
+        loading: true,
 
         bills: [],
         rooms: [],
@@ -412,6 +413,7 @@ function app(initialMonth, initialYear) {
             this.isMobile = window.innerWidth < 768;
             window.addEventListener('resize', () => { this.isMobile = window.innerWidth < 768; });
             await Promise.all([this.loadData(), this.loadSettings(), this.loadRooms()]);
+            this.loading = false;
             this.loadRevenueSummary();
             this.loadReceivables();
             this.initLiquidLight();
@@ -460,36 +462,76 @@ function app(initialMonth, initialYear) {
             setTimeout(() => { this.toast.show = false; }, 3000);
         },
 
+        prefersReducedMotion() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        },
+
+        // ── D2: fetch dùng chung — tự xử lý 401 (hết phiên → /login) và lỗi mạng (toast) ──
+        async apiFetch(url, opts = {}) {
+            try {
+                const res = await fetch(url, opts);
+                if (res.status === 401) { window.location.href = '/login'; return null; }
+                if (!res.ok) {
+                    let detail = '';
+                    try { detail = (await res.json()).detail; } catch (e) {}
+                    this.showToast(detail || 'Có lỗi xảy ra', 'error');
+                    return null;
+                }
+                const ct = res.headers.get('content-type') || '';
+                return ct.includes('application/json') ? await res.json() : res;
+            } catch (e) {
+                this.showToast('Lỗi kết nối server', 'error');
+                return null;
+            }
+        },
+
+        // ── Animation: đếm tăng dần (count-up) số liệu; tôn trọng prefers-reduced-motion ──
+        tween(obj, key, target) {
+            target = Number(target) || 0;
+            const start = Number(obj[key]) || 0;
+            if (start === target) return;
+            if (this.prefersReducedMotion()) { obj[key] = target; return; }
+            const dur = 650, t0 = performance.now();
+            const step = (now) => {
+                const p = Math.min((now - t0) / dur, 1);
+                const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+                obj[key] = Math.round(start + (target - start) * eased);
+                if (p < 1) requestAnimationFrame(step);
+                else obj[key] = target;
+            };
+            requestAnimationFrame(step);
+        },
+
         async loadData() {
-            const res = await fetch(`/api/bills?month=${this.month}&year=${this.year}`);
-            if (res.status === 401) return;
-            this.bills = await res.json();
+            const data = await this.apiFetch(`/api/bills?month=${this.month}&year=${this.year}`);
+            if (!data) return;
+            this.bills = data;
             if (this.selectedBillId && !this.bills.find(b => b.room_id === this.selectedBillId))
                 this.selectedBillId = null;
         },
 
         async loadRooms() {
-            const res = await fetch('/api/rooms');
-            if (res.status === 401) return;
-            this.rooms = await res.json();
+            const data = await this.apiFetch('/api/rooms');
+            if (!data) return;
+            this.rooms = data;
         },
 
         async loadSettings() {
-            const res = await fetch('/api/settings');
-            if (res.status === 401) return;
-            this.settings = await res.json();
+            const data = await this.apiFetch('/api/settings');
+            if (!data) return;
+            this.settings = data;
         },
 
         async loadRevenueSummary() {
-            const res = await fetch('/api/bills/revenue/summary');
-            if (res.status === 401) return;
-            this.revenueSummary = (await res.json()).reverse();
+            const data = await this.apiFetch('/api/bills/revenue/summary');
+            if (!data) return;
+            this.revenueSummary = data.reverse();
         },
 
         async loadReceivables() {
-            const res = await fetch('/api/bills/receivables');
-            if (res.status === 401) return;
-            this.receivables = await res.json();
+            const data = await this.apiFetch('/api/bills/receivables');
+            if (!data) return;
+            this.receivables = data;
         },
 
         // ── C4: Export hoá đơn tháng hiện tại ra CSV ──
@@ -582,7 +624,8 @@ function app(initialMonth, initialYear) {
 
         async saveSettings() {
             const data = Object.keys(this.settings).map(key => ({ key, value: this.settings[key] }));
-            await fetch('/api/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            const ok = await this.apiFetch('/api/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            if (!ok) return;
             this.showToast(this.t.settingOk || 'Đã lưu cài đặt!');
             this.loadData();
         },
@@ -637,11 +680,12 @@ function app(initialMonth, initialYear) {
         },
 
         async updateElectricity(bill) {
-            await fetch('/api/electricity', {
+            const ok = await this.apiFetch('/api/electricity', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ room_id: bill.room_id, month: this.month, year: this.year, new_reading: bill.new_reading })
             });
+            if (!ok) return;
             this.showToast(`Đã lưu số điện P.${bill.room_number}`);
             await this.loadData();
         },
@@ -681,7 +725,7 @@ function app(initialMonth, initialYear) {
 
         async confirmPrepaid() {
             if (!this.prepaidModal.months) return;
-            await fetch('/api/bills/mark-prepaid', {
+            const ok = await this.apiFetch('/api/bills/mark-prepaid', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -690,6 +734,7 @@ function app(initialMonth, initialYear) {
                     year: this.year
                 })
             });
+            if (!ok) return;
             this.prepaidModal.show = false;
             this.showToast('Đã lưu đóng tiền trước!');
             await this.loadData();

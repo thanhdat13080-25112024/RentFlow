@@ -39,8 +39,15 @@
         </div>
     </div>
 
+    <!-- 6 stat tiles — skeleton while loading -->
+    <div x-show="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <template x-for="i in 6" :key="i">
+            <div class="stat-tile"><div class="skeleton" style="height:60px; width:100%"></div></div>
+        </template>
+    </div>
+
     <!-- 6 stat tiles -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div x-show="!loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="stat-tile">
             <div class="stat-tile__icon tile-icon--neutral">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -51,7 +58,9 @@
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statTotalRooms"></p>
-                <p class="stat-tile__value" x-text="stats.totalRooms"></p>
+                <p class="stat-tile__value" x-data="{ n: 0 }"
+                   x-init="tween($data,'n',stats.totalRooms); $watch(() => stats.totalRooms, v => tween($data,'n',v))"
+                   x-text="n"></p>
                 <p class="stat-tile__sub" x-text="stats.occupiedCount + ' ' + t.statOccupied + ' · ' + stats.emptyCount + ' ' + t.statEmpty"></p>
             </div>
         </div>
@@ -64,7 +73,9 @@
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statUnpaid"></p>
-                <p class="stat-tile__value tile-value--danger" x-text="stats.unpaidCount"></p>
+                <p class="stat-tile__value tile-value--danger" x-data="{ n: 0 }"
+                   x-init="tween($data,'n',stats.unpaidCount); $watch(() => stats.unpaidCount, v => tween($data,'n',v))"
+                   x-text="n"></p>
                 <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
@@ -78,7 +89,9 @@
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statPaid"></p>
-                <p class="stat-tile__value tile-value--success" x-text="stats.paidCount"></p>
+                <p class="stat-tile__value tile-value--success" x-data="{ n: 0 }"
+                   x-init="tween($data,'n',stats.paidCount); $watch(() => stats.paidCount, v => tween($data,'n',v))"
+                   x-text="n"></p>
                 <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
@@ -94,7 +107,9 @@
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statPrepaid"></p>
-                <p class="stat-tile__value tile-value--primary" x-text="stats.prepaidCount"></p>
+                <p class="stat-tile__value tile-value--primary" x-data="{ n: 0 }"
+                   x-init="tween($data,'n',stats.prepaidCount); $watch(() => stats.prepaidCount, v => tween($data,'n',v))"
+                   x-text="n"></p>
                 <p class="stat-tile__sub" x-text="t.statRooms"></p>
             </div>
         </div>
@@ -109,7 +124,9 @@
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statCollected"></p>
-                <p class="stat-tile__value stat-tile__value--money tile-value--success" x-text="formatMoney(stats.collectedAmount)"></p>
+                <p class="stat-tile__value stat-tile__value--money tile-value--success" x-data="{ n: 0 }"
+                   x-init="tween($data,'n',stats.collectedAmount); $watch(() => stats.collectedAmount, v => tween($data,'n',v))"
+                   x-text="formatMoney(n)"></p>
                 <p class="stat-tile__sub" x-text="t.statThisMonth"></p>
             </div>
         </div>
@@ -124,7 +141,9 @@
             </div>
             <div class="min-w-0">
                 <p class="stat-tile__label" x-text="t.statDeposit"></p>
-                <p class="stat-tile__value stat-tile__value--money" x-text="formatMoney(stats.depositTotal)"></p>
+                <p class="stat-tile__value stat-tile__value--money" x-data="{ n: 0 }"
+                   x-init="tween($data,'n',stats.depositTotal); $watch(() => stats.depositTotal, v => tween($data,'n',v))"
+                   x-text="formatMoney(n)"></p>
                 <p class="stat-tile__sub" x-text="stats.occupiedCount + ' ' + t.statRooms"></p>
             </div>
         </div>
