@@ -7,54 +7,7 @@
 {% endblock %}
 
 {% block content %}
-    <!-- ── AURORA BACKGROUND LAYER — Liquid Glass Dark ── -->
-    <div aria-hidden="true"
-         style="position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none">
-        <!-- Primary blue orb — upper left, dominant anchor -->
-        <div class="aurora-orb"
-             style="width:min(1000px,100vw);height:min(1000px,100vw);top:-28%;left:-24%;
-                    background:radial-gradient(circle,rgba(37,99,235,0.55) 0%,rgba(56,189,248,0.22) 40%,transparent 68%);
-                    filter:blur(70px);
-                    animation:aurora-drift-1 24s ease-in-out infinite alternate;"></div>
-        <!-- Cyan/Sky orb — upper right, cool refraction -->
-        <div class="aurora-orb"
-             style="width:min(860px,88vw);height:min(860px,88vw);top:-18%;right:-22%;
-                    background:radial-gradient(circle,rgba(14,165,233,0.48) 0%,rgba(6,182,212,0.18) 42%,transparent 68%);
-                    filter:blur(65px);
-                    animation:aurora-drift-2 30s ease-in-out infinite alternate;"></div>
-        <!-- Rose/Magenta orb — bottom left, warm contrast -->
-        <div class="aurora-orb"
-             style="width:min(760px,78vw);height:min(760px,78vw);bottom:-20%;left:-14%;
-                    background:radial-gradient(circle,rgba(236,72,153,0.36) 0%,rgba(244,114,182,0.14) 42%,transparent 68%);
-                    filter:blur(70px);
-                    animation:aurora-drift-4 38s ease-in-out infinite alternate;"></div>
-        <!-- Violet/Purple orb — center, deep glow -->
-        <div class="aurora-orb"
-             style="width:min(680px,70vw);height:min(680px,70vw);top:28%;left:28%;
-                    background:radial-gradient(circle,rgba(124,58,237,0.28) 0%,rgba(139,92,246,0.10) 42%,transparent 68%);
-                    filter:blur(80px);
-                    animation:aurora-drift-3 44s ease-in-out infinite alternate-reverse;"></div>
-        <!-- Emerald/Teal orb — mid right, cool depth -->
-        <div class="aurora-orb"
-             style="width:min(580px,60vw);height:min(580px,60vw);top:45%;right:-8%;
-                    background:radial-gradient(circle,rgba(16,185,129,0.20) 0%,rgba(20,184,166,0.08) 42%,transparent 68%);
-                    filter:blur(60px);
-                    animation:aurora-drift-2 46s ease-in-out infinite alternate-reverse;"></div>
-        <!-- Indigo/Cobalt orb — bottom right, secondary anchor -->
-        <div class="aurora-orb"
-             style="width:min(720px,74vw);height:min(720px,74vw);bottom:-18%;right:-16%;
-                    background:radial-gradient(circle,rgba(79,70,229,0.30) 0%,rgba(99,102,241,0.12) 42%,transparent 68%);
-                    filter:blur(70px);
-                    animation:aurora-drift-5 32s ease-in-out infinite alternate;"></div>
-        <!-- Sky micro-orb — upper center, specular catch -->
-        <div class="aurora-orb"
-             style="width:min(400px,42vw);height:min(400px,42vw);top:-8%;left:38%;
-                    background:radial-gradient(circle,rgba(56,189,248,0.22) 0%,transparent 65%);
-                    filter:blur(50px);
-                    animation:aurora-drift-1 52s ease-in-out infinite alternate-reverse;"></div>
-    </div>
-
-    {% include 'components/toast.html' %}
+        {% include 'components/toast.html' %}
     {% include 'components/modals.html' %}
 
     <!-- ── REVENUE EXPANDED OVERLAY ── -->
@@ -533,7 +486,7 @@
                         style="color: var(--color-text-primary)"
                         class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-none">
                     <span x-text="t.filterAll"></span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                    <span class="px-1.5 py-0.5 rounded-full text-xs"
                           :style="billTab === 'all' ? 'background: var(--color-primary-light); color: var(--color-primary)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
                           x-text="bills.filter(b=>b.is_occupied).length"></span>
                 </button>
@@ -545,7 +498,7 @@
                             : 'color: var(--color-text-primary)'"
                         class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-transparent">
                     <span x-text="t.filterUnpaid"></span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                    <span class="px-1.5 py-0.5 rounded-full text-xs"
                           :style="billTab === 'unpaid' ? 'background: rgba(220,38,38,0.15); color: var(--color-unpaid)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
                           x-text="bills.filter(b=>b.status==='unpaid'&&b.is_occupied).length"></span>
                 </button>
@@ -557,7 +510,7 @@
                             : 'color: var(--color-text-primary)'"
                         class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-transparent">
                     <span x-text="t.filterPaid"></span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                    <span class="px-1.5 py-0.5 rounded-full text-xs"
                           :style="billTab === 'paid' ? 'background: rgba(22,163,74,0.15); color: var(--color-paid)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
                           x-text="bills.filter(b=>b.status==='paid').length"></span>
                 </button>
@@ -569,7 +522,7 @@
                             : 'color: var(--color-text-primary)'"
                         class="px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 lg-surface-regular border-transparent">
                     <span x-text="t.filterPrepaid"></span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px]"
+                    <span class="px-1.5 py-0.5 rounded-full text-xs"
                           :style="billTab === 'prepaid' ? 'background: rgba(124,58,237,0.15); color: var(--color-prepaid)' : 'background: rgba(0,0,0,0.08); color: var(--color-text-secondary)'"
                           x-text="bills.filter(b=>b.status==='prepaid').length"></span>
                 </button>
