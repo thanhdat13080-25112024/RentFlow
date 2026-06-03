@@ -30,25 +30,25 @@ alembic downgrade -1                                    # Roll back one migratio
 
 ```
 Browser → FastAPI (app/main.py)
-  ├── GET /  → renders index.html (auth-gated via cookie check)
+  ├── GET /  → renders index.html (web router, app/api/web.py)
   ├── GET /login → renders login.html
-  └── /api/* → api_router (app/api/v1/api.py)
-       ├── /auth  → endpoints/auth.py   (public)
-       └── /rooms, /bills, /electricity, /settings  (all require JWT cookie)
+  └── /api/* → api_router (app/api/v1/router.py)
+       ├── /auth  → endpoints/auth.py
+       └── /rooms, /bills, /electricity, /settings → endpoints/*.py
 ```
 
-Auth is cookie-based JWT. The `get_current_user` dependency in `app/core/security.py` reads the `access_token` cookie. All protected routers declare `dependencies=[Depends(get_current_user)]` in `app/api/v1/api.py`.
+Auth is cookie-based JWT. `get_current_user` in `app/core/security.py` reads the `access_token` cookie. **Note (verify before relying on it):** in the current `app/api/v1/router.py`, the rooms/bills/electricity/settings routers are registered under a `# Public routes` comment **without** `dependencies=[Depends(get_current_user)]` — i.e. they are not auth-gated right now. Add the dependency to a router/`include_router` if you need to protect an endpoint.
 
 ### Key files
 
 | File | Purpose |
 |------|---------|
 | `app/core/config.py` | `Settings` class (pydantic-settings, reads `.env`) |
-| `app/core/database.py` | SQLAlchemy engine, `SessionLocal`, `get_db()` dependency, `Base` |
-| `app/models/entities.py` | All ORM models: `Room`, `ElectricityReading`, `MonthlyBill`, `Setting` |
-| `app/schemas/data_transfer_objects.py` | All Pydantic request/response schemas |
-| `app/services/billing.py` | `update_bill()` — creates or recalculates a bill for one room/month; **caller must commit** |
-| `app/services/database_seeder.py` | `init_data()` — seeds default settings and 12 sample rooms on first run |
+| `app/db/` | `base.py` (`Base`), `session.py` (engine, `SessionLocal`, `get_db()`), `__init__.py` re-exports them |
+| `app/models/*.py` | One model per file (`room.py`, `electricity_reading.py`, `monthly_bill.py`, `setting.py`); `__init__.py` exports `Room`, `ElectricityReading`, `MonthlyBill`, `Setting` |
+| `app/schemas/*.py` | One group per file (`bill.py`, `electricity.py`, `room.py`, `setting.py`); import via `from app.schemas import ...` |
+| `app/services/billing.py` | `update_bill()` — creates or recalculates a bill for one room/month; **calls `db.commit()` itself** |
+| `app/services/seeder.py` | `seed_initial_data()` — seeds default settings and sample rooms on first run |
 
 ### Billing logic
 
@@ -56,7 +56,7 @@ Auth is cookie-based JWT. The `get_current_user` dependency in `app/core/securit
 1. Looks up `ElectricityReading` for the room+month
 2. Calculates `electricity_fee` (meter: `usage × unit_price`, fixed: `room.fixed_electricity_fee`)
 3. Creates or updates a `MonthlyBill` record — **only updates if `status == "unpaid"`**, never overwrites paid/prepaid bills
-4. Calls `db.flush()` — the **caller must call `db.commit()`**
+4. Calls `db.commit()` itself (so when called in a loop, e.g. `/api/bills/`, it commits per iteration)
 
 This function is called from GET endpoints (`/api/bills/`) to auto-create bills on first access.
 
@@ -85,3 +85,16 @@ Set `ENVIRONMENT=production` to enable `secure=True` on the auth cookie (require
 Schema is managed by both `Base.metadata.create_all()` (on startup) and Alembic. When adding a new column to a model, create a migration with `alembic revision --autogenerate` rather than relying solely on `create_all`.
 
 The `settings` table stores runtime config (electricity unit price, bank details) edited via the Settings UI tab — do not hardcode these values in app code.
+
+## Harness: RentFlow
+
+**Mục tiêu:** Đội agent chuyên biệt cho phát triển full-stack (API + UI), thiết kế UI, và review/sửa lỗi trên RentFlow.
+
+**Trigger:** Yêu cầu phát triển tính năng (API + UI), chỉnh giao diện/dashboard, hoặc review/debug → dùng skill `rentflow-orchestrator`. Câu hỏi đơn giản trả lời trực tiếp.
+
+Agent ở `.claude/agents/` (rentflow-backend, -frontend, -qa, -reviewer); skill tương ứng + orchestrator ở `.claude/skills/`. Chế độ: sub-agent (môi trường không có team tools).
+
+**Changelog:**
+| Ngày | Thay đổi | Đối tượng | Lý do |
+|------|----------|-----------|-------|
+| 2026-06-03 | Khởi tạo harness | toàn bộ (4 agent + 5 skill) | Hỗ trợ full-stack / UI / review theo yêu cầu |
