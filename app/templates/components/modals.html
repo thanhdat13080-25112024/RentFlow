@@ -150,10 +150,17 @@
 
 <!-- ── MODAL: QR / INVOICE ── -->
 <div x-show="qrModal.show" x-cloak
+     @click.self="qrModal.show = false"
+     @keydown.escape.window="qrModal.show = false"
      class="fixed inset-0 z-[1000] flex items-center justify-center px-4 lg-surface-clear"
      style="background: rgba(15,10,40,0.60)">
-    <div class="card-static w-full max-w-2xl overflow-hidden slide-up" style="max-width: min(90vw, 800px)">
-        <div id="invoice-content" class="p-6 sm:p-8 bg-white">
+    <div class="card-static w-full max-w-2xl overflow-hidden slide-up flex flex-col max-h-[90vh]" style="max-width: min(90vw, 800px)">
+        <!-- Close button -->
+        <div class="flex items-center justify-end px-4 pt-3 pb-0 shrink-0">
+            <button @click="qrModal.show = false"
+                    class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors" style="color: var(--color-text-tertiary)">✕</button>
+        </div>
+        <div id="invoice-content" class="p-6 sm:p-8 bg-white overflow-y-auto flex-1">
             <div class="flex flex-wrap justify-between items-start mb-8 pb-6 gap-4 border-b-2"
                  style="border-color: var(--color-primary-muted)">
                 <div class="min-w-0">
@@ -206,9 +213,9 @@
                                   x-text="formatMoney(qrModal.elec_fee)"></span>
                         </div>
                         <div class="rounded-xl px-4 py-4 flex justify-between items-center mt-2"
-                             style="background: var(--aurora-gradient)">
+                             style="background: var(--accent); background: linear-gradient(135deg, var(--accent), var(--accent-strong))">
                             <p class="text-xs font-bold uppercase tracking-wider"
-                               style="color: rgba(255,255,255,0.75)"
+                               style="color: rgba(255,255,255,0.85)"
                                x-text="t.totalAmount"></p>
                             <p class="text-2xl font-extrabold text-white"
                                x-text="formatMoney(qrModal.amount)"></p>
@@ -231,7 +238,7 @@
                 </div>
             </div>
         </div>
-        <div class="px-6 py-4 border-t flex gap-3 justify-center"
+        <div class="px-6 py-4 border-t flex gap-3 justify-center shrink-0"
              style="background: var(--color-surface-raised); border-color: var(--color-border)">
             <button @click="saveInvoiceAsImage()" class="btn btn--success">
                 ↓ <span x-text="t.downloadInvoice"></span>

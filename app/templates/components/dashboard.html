@@ -40,6 +40,8 @@
                 </svg>
                 <span class="hidden sm:block" x-text="t.exportCSV"></span>
             </button>
+            <!-- Hidden file input for CSV import (must be in app() scope for $refs) -->
+            <input type="file" x-ref="csvFile" @change="handleImport($event)" class="hidden" accept=".csv">
         </div>
     </div>
 

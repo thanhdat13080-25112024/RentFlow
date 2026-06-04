@@ -261,3 +261,19 @@ body {
 /* Empty State */
 .empty-state__icon { color: var(--ink-3); opacity: 0.5; }
 .empty-state__text { font-family: var(--font-display); color: var(--ink-2); font-size: 19px; }
+
+/* Language Dropdown */
+.lang-dropdown {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+}
+.lang-option {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-1);
+  transition: background var(--dur) var(--ease);
+}
+.lang-option:hover { background: var(--paper-2); }
+.lang-option--active { background: var(--accent-tint); color: var(--accent); font-weight: 700; }
