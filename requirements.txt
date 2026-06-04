@@ -9,6 +9,9 @@ alembic
 python-jose[cryptography]
 passlib[bcrypt]
 
+# Postgres driver (production / Vercel). Dev cục bộ vẫn dùng SQLite, không cần.
+psycopg2-binary
+
 # Dev / test
 pytest
 httpx
