@@ -49,7 +49,7 @@ class Settings(BaseSettings):
 
     # Môi trường chạy: "development" (mặc định) hoặc "production".
     # production → cookie auth bật secure=True (yêu cầu HTTPS).
-    ENVIRONMENT: str = "development"
+    ENVIRONMENT: str = "production" if os.getenv("VERCEL") else "development"
 
     # Server settings
     HOST: str = "127.0.0.1"
