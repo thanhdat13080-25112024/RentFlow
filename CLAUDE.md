@@ -22,6 +22,21 @@ alembic revision --autogenerate -m "describe change"   # Generate new migration 
 alembic downgrade -1                                    # Roll back one migration
 ```
 
+## Development Workflow
+
+1.  **Branching**: ALWAYS create a new feature branch from `main` before making any code changes.
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
+2.  **Implementation**: Make changes, test, and validate.
+3.  **Documentation**: Create or update a Markdown file (e.g., `PROGRESS.md`) to document the progress, technical decisions, and specific changes made.
+4.  **Merging**: Once the task is complete and verified, merge the branch back into `main`.
+    ```bash
+    git checkout main
+    git merge feature/your-feature-name
+    git branch -d feature/your-feature-name
+    ```
+
 ## Architecture
 
 **RentFlow** is a single-admin property management app. All state lives server-side in SQLite; the frontend is Jinja2-rendered HTML with Alpine.js for interactivity — there is no separate SPA build step.

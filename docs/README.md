@@ -1,4 +1,4 @@
-# Handoff: RentFlow Website Refactor
+# RentFlow Website — Design System & Reference
 
 ## Overview
 This bundle is the **RentFlow design system** plus a high-fidelity reference design for the
@@ -134,7 +134,7 @@ Listing photos in the prototype are **picsum placeholders** — swap for real wa
 ## Files in this bundle
 | Path | What |
 |------|------|
-| `README.md` | this handoff doc (self-sufficient) |
+| `README.md` | this design reference (self-sufficient) |
 | `colors_and_type.css` | all design tokens + `.rf-*` semantic type classes |
 | `system_README.md` | the full design-system guide (voice, visual foundations, iconography) |
 | `web/index.html` | website reference — shell + view state + modal |
@@ -143,6 +143,6 @@ Listing photos in the prototype are **picsum placeholders** — swap for real wa
 | `web/web-README.md` | notes on the web kit |
 | `assets/` | logos + icon marks |
 
-> Tip for Claude Code: open `system_README.md` and `colors_and_type.css` first to absorb the
+> Tip: open `system_README.md` and `colors_and_type.css` first to absorb the
 > tokens and rules, then implement screen-by-screen from the "Screens / views" section above,
 > matching the reference files in `web/`.

@@ -177,7 +177,7 @@ the brand's calm depends on clarity.
 |------|------|
 | `README.md` | This file — context, voice, visual foundations, iconography, index |
 | `colors_and_type.css` | All design tokens (color, type, spacing, radii, shadow, motion) + semantic type classes |
-| `SKILL.md` | Agent-Skill manifest for using this system in Claude Code |
+| `SKILL.md` | Usage manifest for this design system |
 | `assets/` | Logos, icon marks (see table above) |
 | `fonts/` | Self-hosted Roboto / Roboto Condensed / Roboto SemiCondensed (TTF) |
 | `preview/` | Design-system preview cards (color, type, spacing, components) |

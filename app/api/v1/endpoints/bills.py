@@ -26,7 +26,7 @@ async def get_revenue_summary(db: Session = Depends(get_db)):
     now = datetime.now()
     all_periods.add((now.month, now.year))
 
-    rooms = db.query(Room).filter(Room.is_occupied == True).all()  # noqa: E712 (B2)
+    rooms = db.query(Room).filter(Room.is_occupied == True).all()  # noqa: E712
     bill_map = {(b.room_id, b.month, b.year): b for b in db.query(MonthlyBill).all()}
     reading_map = {(r.room_id, r.month, r.year): r for r in db.query(ElectricityReading).all()}
 

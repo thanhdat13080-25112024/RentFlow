@@ -28,7 +28,7 @@ async def update_room(data: RoomUpdate, db: Session = Depends(get_db)):
     room.move_in_date = data.move_in_date
     room.electricity_type = data.electricity_type
     room.fixed_electricity_fee = data.fixed_electricity_fee
-    # B3: occupancy gắn với việc CÓ KHÁCH (contact_info), không phải có giá phòng.
+    # occupancy gắn với việc CÓ KHÁCH (contact_info), không phải có giá phòng.
     # Trước đây "rent + service > 0" khiến phòng trống đã cấu hình giá bị tính là đang thuê.
     room.is_occupied = bool(data.contact_info and str(data.contact_info).strip())
     

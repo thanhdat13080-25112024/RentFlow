@@ -34,5 +34,5 @@ Thumbs.db
 *.sln
 *.swp
 
-# Claude Code (chỉ ignore local settings, không ignore project settings)
+# Local editor/tool settings (project config stays tracked)
 .claude/settings.local.json

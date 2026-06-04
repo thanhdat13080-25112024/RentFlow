@@ -113,7 +113,7 @@ RentFlow/
 │   ├── static/{js,css}/         # Alpine, Tailwind, design tokens
 │   └── templates/               # Jinja2 (base, index, login + components)
 ├── alembic/                     # Migration scaffold (Alembic)
-├── tests/                       # Scaffold (chưa có test)
+├── tests/                       # Pytest suite (billing + API)
 ├── main.py                      # Entry point uvicorn
 ├── rentflow.db                  # DB mẫu (12 phòng + 3 tháng dữ liệu)
 ├── requirements.txt
@@ -166,7 +166,7 @@ File `rentflow.db` đã được commit sẵn vào repo — clone xong chạy ng
 
 Dữ liệu mẫu gồm:
 - 4 cài đặt mặc định (giá điện, thông tin ngân hàng)
-- 12 phòng mẫu (3 tầng × 4 phòng): 9 phòng có khách, 3 phòng trống
+- 12 phòng mẫu (3 tầng × 4 phòng): 8 phòng có khách, 4 phòng trống
 - Hoá đơn + số điện cho 3 tháng gần nhất
 
 Để reset về trạng thái ban đầu, xoá `rentflow.db` rồi chạy lại — hàm `seed_initial_data` trong `app/services/seeder.py` sẽ tự tạo lại.
@@ -178,6 +178,12 @@ Dự án dùng `ruff` cho import sorting + unused-import check:
 ```bash
 pip install ruff
 ruff check app/ tests/ alembic/env.py main.py --select I,F
+```
+
+## 🧪 Test
+
+```bash
+pytest            # billing (unit) + API (auth, validation, receivables/export)
 ```
 
 ## 📜 License

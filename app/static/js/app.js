@@ -466,7 +466,7 @@ function app(initialMonth, initialYear) {
             return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         },
 
-        // ── D2: fetch dùng chung — tự xử lý 401 (hết phiên → /login) và lỗi mạng (toast) ──
+        // ── fetch dùng chung — tự xử lý 401 (hết phiên → /login) và lỗi mạng (toast) ──
         async apiFetch(url, opts = {}) {
             try {
                 const res = await fetch(url, opts);
@@ -534,13 +534,13 @@ function app(initialMonth, initialYear) {
             this.receivables = data;
         },
 
-        // ── C4: Export hoá đơn tháng hiện tại ra CSV ──
+        // ── Export hoá đơn tháng hiện tại ra CSV ──
         exportCSV() {
             // Content-Disposition: attachment → trình duyệt tải file, không rời SPA.
             window.location.href = `/api/bills/export?month=${this.month}&year=${this.year}`;
         },
 
-        // ── C1: Nhắc thu tiền ──
+        // ── Nhắc thu tiền ──
         extractPhone(contact) {
             const m = (contact || '').match(/\d[\d\s.\-]{7,}\d/);
             return m ? m[0].replace(/\D/g, '') : '';
@@ -574,7 +574,7 @@ function app(initialMonth, initialYear) {
             return `sms:${this.remindModal.phone}?&body=${encodeURIComponent(this.remindModal.message)}`;
         },
 
-        // ── C3: Trả phòng (dọn phòng) ──
+        // ── Trả phòng (dọn phòng) ──
         moveOut(room) {
             this.confirmModal = {
                 show: true,
