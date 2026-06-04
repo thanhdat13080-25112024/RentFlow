@@ -15,6 +15,10 @@
                 <div class="floor-row__line"></div>
                 <span class="floor-row__count"
                       x-text="floor.occupied + '/' + floor.total + ' ' + t.statOccupied"></span>
+                <button @click.stop="addRoom(floor.num)"
+                        class="btn btn--ghost text-xs px-3 py-1 ml-2"
+                        style="color: var(--color-primary)"
+                        x-text="t.addRoom"></button>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 <template x-for="(room, ri) in floor.rooms" :key="room.id">
@@ -44,6 +48,16 @@
                                       : (getBillForRoom(room)
                                           ? (t.status_map[getBillForRoom(room).status] || '')
                                           : t.status_map.empty)"></span>
+                            <!-- Delete button for vacant rooms -->
+                            <button x-show="!room.is_occupied"
+                                    @click.stop="deleteRoom(room)"
+                                    class="w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-100 transition-colors ml-1"
+                                    style="color: var(--danger)" :title="t.deleteRoom">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
                         </div>
                         <!-- Tenant -->
                         <div class="mb-3 min-h-[2.5rem]">
@@ -122,5 +136,12 @@
             </div>
         </div>
     </template>
+    <!-- Add Floor button -->
+    <div class="mt-4 flex justify-center">
+        <button @click="addFloor()"
+                class="btn btn--ghost px-6 py-2 text-sm"
+                style="color: var(--color-primary); border: 1px dashed var(--color-primary)"
+                x-text="t.addFloor"></button>
+    </div>
     </div><!-- end floor view -->
 </div>

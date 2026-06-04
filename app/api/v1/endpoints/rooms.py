@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
-from app.schemas import RoomHistoryRead, RoomRead, RoomUpdate
+from app.schemas import RoomCreate, RoomHistoryRead, RoomRead, RoomUpdate
 from app.services.billing import update_bill
 
 router = APIRouter()
@@ -13,6 +13,41 @@ router = APIRouter()
 @router.get("/", response_model=List[RoomRead])
 async def get_rooms(db: Session = Depends(get_db)):
     return db.query(Room).all()
+
+@router.post("/", response_model=RoomRead, status_code=201)
+async def create_room(data: RoomCreate, db: Session = Depends(get_db)):
+    """Tạo phòng mới. Trả 409 nếu room_number đã tồn tại."""
+    existing = db.query(Room).filter(Room.room_number == data.room_number).first()
+    if existing:
+        raise HTTPException(status_code=409, detail=f"Phòng {data.room_number} đã tồn tại")
+    room = Room(
+        room_number=data.room_number,
+        rent_price=data.rent_price,
+        service_fee=data.service_fee,
+        deposit=data.deposit,
+        electricity_type=data.electricity_type,
+        fixed_electricity_fee=data.fixed_electricity_fee,
+        is_occupied=False,
+    )
+    db.add(room)
+    db.commit()
+    db.refresh(room)
+    return room
+
+@router.delete("/{room_id}")
+async def delete_room(room_id: int, db: Session = Depends(get_db)):
+    """Xoá phòng trống. Chặn nếu đang có khách (is_occupied)."""
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phòng")
+    if room.is_occupied:
+        raise HTTPException(status_code=400, detail="Phòng đang có khách. Vui lòng trả phòng trước khi xoá.")
+    # Cascade delete electricity readings and bills
+    db.query(ElectricityReading).filter(ElectricityReading.room_id == room_id).delete()
+    db.query(MonthlyBill).filter(MonthlyBill.room_id == room_id).delete()
+    db.delete(room)
+    db.commit()
+    return {"message": f"Đã xoá phòng {room.room_number}"}
 
 @router.post("/update")
 async def update_room(data: RoomUpdate, db: Session = Depends(get_db)):

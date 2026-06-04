@@ -45,6 +45,11 @@ const TRANSLATIONS = {
         copyBtn:'Sao chép', copied:'Đã sao chép!', sendSms:'Gửi SMS', moveOut:'Trả phòng',
         confirmMoveOut:'Trả phòng này về trạng thái trống? Khách hiện tại sẽ được xoá (lịch sử hoá đơn vẫn giữ).',
         actionMarkPaid:'Đánh dấu đã thu phòng...', actionViewQR:'Xem QR phòng...', actionUpdateElec:'Cập nhật số điện', actionCancel:'Hủy',
+        addRoom:'+ Thêm phòng', addFloor:'+ Thêm tầng', deleteRoom:'Xoá phòng',
+        confirmDeleteRoom:'Xác nhận xoá phòng này? Toàn bộ lịch sử hoá đơn và số điện sẽ bị xoá.',
+        batchElec:'Nhập điện hàng loạt', batchElecTitle:'Nhập điện hàng loạt', batchSaveAll:'Lưu tất cả',
+        batchOldReading:'Chỉ số cũ', batchNewReading:'Chỉ số mới', batchUpdated:'Đã cập nhật',
+        darkMode:'Chế độ tối', lightMode:'Chế độ sáng',
     },
     en: {
         appName:'Rent Manager', dataMonth:'Month',
@@ -92,6 +97,11 @@ const TRANSLATIONS = {
         copyBtn:'Copy', copied:'Copied!', sendSms:'Send SMS', moveOut:'Move out',
         confirmMoveOut:'Mark this room as vacant? The current tenant will be cleared (bill history is kept).',
         actionMarkPaid:'Mark room as paid...', actionViewQR:'View QR code...', actionUpdateElec:'Update meter reading', actionCancel:'Cancel',
+        addRoom:'+ Add Room', addFloor:'+ Add Floor', deleteRoom:'Delete Room',
+        confirmDeleteRoom:'Delete this room? All billing history and meter readings will be removed.',
+        batchElec:'Batch Electricity', batchElecTitle:'Batch Electricity Input', batchSaveAll:'Save All',
+        batchOldReading:'Old Reading', batchNewReading:'New Reading', batchUpdated:'updated',
+        darkMode:'Dark Mode', lightMode:'Light Mode',
     },
     ko: {
         appName:'임대 관리', dataMonth:'월',
@@ -139,6 +149,11 @@ const TRANSLATIONS = {
         copyBtn:'복사', copied:'복사됨!', sendSms:'SMS 보내기', moveOut:'퇴실',
         confirmMoveOut:'이 방을 공실로 처리할까요? 현재 세입자 정보가 삭제됩니다(청구 이력은 유지).',
         actionMarkPaid:'수납 완료 처리...', actionViewQR:'QR 코드 보기...', actionUpdateElec:'전기 검침 입력', actionCancel:'취소',
+        addRoom:'+ 방 추가', addFloor:'+ 층 추가', deleteRoom:'방 삭제',
+        confirmDeleteRoom:'이 방을 삭제하시겠습니까? 모든 청구 이력과 검침 기록이 삭제됩니다.',
+        batchElec:'일괄 전기 입력', batchElecTitle:'일괄 전기 입력', batchSaveAll:'전체 저장',
+        batchOldReading:'이전 검침', batchNewReading:'현재 검침', batchUpdated:'건 업데이트',
+        darkMode:'다크 모드', lightMode:'라이트 모드',
     },
     ja: {
         appName:'賃貸管理', dataMonth:'月',
@@ -186,6 +201,11 @@ const TRANSLATIONS = {
         copyBtn:'コピー', copied:'コピーしました!', sendSms:'SMS送信', moveOut:'退去',
         confirmMoveOut:'この部屋を空室にしますか？現在の入居者情報は削除されます（請求履歴は保持）。',
         actionMarkPaid:'収納済にする...', actionViewQR:'QRコード表示...', actionUpdateElec:'検針入力', actionCancel:'キャンセル',
+        addRoom:'+ 部屋追加', addFloor:'+ 階追加', deleteRoom:'部屋削除',
+        confirmDeleteRoom:'この部屋を削除しますか？全ての請求履歴と検針記録が削除されます。',
+        batchElec:'一括電気入力', batchElecTitle:'一括電気入力', batchSaveAll:'全て保存',
+        batchOldReading:'前回検針', batchNewReading:'今回検針', batchUpdated:'件更新',
+        darkMode:'ダークモード', lightMode:'ライトモード',
     },
     zh: {
         appName:'租金管理', dataMonth:'月',
@@ -233,6 +253,11 @@ const TRANSLATIONS = {
         copyBtn:'复制', copied:'已复制!', sendSms:'发送短信', moveOut:'退租',
         confirmMoveOut:'将此房间设为空置？当前租户信息将被清除（账单历史保留）。',
         actionMarkPaid:'标记已收款...', actionViewQR:'查看QR码...', actionUpdateElec:'更新电表读数', actionCancel:'取消',
+        addRoom:'+ 添加房间', addFloor:'+ 添加楼层', deleteRoom:'删除房间',
+        confirmDeleteRoom:'确认删除此房间？所有账单历史和电表记录将被删除。',
+        batchElec:'批量录入电表', batchElecTitle:'批量录入电表', batchSaveAll:'全部保存',
+        batchOldReading:'上期读数', batchNewReading:'本期读数', batchUpdated:'条已更新',
+        darkMode:'深色模式', lightMode:'浅色模式',
     }
 };
 
@@ -876,6 +901,55 @@ function app(initialMonth, initialYear) {
 
         fixMoney(room, field) {
             if (room[field] > 0 && room[field] < 10000) room[field] = room[field] * 1000;
+        },
+
+        // ── Room/Floor Management ──
+        async addRoom(floorNum) {
+            // Auto-calculate next room number for this floor
+            const floorRooms = this.rooms.filter(r => (r.room_number || '?')[0] === String(floorNum));
+            const nums = floorRooms.map(r => parseInt(r.room_number) || 0);
+            const nextNum = nums.length ? Math.max(...nums) + 1 : floorNum * 100 + 1;
+            const res = await this.apiFetch('/api/rooms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ room_number: String(nextNum) })
+            });
+            if (!res) return;
+            this.showToast(`Đã thêm phòng ${nextNum}`);
+            await this.loadRooms();
+            await this.loadData();
+        },
+
+        async addFloor() {
+            // Determine next floor = max existing floor + 1
+            const floors = this.rooms.map(r => parseInt((r.room_number || '0')[0]) || 0);
+            const nextFloor = floors.length ? Math.max(...floors) + 1 : 1;
+            const nextNum = nextFloor * 100 + 1;
+            const res = await this.apiFetch('/api/rooms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ room_number: String(nextNum) })
+            });
+            if (!res) return;
+            this.showToast(`Đã thêm tầng ${nextFloor} (phòng ${nextNum})`);
+            await this.loadRooms();
+            await this.loadData();
+        },
+
+        deleteRoom(room) {
+            this.confirmModal = {
+                show: true,
+                title: this.t.deleteRoom || 'Xoá phòng',
+                message: this.t.confirmDeleteRoom,
+                callback: async () => {
+                    const res = await this.apiFetch(`/api/rooms/${room.id}`, { method: 'DELETE' });
+                    if (!res) return;
+                    this.showToast(`Đã xoá phòng ${room.room_number}`);
+                    await this.loadRooms();
+                    await this.loadData();
+                    this.loadRevenueSummary();
+                }
+            };
         }
     };
 }

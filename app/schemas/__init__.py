@@ -5,7 +5,7 @@ from app.schemas.bill import (
     RevenueSummaryRead,
 )
 from app.schemas.electricity import ElectricityReadingCreate
-from app.schemas.room import RoomHistoryRead, RoomRead, RoomUpdate
+from app.schemas.room import RoomCreate, RoomHistoryRead, RoomRead, RoomUpdate
 from app.schemas.setting import SettingRead, SettingUpdate
 
 __all__ = [
@@ -14,6 +14,7 @@ __all__ = [
     "BillRead",
     "RevenueSummaryRead",
     "ElectricityReadingCreate",
+    "RoomCreate",
     "RoomHistoryRead",
     "RoomRead",
     "RoomUpdate",

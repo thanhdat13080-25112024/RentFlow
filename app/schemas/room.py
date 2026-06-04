@@ -19,6 +19,15 @@ class RoomRead(BaseModel):
     is_occupied: bool
 
 
+class RoomCreate(BaseModel):
+    room_number: str = Field(min_length=1)
+    rent_price: int = Field(default=0, ge=0)
+    service_fee: int = Field(default=0, ge=0)
+    deposit: int = Field(default=0, ge=0)
+    electricity_type: Literal["meter", "fixed"] = "meter"
+    fixed_electricity_fee: int = Field(default=0, ge=0)
+
+
 class RoomUpdate(BaseModel):
     id: int = Field(ge=1)
     room_number: str = Field(min_length=1)

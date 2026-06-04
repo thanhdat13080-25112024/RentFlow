@@ -195,7 +195,10 @@ body {
 /* Typography Overrides */
 .font-display, h1, h2, h3, .section-title, .stat-tile__value { font-family: var(--font-display) !important; color: var(--ink); font-weight: 700; }
 .th-cell, .stat-tile__label { font-family: var(--font-cond); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 13px; color: var(--ink-3); }
-.floor-row__label { font-family: var(--font-display); font-weight: 700; color: var(--ink); }
+.floor-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.floor-row__label { font-family: var(--font-display); font-weight: 700; color: var(--ink); white-space: nowrap; }
+.floor-row__line { flex: 1; height: 1px; background: var(--line); }
+.floor-row__count { font-size: 13px; font-weight: 500; color: var(--ink-3); white-space: nowrap; }
 
 /* Badges */
 .badge {
