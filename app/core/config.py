@@ -5,7 +5,9 @@ from pathlib import Path
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-_ENV_FILE = Path(".env")
+# Thư mục gốc của dự án (chứa .env, app/, api/...)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+_ENV_FILE = BASE_DIR / ".env"
 
 def _get_or_create_secret_key() -> str:
     """Lấy SECRET_KEY theo thứ tự ưu tiên:
@@ -33,6 +35,7 @@ def _get_or_create_secret_key() -> str:
     return key
 
 class Settings(BaseSettings):
+    BASE_DIR: Path = BASE_DIR
     PROJECT_NAME: str = "RentFlow"
 
     # Nguồn URL database. Ưu tiên DATABASE_URL (production/Vercel, Postgres);
