@@ -266,6 +266,7 @@ function app(initialMonth, initialYear) {
         month: initialMonth,
         year: initialYear,
         lang: localStorage.getItem('qlTroLang') || 'vi',
+        theme: localStorage.getItem('qlTroTheme') || 'light',
         activeTab: 'dashboard',
         billTab: 'all',
         searchQuery: '',
@@ -461,6 +462,17 @@ function app(initialMonth, initialYear) {
         },
 
         setLang(l) { this.lang = l; localStorage.setItem('qlTroLang', l); },
+
+        toggleTheme() {
+            this.theme = this.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', this.theme === 'dark' ? 'dark' : '');
+            if (this.theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            localStorage.setItem('qlTroTheme', this.theme);
+        },
 
         getGreeting() {
             const h = new Date().getHours();

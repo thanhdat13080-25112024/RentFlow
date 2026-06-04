@@ -280,3 +280,76 @@ body {
 }
 .lang-option:hover { background: var(--paper-2); }
 .lang-option--active { background: var(--accent-tint); color: var(--accent); font-weight: 700; }
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+:root[data-theme="dark"] {
+  --paper:      #141518;
+  --paper-2:    #1C1D22;
+  --surface:    #1E1F25;
+  --surface-2:  #26272E;
+  --ink:        #E8E8E4;
+  --ink-1:      #D0D0CC;
+  --ink-2:      #A0A09C;
+  --ink-3:      #787874;
+  --on-dark:    #E8E8E4;
+  --line:       #2E2F36;
+  --line-strong:#3A3B44;
+
+  --accent:        #5A8D6A;
+  --accent-strong: #4A7A58;
+  --accent-tint:   rgba(90,141,106,0.18);
+  --accent-on:     #F0F0EC;
+
+  --success:      #4A9A62;  --success-tint: rgba(74,154,98,0.16);
+  --warning:      #C4922F;  --warning-tint: rgba(196,146,47,0.16);
+  --danger:       #C45A50;  --danger-tint:  rgba(196,90,80,0.16);
+  --info:         #5A8DAA;  --info-tint:    rgba(90,141,170,0.16);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.30);
+  --shadow-md: 0 4px 16px -4px rgba(0,0,0,.40);
+  --shadow-lg: 0 18px 48px -14px rgba(0,0,0,.50);
+  --shadow-focus: 0 0 0 3px rgba(90,141,106,.35);
+
+  --aurora-gradient: var(--accent);
+  --color-prepaid-border: var(--info);
+  --color-paid-border: var(--success);
+}
+
+/* Dark mode component overrides */
+:root[data-theme="dark"] .header-root {
+  background: rgba(20,21,24,.94) !important;
+  border-bottom-color: var(--line) !important;
+}
+:root[data-theme="dark"] .mobile-nav {
+  background: var(--surface) !important;
+  border-top-color: var(--line) !important;
+}
+:root[data-theme="dark"] .table-head-dark {
+  background: var(--surface-2);
+}
+:root[data-theme="dark"] .table-row-hover:hover {
+  background: var(--paper-2);
+}
+:root[data-theme="dark"] .skeleton {
+  background: var(--surface-2);
+}
+:root[data-theme="dark"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
+}
+/* Keep invoice/QR content white for printing */
+:root[data-theme="dark"] #invoice-content {
+  background: white !important;
+  color: #1A1C1D !important;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: var(--r-pill);
+  background: transparent; border: none; cursor: pointer;
+  color: var(--ink-2);
+  transition: all var(--dur) var(--ease);
+}
+.theme-toggle:hover { background: var(--paper-2); color: var(--ink); }

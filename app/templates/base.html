@@ -6,6 +6,13 @@
     <meta name="theme-color" content="#060c18">
     <meta name="theme-color" content="#EFF6FF" media="(prefers-color-scheme: light)">
     <title>{% block title %}RentFlow{% endblock %}</title>
+    <!-- Anti-FOUC: apply dark mode BEFORE first paint -->
+    <script>
+    (function(){
+        var t = localStorage.getItem('qlTroTheme');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+    </script>
     <script>
     /* tailwind.config PHẢI đặt TRƯỚC <script src="cdn.tailwindcss.com">.
        Nếu đặt sau, Tailwind CDN đã khởi tạo xong và bỏ qua config này. */
@@ -114,7 +121,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/tokens.css?v=12">
+    <link rel="stylesheet" href="/static/css/tokens.css?v=13">
     <style>
         [x-cloak] { display: none !important; }
         body {
