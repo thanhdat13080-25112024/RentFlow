@@ -32,14 +32,18 @@
                                   :class="getFloorText(room.room_number)"
                                   x-text="room.room_number"></span>
                             <span class="badge"
-                                  :class="getBillForRoom(room)
-                                      ? (getBillForRoom(room).status==='paid' ? 'badge--paid'
-                                          : getBillForRoom(room).status==='prepaid' ? 'badge--prepaid'
-                                          : 'badge--unpaid')
-                                      : 'badge--neutral'"
-                                  x-text="getBillForRoom(room)
-                                      ? (t.status_map[getBillForRoom(room).status] || '')
-                                      : t.status_map.empty"></span>
+                                  :class="!room.is_occupied
+                                      ? 'badge--neutral'
+                                      : (getBillForRoom(room)
+                                          ? (getBillForRoom(room).status==='paid' ? 'badge--paid'
+                                              : getBillForRoom(room).status==='prepaid' ? 'badge--prepaid'
+                                              : 'badge--unpaid')
+                                          : 'badge--neutral')"
+                                  x-text="!room.is_occupied
+                                      ? t.status_map.empty
+                                      : (getBillForRoom(room)
+                                          ? (t.status_map[getBillForRoom(room).status] || '')
+                                          : t.status_map.empty)"></span>
                         </div>
                         <!-- Tenant -->
                         <div class="mb-3 min-h-[2.5rem]">
@@ -86,10 +90,10 @@
                                     </div>
                                 </div>
                                 <!-- Quick actions -->
-                                <div class="flex items-center gap-2 mt-3">
+                                <div class="flex items-center justify-between gap-2 mt-3">
                                     <template x-if="getBillForRoom(room).status === 'unpaid'">
                                         <button @click.stop="quickCollect(getBillForRoom(room))"
-                                                class="btn btn--success flex-1 text-xs py-1.5"
+                                                class="btn btn--success flex-1 h-8 text-xs leading-none"
                                                 x-text="t.collect"></button>
                                     </template>
                                     <button @click.stop="showQR(getBillForRoom(room))"
