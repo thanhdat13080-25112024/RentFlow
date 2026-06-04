@@ -466,11 +466,10 @@ function app(initialMonth, initialYear) {
             return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         },
 
-        // ── fetch dùng chung — tự xử lý 401 (hết phiên → /login) và lỗi mạng (toast) ──
+        // ── fetch dùng chung — xử lý lỗi mạng (toast) ──
         async apiFetch(url, opts = {}) {
             try {
                 const res = await fetch(url, opts);
-                if (res.status === 401) { window.location.href = '/login'; return null; }
                 if (!res.ok) {
                     let detail = '';
                     try { detail = (await res.json()).detail; } catch (e) {}
@@ -877,11 +876,6 @@ function app(initialMonth, initialYear) {
 
         fixMoney(room, field) {
             if (room[field] > 0 && room[field] < 10000) room[field] = room[field] * 1000;
-        },
-
-        async logout() {
-            const res = await fetch('/api/auth/logout', { method: 'POST' });
-            if (res.ok) window.location.href = '/login';
         }
     };
 }
