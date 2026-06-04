@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, Field
 
 
@@ -6,3 +8,14 @@ class ElectricityReadingCreate(BaseModel):
     month: int = Field(ge=1, le=12)
     year: int = Field(ge=2000, le=2100)
     new_reading: int = Field(ge=0)
+
+
+class BatchElectricityItem(BaseModel):
+    room_id: int = Field(ge=1)
+    new_reading: int = Field(ge=0)
+
+
+class BatchElectricityRequest(BaseModel):
+    month: int = Field(ge=1, le=12)
+    year: int = Field(ge=2000, le=2100)
+    items: List[BatchElectricityItem]

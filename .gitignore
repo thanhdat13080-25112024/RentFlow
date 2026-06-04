@@ -34,5 +34,17 @@ Thumbs.db
 *.sln
 *.swp
 
-# Local editor/tool settings (project config stays tracked)
+# Local editor/tool settings
 .claude/settings.local.json
+.claude/worktrees/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node/Frontend (just in case)
+node_modules/
+dist/
+.parcel-cache/
+.next/

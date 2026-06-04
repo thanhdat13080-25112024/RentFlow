@@ -160,16 +160,16 @@ Tài liệu OpenAPI tự động tại `http://localhost:8000/docs` (Swagger UI)
   - Schema suffix theo CRUD: `*Create`, `*Update`, `*Read` (e.g. `RoomRead`, `BillPaidUpdate`)
 - **Auth** — JWT trong cookie `httponly` `samesite=lax`; password lưu bcrypt; `SECRET_KEY` persist trong `.env`.
 
-## 🗄 Database mẫu
+## 🗄 Database
 
-File `rentflow.db` đã được commit sẵn vào repo — clone xong chạy ngay, không cần seed thủ công.
+Dự án sử dụng SQLite làm mặc định. Mặc dù `*.db` bị bỏ qua trong `.gitignore`, hệ thống sẽ tự động khởi tạo dữ liệu mẫu nếu không tìm thấy file database.
 
-Dữ liệu mẫu gồm:
+Dữ liệu mẫu (seeder) gồm:
 - 4 cài đặt mặc định (giá điện, thông tin ngân hàng)
 - 12 phòng mẫu (3 tầng × 4 phòng): 8 phòng có khách, 4 phòng trống
-- Hoá đơn + số điện cho 3 tháng gần nhất
+- Hoá đơn + số điện cho 3 tháng gần nhất (nếu chạy lần đầu)
 
-Để reset về trạng thái ban đầu, xoá `rentflow.db` rồi chạy lại — hàm `seed_initial_data` trong `app/services/seeder.py` sẽ tự tạo lại.
+Để reset về trạng thái ban đầu, bạn chỉ cần xoá `rentflow.db` rồi chạy lại — hàm `seed_initial_data` trong `app/services/seeder.py` sẽ tự động tạo lại mọi thứ.
 
 ## 🧰 Lint
 
