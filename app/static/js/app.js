@@ -798,10 +798,26 @@ function app(initialMonth, initialYear) {
             return `https://qr.sepay.vn/img?bank=${bank}&acc=${account}&template=compact&amount=${this.qrModal.amount}&des=${desc}`;
         },
 
+        // Tải lười html2canvas (194KB) — chỉ nạp lần đầu khi cần xuất ảnh,
+        // tránh chặn tải trang chủ. Trả về Promise, cache lại sau lần đầu.
+        ensureHtml2Canvas() {
+            if (window.html2canvas) return Promise.resolve();
+            if (this._html2canvasPromise) return this._html2canvasPromise;
+            this._html2canvasPromise = new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = '/static/js/html2canvas.min.js';
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+            return this._html2canvasPromise;
+        },
+
         async saveInvoiceAsImage() {
             const element = document.getElementById('invoice-content');
             this.showToast('Đang tạo ảnh hóa đơn...');
             try {
+                await this.ensureHtml2Canvas();
                 const canvas = await html2canvas(element, { useCORS: true, scale: 2, backgroundColor: '#ffffff', logging: false });
                 const link = document.createElement('a');
                 link.download = `HoaDon_Phong${this.qrModal.room}_Thang${this.month}.png`;
