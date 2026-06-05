@@ -75,13 +75,18 @@ Thumbs.db
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# Local editor/tool settings
-.claude/settings.local.json
-.claude/worktrees/
+# AI agent / harness — giữ local, KHÔNG đẩy lên repo bài tập OOP
+.claude/
 CLAUDE.md
+GEMINI.md
 PROGRESS.md
 PRESENTATION_SCRIPT.md
 _workspace/
+
+# Ngoài phạm vi bài OOP (giữ local): docs cũ + cấu hình deploy Vercel
+/docs/
+/vercel.json
+/api/
 
 # Testing
 .pytest_cache/
