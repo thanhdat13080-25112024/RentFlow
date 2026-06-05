@@ -1,7 +1,7 @@
 <!-- ── MODAL: EDIT ROOM ── -->
 <div x-show="editRoomModal.show" x-cloak
-     class="fixed inset-0 z-[1000] flex items-center justify-center px-4 lg-surface-clear"
-     style="background: rgba(15,10,40,0.50)">
+     class="fixed inset-0 h-full w-full z-[1000] flex items-center justify-center px-4"
+     style="background: rgba(15,10,40,0.50); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px)">
     <div class="card-static w-full max-w-xl overflow-hidden slide-up">
         <div class="px-6 py-5 border-b flex items-center justify-between"
              style="background: var(--color-primary-light); border-color: var(--color-primary-muted)">
@@ -80,8 +80,8 @@
 
 <!-- ── MODAL: ROOM HISTORY ── -->
 <div x-show="roomHistory.show" x-cloak
-     class="fixed inset-0 z-[1000] flex items-center justify-center px-4 lg-surface-clear"
-     style="background: rgba(15,10,40,0.50)">
+     class="fixed inset-0 h-full w-full z-[1000] flex items-center justify-center px-4"
+     style="background: rgba(15,10,40,0.50); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px)">
     <div class="card-static w-full max-w-4xl max-h-[85vh] flex flex-col slide-up">
         <div class="px-6 py-5 border-b flex items-center justify-between"
              style="border-color: var(--color-border)">
@@ -152,8 +152,8 @@
 <div x-show="qrModal.show" x-cloak
      @click.self="qrModal.show = false"
      @keydown.escape.window="qrModal.show = false"
-     class="fixed inset-0 z-[1000] flex items-center justify-center px-4 lg-surface-clear"
-     style="background: rgba(15,10,40,0.60)">
+     class="fixed inset-0 h-full w-full z-[1000] flex items-center justify-center px-4"
+     style="background: rgba(15,10,40,0.60); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px)">
     <div class="card-static w-full max-w-2xl overflow-hidden slide-up flex flex-col max-h-[90vh]" style="max-width: min(90vw, 800px)">
         <!-- Close button -->
         <div class="flex items-center justify-end px-4 pt-3 pb-0 shrink-0">
@@ -253,8 +253,8 @@
 
 <!-- ── MODAL: PREPAID ── -->
 <div x-show="prepaidModal.show" x-cloak
-     class="fixed inset-0 z-[1000] flex items-center justify-center px-4 lg-surface-clear"
-     style="background: rgba(15,10,40,0.50)">
+     class="fixed inset-0 h-full w-full z-[1000] flex items-center justify-center px-4"
+     style="background: rgba(15,10,40,0.50); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px)">
     <div class="card-static w-full max-w-sm p-6 slide-up">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 flex items-center justify-center rounded-lg shrink-0"
@@ -289,7 +289,7 @@
 
 <!-- ── MODAL: CONFIRM ── -->
 <div x-show="confirmModal.show" x-cloak
-     class="fixed inset-0 z-[1000] flex items-center justify-center px-4"
+     class="fixed inset-0 h-full w-full z-[1000] flex items-center justify-center px-4"
      style="background: rgba(15,10,40,0.50); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px)">
     <div class="card-static w-full max-w-sm p-6 text-center slide-up">
         <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4"
@@ -311,8 +311,8 @@
 
 <!-- ── MODAL: REMIND (nhắc thu tiền) ── -->
 <div x-show="remindModal.show" x-cloak
-     class="fixed inset-0 z-[1000] flex items-center justify-center px-4 lg-surface-clear"
-     style="background: rgba(15,10,40,0.50)">
+     class="fixed inset-0 h-full w-full z-[1000] flex items-center justify-center px-4"
+     style="background: rgba(15,10,40,0.50); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px)">
     <div class="card-static w-full max-w-md p-6 slide-up">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
