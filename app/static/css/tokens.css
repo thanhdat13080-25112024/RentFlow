@@ -188,6 +188,41 @@ body {
   border-color: var(--danger-tint) !important;
 }
 
+/* Stat tile layout — icon + text căn ngang, có padding/gap.
+   (Đã bị mất ở lần refactor f96cded; khôi phục lại) */
+.stat-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+/* Giá trị số: cỡ chữ có giới hạn (responsive) để cân đối với nhãn,
+   không cho số nhiều chữ số làm tràn/xuống dòng. */
+.stat-tile__value {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  line-height: var(--leading-xl);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+/* Giá trị tiền — nhỏ hơn chút tránh tràn với số nhiều chữ số */
+.stat-tile__value--money {
+  font-size: clamp(0.85rem, 1.6vw, 1.125rem);
+}
+
+/* Dòng phụ ("X phòng", "tháng này"…): cỡ nhỏ, một dòng,
+   cắt bằng … thay vì rớt chữ lẻ xuống dòng riêng. */
+.stat-tile__sub {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  line-height: var(--leading-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Status Icons */
 .stat-tile__icon {
   width: 48px; height: 48px; border-radius: var(--r-md);
