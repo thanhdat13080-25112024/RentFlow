@@ -13,8 +13,7 @@ from app.services.billing import compute_bill_fields, get_unit_price, update_bil
 
 router = APIRouter()
 
-@router.get("/revenue/summary")
-async def get_revenue_summary(db: Session = Depends(get_db)):
+def _get_revenue_summary(db: Session):
     # Chỉ ĐỌC: tính doanh thu ảo (không ghi DB) cho các phòng ĐANG THUÊ.
     # Dùng giá trị bill đã lưu nếu có, ngược lại tính từ số điện — cho ra cùng
     # con số như trước nhưng không tạo hàng trăm bill / commit mỗi lần mở dashboard,
@@ -47,6 +46,11 @@ async def get_revenue_summary(db: Session = Depends(get_db)):
         results.append({"year": y, "month": m, **agg})
 
     return results
+
+
+@router.get("/revenue/summary")
+async def get_revenue_summary(db: Session = Depends(get_db)):
+    return _get_revenue_summary(db)
 
 def _collect_bills(db: Session, month: int, year: int):
     # Chỉ ĐỌC: dùng bill đã lưu nếu có, ngược lại tính ảo (không ghi DB).
@@ -120,8 +124,7 @@ async def get_bills(month: int, year: int, db: Session = Depends(get_db)):
     return _collect_bills(db, month, year)
 
 
-@router.get("/receivables")
-async def get_receivables(db: Session = Depends(get_db)):
+def _get_receivables(db: Session):
     """Công nợ: tổng tiền các hoá đơn CHƯA THU của phòng đang thuê, gộp theo phòng.
 
     Chỉ tính bill đã ghi (status='unpaid') — bill được ghi khi nhập điện / sửa phòng,
@@ -153,6 +156,11 @@ async def get_receivables(db: Session = Depends(get_db)):
     ]
     rooms.sort(key=lambda x: x["amount"], reverse=True)
     return {"total": sum(x["amount"] for x in rooms), "count": len(rooms), "rooms": rooms}
+
+
+@router.get("/receivables")
+async def get_receivables(db: Session = Depends(get_db)):
+    return _get_receivables(db)
 
 
 @router.get("/export")

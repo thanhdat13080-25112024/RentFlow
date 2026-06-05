@@ -438,10 +438,18 @@ function app(initialMonth, initialYear) {
         async init() {
             this.isMobile = window.innerWidth < 768;
             window.addEventListener('resize', () => { this.isMobile = window.innerWidth < 768; });
-            await Promise.all([this.loadData(), this.loadSettings(), this.loadRooms()]);
+            
+            // Gộp 5 request khởi tạo thành 1 để tối ưu cold-start
+            const boot = await this.apiFetch(`/api/bootstrap/?month=${this.month}&year=${this.year}`);
+            if (boot) {
+                this.bills = boot.bills;
+                this.settings = boot.settings;
+                this.rooms = boot.rooms;
+                this.revenueSummary = boot.revenue_summary.reverse();
+                this.receivables = boot.receivables;
+            }
+
             this.loading = false;
-            this.loadRevenueSummary();
-            this.loadReceivables();
             this.initLiquidLight();
         },
 

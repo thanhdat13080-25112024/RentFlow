@@ -26,6 +26,18 @@ def test_revenue_excludes_vacant(client):
     assert isinstance(r.json(), list)
 
 
+def test_bootstrap_shape(client):
+    r = client.get("/api/bootstrap/?month=6&year=2026")
+    assert r.status_code == 200
+    body = r.json()
+    assert {"bills", "settings", "rooms", "revenue_summary", "receivables"} <= set(body.keys())
+    assert isinstance(body["bills"], list)
+    assert isinstance(body["settings"], dict)
+    assert isinstance(body["rooms"], list)
+    assert isinstance(body["revenue_summary"], list)
+    assert isinstance(body["receivables"], dict)
+
+
 def test_export_csv_headers(client):
     r = client.get("/api/bills/export?month=6&year=2026")
     assert r.status_code == 200
