@@ -13,115 +13,16 @@
         if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
     })();
     </script>
-    <script>
-    /* tailwind.config PHẢI đặt TRƯỚC <script src="cdn.tailwindcss.com">.
-       Nếu đặt sau, Tailwind CDN đã khởi tạo xong và bỏ qua config này. */
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            gray: {
-              50:  'var(--paper)',
-              100: 'var(--surface-2)',
-              200: 'var(--line)',
-              300: 'var(--line-strong)',
-              400: 'var(--ink-3)',
-              500: 'var(--ink-2)',
-              600: 'var(--ink-2)',
-              700: 'var(--ink-1)',
-              800: 'var(--ink-1)',
-              900: 'var(--ink)',
-            },
-            violet: {
-              50:  'var(--accent-tint)',
-              100: 'var(--accent-tint)',
-              500: 'var(--accent)',
-              600: 'var(--accent)',
-              700: 'var(--accent-strong)',
-              900: 'var(--accent-strong)',
-            },
-            blue: {
-              50:  'var(--accent-tint)',
-              100: 'var(--accent-tint)',
-              500: 'var(--accent)',
-              600: 'var(--accent)',
-              700: 'var(--accent-strong)',
-              900: 'var(--accent-strong)',
-            },
-            sky: {
-              500: 'var(--accent)',
-            },
-            indigo: {
-              500: 'var(--accent)',
-            },
-            cyan: {
-              500: 'var(--accent)',
-            },
-            green: {
-              50:  'var(--success-tint)',
-              100: 'var(--success-tint)',
-              200: 'var(--success-tint)',
-              500: 'var(--success)',
-              600: 'var(--success)',
-              700: 'var(--success)',
-            },
-            red: {
-              50:  'var(--danger-tint)',
-              100: 'var(--danger-tint)',
-              200: 'var(--danger-tint)',
-              500: 'var(--danger)',
-              600: 'var(--danger)',
-              700: 'var(--danger)',
-            },
-            amber: {
-              50:  'var(--warning-tint)',
-              100: 'var(--warning-tint)',
-              500: 'var(--warning)',
-              600: 'var(--warning)',
-            },
-          },
-
-          fontFamily: {
-            sans:    ['var(--font-body)',    'system-ui', 'sans-serif'],
-            display: ['var(--font-display)', 'serif'],
-          },
-          borderRadius: {
-            sm:    'var(--radius-sm)',
-            md:    'var(--radius-md)',
-            lg:    'var(--radius-lg)',
-            xl:    'var(--radius-xl)',
-            '2xl': 'var(--radius-2xl)',
-            full:  '9999px',
-          },
-          boxShadow: {
-            xs: 'var(--shadow-xs)',
-            sm: 'var(--shadow-sm)',
-            md: 'var(--shadow-md)',
-            lg: 'var(--shadow-lg)',
-            xl: 'var(--shadow-xl)',
-          },
-          transitionTimingFunction: {
-            out: 'var(--ease-out)',
-            in:  'var(--ease-in)',
-            std: 'var(--ease-std)',
-          },
-          transitionDuration: {
-            fast:   'var(--duration-fast)',
-            normal: 'var(--duration-normal)',
-            slow:   'var(--duration-slow)',
-          },
-        }
-      }
-    }
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS đã build tĩnh (thay cho cdn.tailwindcss.com chạy runtime).
+         Cấu hình theme nay nằm ở tailwind.config.js; sửa class xong chạy `npm run build:css`. -->
+    <link rel="stylesheet" href="/static/css/tailwind.css?v=1">
     <script defer src="/static/js/alpine.min.js"></script>
     <!-- html2canvas: tải lười, chỉ nạp khi xuất ảnh hóa đơn (xem app.js → ensureHtml2Canvas) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/tokens.css?v=15">
+    <link rel="stylesheet" href="/static/css/tokens.css?v=16">
     <style>
         [x-cloak] { display: none !important; }
         body {
