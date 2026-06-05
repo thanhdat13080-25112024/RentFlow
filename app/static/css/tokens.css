@@ -125,15 +125,20 @@
   --aurora-gradient: var(--surface-2);
   --aurora-glow: none;
   --shadow-glow-violet: var(--shadow-focus);
+
+  /* Z-index scale (Tailwind CDN has no `z-sticky` utility — define here) */
+  --z-sticky: 100;
 }
 
 /* Base Body */
+html { overflow-x: hidden; }   /* chặn scroll ngang ở scroll-root (body overflow-x-hidden không đủ khi html mới là phần tử cuộn) */
 body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-base);
+  max-width: 100%;
 }
 
 /* Remove aurora animations from UI */
@@ -146,12 +151,16 @@ body {
   -webkit-backdrop-filter: blur(14px) !important;
   border-bottom: 1px solid var(--line) !important;
   box-shadow: none !important;
+  /* `z-sticky` Tailwind class không tồn tại → header bị nội dung (có transform/
+     fade-in-up tạo stacking context) đè lên. Đặt z-index thật ở đây. */
+  z-index: var(--z-sticky) !important;
 }
 
 .mobile-nav {
   background: var(--surface) !important;
   border-top: 1px solid var(--line) !important;
   box-shadow: 0 -4px 16px -4px rgba(26,28,29,.10) !important;
+  z-index: var(--z-sticky) !important;
 }
 
 .card-base, .card-static, .lg-surface-regular, .lg-surface-clear, .stat-tile {

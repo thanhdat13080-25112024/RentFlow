@@ -8,6 +8,28 @@ env/
 venv/
 ENV/
 .env
+.env.*
+!.env.example
+.python-version
+
+# Build & Packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Test / lint cache
 .pytest_cache/
@@ -26,9 +48,15 @@ htmlcov/
 
 # Logs
 *.log
+logs/
 
 # Hệ điều hành
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # IDE và Editor
@@ -39,18 +67,30 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
+*.bak
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 # Local editor/tool settings
 .claude/settings.local.json
 .claude/worktrees/
+CLAUDE.md
+PROGRESS.md
+PRESENTATION_SCRIPT.md
+_workspace/
 
 # Testing
 .pytest_cache/
 .coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
 htmlcov/
-
-# Node/Frontend (just in case)
-node_modules/
-dist/
-.parcel-cache/
-.next/
+.hypothesis/
+.pytest_cache/

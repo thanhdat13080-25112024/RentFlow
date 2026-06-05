@@ -185,7 +185,7 @@
             x-data="{ scrolled: false }"
             @scroll.window="scrolled = window.scrollY > 8"
             :class="scrolled && 'header-scrolled'">
-        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 min-h-14 flex items-center gap-2 sm:gap-4 min-w-0">
 
             <!-- Logo -->
             <div class="flex items-center gap-2.5 shrink-0 group cursor-default select-none">
@@ -228,7 +228,7 @@
                 </button>
                 <div class="relative">
                     <button @click="pop = !pop; popYear = year"
-                            class="month-display relative lg-surface-regular lg-size-card px-3 py-1 text-center min-w-[110px] cursor-pointer hover:ring-2 hover:ring-violet-200 transition-all">
+                            class="month-display relative lg-surface-regular lg-size-card px-3 py-1 text-center min-w-[88px] sm:min-w-[110px] cursor-pointer hover:ring-2 hover:ring-violet-200 transition-all">
                         <span class="month-label" x-text="t.dataMonth"></span>
                         <span class="month-value">
                             <span x-text="month"></span> / <span x-text="year"></span>
