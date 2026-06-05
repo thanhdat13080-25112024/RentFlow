@@ -224,7 +224,10 @@
                 </div>
                 <div class="flex flex-col items-center gap-4">
                     <div class="p-3 rounded-2xl" style="background: rgba(255,255,255,0.96); box-shadow: var(--shadow-glass-md)">
-                        <img :src="getQRUrl()" alt="QR" class="w-48 h-48 rounded-xl" crossorigin="anonymous">
+                        <!-- Lazy load QR: only set src when modal is shown to avoid initial load overhead -->
+                        <template x-if="qrModal.show">
+                            <img :src="getQRUrl()" alt="QR" class="w-48 h-48 rounded-xl" crossorigin="anonymous">
+                        </template>
                     </div>
                     <div class="text-center w-full">
                         <p class="th-cell block mb-2" x-text="t.transferContent"></p>

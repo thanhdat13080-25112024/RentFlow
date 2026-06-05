@@ -556,6 +556,8 @@
 {% endblock %}
 
 {% block scripts %}
+    <!-- Hydrate data -->
+    <script id="bootstrap-data" type="application/json">{{ bootstrap_data | safe }}</script>
 <script>
     ;(function () {
         var _factory = window.app;

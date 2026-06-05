@@ -30,8 +30,11 @@ def _get_revenue_summary(db: Session):
     reading_map = {(r.room_id, r.month, r.year): r for r in db.query(ElectricityReading).all()}
 
     results = []
-    for m, y in sorted(all_periods, key=lambda p: (p[1], p[0]), reverse=True):
+    # Chỉ tính doanh thu cho 6 tháng gần nhất để tối ưu tốc độ.
+    sorted_periods = sorted(all_periods, key=lambda p: (p[1], p[0]), reverse=True)[:6]
+    for m, y in sorted_periods:
         agg = {"total_elec": 0, "total_service": 0, "total_rent": 0, "total_revenue": 0}
+
         for room in rooms:
             bill = bill_map.get((room.id, m, y))
             if bill:

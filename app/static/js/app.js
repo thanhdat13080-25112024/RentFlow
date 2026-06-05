@@ -439,8 +439,22 @@ function app(initialMonth, initialYear) {
             this.isMobile = window.innerWidth < 768;
             window.addEventListener('resize', () => { this.isMobile = window.innerWidth < 768; });
             
-            // Gộp 5 request khởi tạo thành 1 để tối ưu cold-start
-            const boot = await this.apiFetch(`/api/bootstrap/?month=${this.month}&year=${this.year}`);
+            // Hydration: Check for pre-injected data in the HTML
+            const hydrateTag = document.getElementById('bootstrap-data');
+            let boot = null;
+            if (hydrateTag) {
+                try {
+                    boot = JSON.parse(hydrateTag.textContent);
+                } catch (e) {
+                    console.error("Failed to parse bootstrap data", e);
+                }
+            }
+
+            // Fallback to API if hydration failed or tag not found
+            if (!boot) {
+                boot = await this.apiFetch(`/api/bootstrap/?month=${this.month}&year=${this.year}`);
+            }
+
             if (boot) {
                 this.bills = boot.bills;
                 this.settings = boot.settings;
