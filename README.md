@@ -25,7 +25,8 @@
 - **Import CSV** — nạp dữ liệu hàng loạt từ file CSV (UTF-8 BOM).
 - **Đa ngôn ngữ** — Tiếng Việt 🇻🇳, English 🇺🇸, 한국어 🇰🇷, 日本語 🇯🇵, 中文 🇨🇳.
 - **Responsive** — chạy mượt trên desktop và mobile (iOS / Android).
-- **Auth** — JWT cookie + bcrypt, `SECRET_KEY` được tự sinh và persist vào `.env` ngay lần chạy đầu.
+- **Thiết kế OOP** — tính tiền điện theo **Strategy pattern** (meter/fixed), hành vi `is_paid`/`is_overdue` đóng gói trong model. Phân tích đầy đủ trong [`Documentation/`](Documentation/).
+- **Chế độ dự án mở** — bản hiện tại bỏ đăng nhập, mở thẳng dashboard với dữ liệu mẫu (hạ tầng JWT/bcrypt vẫn còn trong `app/core/security.py` để bật lại khi cần).
 
 ## 🛠 Yêu cầu
 
@@ -58,8 +59,7 @@ cp .env.example .env
 python main.py
 ```
 
-Mặc định server lắng nghe tại `http://127.0.0.1:8000`.
-Tài khoản admin mặc định: **`admin / admin123`** (đổi qua `.env`).
+Mặc định server lắng nghe tại `http://127.0.0.1:8000` — mở thẳng dashboard, **không cần đăng nhập** (chế độ dự án mở, dữ liệu mẫu).
 
 ## 🔧 Cấu hình (`.env`)
 
@@ -87,10 +87,10 @@ RentFlow/
 │   ├── main.py                  # FastAPI app + startup hooks
 │   ├── api/
 │   │   ├── deps.py              # Common deps (get_db, get_current_user)
-│   │   ├── web.py               # HTML page routes ("/", "/login")
+│   │   ├── web.py               # HTML page route ("/")
 │   │   └── v1/
-│   │       ├── router.py        # Aggregator APIRouter
-│   │       └── endpoints/       # auth, rooms, bills, electricity, settings
+│   │       ├── router.py        # Aggregator APIRouter (mọi route công khai)
+│   │       └── endpoints/       # rooms, bills, electricity, settings
 │   ├── core/
 │   │   ├── config.py            # pydantic-settings Settings
 │   │   └── security.py          # JWT + password hashing
@@ -108,12 +108,14 @@ RentFlow/
 │   │   ├── electricity.py       # ElectricityReadingCreate
 │   │   └── setting.py           # SettingUpdate, SettingRead
 │   ├── services/
-│   │   ├── billing.py           # Logic tính hoá đơn
+│   │   ├── billing.py           # Logic tính hoá đơn (compute_bill_fields, update_bill)
+│   │   ├── electricity_strategy.py  # Strategy pattern tính tiền điện (Meter/Fixed)
 │   │   └── seeder.py            # Seed 12 phòng mẫu lần đầu
 │   ├── static/{js,css}/         # Alpine, Tailwind, design tokens
-│   └── templates/               # Jinja2 (base, index, login + components)
+│   └── templates/               # Jinja2 (base, index + components)
+├── Documentation/               # Tài liệu OOP (phân tích, UML, báo cáo test)
 ├── alembic/                     # Migration scaffold (Alembic)
-├── tests/                       # Pytest suite (billing + API)
+├── tests/                       # Pytest suite (billing, API, strategy, model behavior)
 ├── main.py                      # Entry point uvicorn
 ├── rentflow.db                  # DB mẫu (12 phòng + 3 tháng dữ liệu)
 ├── requirements.txt
@@ -123,12 +125,10 @@ RentFlow/
 
 ## 🔌 API
 
-Tất cả endpoint REST nằm dưới prefix `/api`. Endpoint không phải `auth` đều yêu cầu cookie `access_token`.
+Tất cả endpoint REST nằm dưới prefix `/api`. Bản hiện tại ở **chế độ mở** — mọi endpoint công khai, không yêu cầu đăng nhập.
 
 | Method | URL | Mô tả |
 |--------|-----|-------|
-| `POST` | `/api/auth/login` | Đăng nhập, set cookie `access_token` |
-| `POST` | `/api/auth/logout` | Xoá cookie |
 | `GET`  | `/api/rooms` | Danh sách phòng |
 | `POST` | `/api/rooms/update` | Cập nhật phòng (giá, khách, số điện cũ) |
 | `GET`  | `/api/rooms/{id}/history` | Lịch sử hoá đơn theo phòng |
@@ -145,8 +145,7 @@ Trang HTML server-rendered:
 
 | URL | Mô tả |
 |-----|-------|
-| `GET /` | Dashboard chính (redirect `/login` nếu chưa đăng nhập) |
-| `GET /login` | Trang đăng nhập |
+| `GET /` | Dashboard chính (render trực tiếp, không cần đăng nhập) |
 
 Tài liệu OpenAPI tự động tại `http://localhost:8000/docs` (Swagger UI) và `/redoc`.
 
@@ -158,7 +157,8 @@ Tài liệu OpenAPI tự động tại `http://localhost:8000/docs` (Swagger UI)
   - File / module: `snake_case`
   - Class: `PascalCase`
   - Schema suffix theo CRUD: `*Create`, `*Update`, `*Read` (e.g. `RoomRead`, `BillPaidUpdate`)
-- **Auth** — JWT trong cookie `httponly` `samesite=lax`; password lưu bcrypt; `SECRET_KEY` persist trong `.env`.
+- **Thiết kế hướng đối tượng** — tính tiền điện dùng **Strategy pattern** (`ElectricityStrategy` ABC ← `MeterStrategy`/`FixedStrategy`); model `MonthlyBill` đóng gói hành vi `is_paid`/`is_overdue`. Phân tích 4 nguyên lý OOP + UML trong [`Documentation/`](Documentation/).
+- **Auth** — hiện tắt (chế độ mở). Hạ tầng JWT cookie `httponly` `samesite=lax` + bcrypt vẫn nằm trong `app/core/security.py`, bật lại bằng cách thêm `dependencies=[Depends(get_current_user)]` vào router.
 
 ## 🗄 Database mẫu
 
@@ -183,8 +183,23 @@ ruff check app/ tests/ alembic/env.py main.py --select I,F
 ## 🧪 Test
 
 ```bash
-pytest            # billing (unit) + API (auth, validation, receivables/export)
+pytest            # 22 ca: billing, API, electricity strategy, model behavior
 ```
+
+| File | Nội dung |
+|------|----------|
+| `tests/test_billing.py` | Logic tính/ghi hoá đơn (6) |
+| `tests/test_api.py` | Endpoint công khai, validation, shape JSON (5) |
+| `tests/test_electricity_strategy.py` | Strategy tính tiền điện — đa hình (6) |
+| `tests/test_model_behavior.py` | `is_paid`/`is_overdue` của `MonthlyBill` (5) |
+
+## 📚 Tài liệu
+
+Thư mục [`Documentation/`](Documentation/) chứa tài liệu kỹ thuật cho học phần OOP:
+
+- [`OOP_Analysis.md`](Documentation/OOP_Analysis.md) — 4 nguyên lý OOP + design pattern, sơ đồ lớp.
+- [`UML_Architecture.md`](Documentation/UML_Architecture.md) — kiến trúc + sơ đồ UML (Use Case, Component, Sequence, State, Activity).
+- [`Testing_Report.md`](Documentation/Testing_Report.md) — kết quả test, điểm mạnh/yếu, rủi ro, khuyến nghị.
 
 ## 📜 License
 

@@ -9,6 +9,12 @@ venv/
 ENV/
 .env
 
+# Test / lint cache
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
 # SQLite
 *.db
 *.db-journal
