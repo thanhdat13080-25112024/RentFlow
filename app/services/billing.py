@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models import ElectricityReading, MonthlyBill, Room, Setting
+from app.services.electricity_strategy import electricity_fee
 
 
 def get_unit_price(db: Session) -> int:
@@ -19,13 +20,11 @@ def get_unit_price(db: Session) -> int:
 def compute_bill_fields(room: Room, reading: Optional[ElectricityReading]) -> dict:
     """Tính các khoản tiền cho 1 phòng/tháng — THUẦN, KHÔNG đụng DB.
 
-    Dùng chung cho cả hiển thị (các endpoint GET, không ghi) lẫn update_bill (ghi)."""
-    if room.electricity_type == "fixed":
-        elec_fee = room.fixed_electricity_fee or 0
-    elif reading:
-        elec_fee = (reading.new_reading - reading.old_reading) * reading.unit_price
-    else:
-        elec_fee = 0
+    Dùng chung cho cả hiển thị (các endpoint GET, không ghi) lẫn update_bill (ghi).
+
+    Cách tính tiền điện được uỷ quyền cho Strategy pattern (electricity_strategy.py)
+    — đa hình theo loại điện, không còn if/elif ở đây."""
+    elec_fee = electricity_fee(room, reading)
     return {
         "electricity_fee": elec_fee,
         "rent_fee": room.rent_price,
