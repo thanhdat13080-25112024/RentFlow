@@ -10,11 +10,14 @@ from app.services.seeder import seed_initial_data
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Khởi tạo schema và seed dữ liệu.
-    # Trên serverless (Vercel), code này chạy khi function "cold start".
-    # Ta tránh chạy nếu đang dùng SQLite ở môi trường production vì filesystem là read-only.
-    is_sqlite = settings.SQLALCHEMY_DATABASE_URL.startswith("sqlite")
-    if not (is_sqlite and settings.ENVIRONMENT == "production"):
+    # Khởi tạo schema và seed dữ liệu — CHỈ chạy ở môi trường development.
+    #
+    # Trên serverless (Vercel), lifespan chạy lại mỗi lần function "cold start".
+    # Nếu để create_all + seed chạy ở đây thì MỖI cold-start tốn thêm hàng chục
+    # query → kéo dài thời gian phản hồi của request đầu tiên. Production phải
+    # tạo bảng & seed MỘT LẦN từ trước (chạy seeder cục bộ rồi push DB, hoặc
+    # dùng migration), nên ở production ta bỏ qua hoàn toàn bước này.
+    if settings.ENVIRONMENT != "production":
         try:
             Base.metadata.create_all(bind=engine)
             if settings.SEED_SAMPLE_DATA:

@@ -539,7 +539,7 @@ function app(initialMonth, initialYear) {
         },
 
         async loadData() {
-            const data = await this.apiFetch(`/api/bills?month=${this.month}&year=${this.year}`);
+            const data = await this.apiFetch(`/api/bills/?month=${this.month}&year=${this.year}`);
             if (!data) return;
             this.bills = data;
             if (this.selectedBillId && !this.bills.find(b => b.room_id === this.selectedBillId))
@@ -547,13 +547,13 @@ function app(initialMonth, initialYear) {
         },
 
         async loadRooms() {
-            const data = await this.apiFetch('/api/rooms');
+            const data = await this.apiFetch('/api/rooms/');
             if (!data) return;
             this.rooms = data;
         },
 
         async loadSettings() {
-            const data = await this.apiFetch('/api/settings');
+            const data = await this.apiFetch('/api/settings/');
             if (!data) return;
             this.settings = data;
         },
@@ -660,7 +660,7 @@ function app(initialMonth, initialYear) {
 
         async saveSettings() {
             const data = Object.keys(this.settings).map(key => ({ key, value: this.settings[key] }));
-            const ok = await this.apiFetch('/api/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            const ok = await this.apiFetch('/api/settings/', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
             if (!ok) return;
             this.showToast(this.t.settingOk || 'Đã lưu cài đặt!');
             this.loadData();
@@ -716,7 +716,7 @@ function app(initialMonth, initialYear) {
         },
 
         async updateElectricity(bill) {
-            const ok = await this.apiFetch('/api/electricity', {
+            const ok = await this.apiFetch('/api/electricity/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ room_id: bill.room_id, month: this.month, year: this.year, new_reading: bill.new_reading })
@@ -937,7 +937,7 @@ function app(initialMonth, initialYear) {
             const floorRooms = this.rooms.filter(r => (r.room_number || '?')[0] === String(floorNum));
             const nums = floorRooms.map(r => parseInt(r.room_number) || 0);
             const nextNum = nums.length ? Math.max(...nums) + 1 : floorNum * 100 + 1;
-            const res = await this.apiFetch('/api/rooms', {
+            const res = await this.apiFetch('/api/rooms/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ room_number: String(nextNum) })
@@ -953,7 +953,7 @@ function app(initialMonth, initialYear) {
             const floors = this.rooms.map(r => parseInt((r.room_number || '0')[0]) || 0);
             const nextFloor = floors.length ? Math.max(...floors) + 1 : 1;
             const nextNum = nextFloor * 100 + 1;
-            const res = await this.apiFetch('/api/rooms', {
+            const res = await this.apiFetch('/api/rooms/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ room_number: String(nextNum) })
