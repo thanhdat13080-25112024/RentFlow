@@ -55,7 +55,7 @@ def update_bill(db: Session, room: Room, month: int, year: int):
     ).first()
 
     if bill:
-        if bill.status == "unpaid":  # Chỉ cập nhật nếu chưa thanh toán
+        if bill.is_overdue:  # Chỉ cập nhật nếu chưa thanh toán (không ghi đè bill đã thu)
             bill.electricity_fee = fields["electricity_fee"]
             bill.rent_fee = fields["rent_fee"]
             bill.service_fee = fields["service_fee"]

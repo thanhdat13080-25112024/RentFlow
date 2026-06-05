@@ -23,3 +23,17 @@ class MonthlyBill(Base):
     move_in_date = Column(String, nullable=True)
 
     room = relationship("Room", back_populates="bills")
+
+    # Quy tắc nghiệp vụ "thế nào là đã thu / còn nợ" được đóng gói trong chính
+    # đối tượng, thay vì rải `status == "..."` khắp endpoint và service.
+    PAID_STATUSES = ("paid", "prepaid")
+
+    @property
+    def is_paid(self) -> bool:
+        """Đã thu (thanh toán trực tiếp hoặc đóng trước)."""
+        return self.status in self.PAID_STATUSES
+
+    @property
+    def is_overdue(self) -> bool:
+        """Còn nợ — hoá đơn chưa được thu."""
+        return not self.is_paid
