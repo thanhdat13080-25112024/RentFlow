@@ -1,10 +1,12 @@
 <div align="center">
   <h1>RentFlow</h1>
   <p><b>Hệ thống quản lý nhà trọ tinh gọn, đa nền tảng</b><br/>theo dõi phòng, khách thuê và hóa đơn điện nước thông minh.</p>
+  <p>🌐 <b><a href="https://rentflow-lake.vercel.app/">Demo trực tiếp »</a></b></p>
 </div>
 
 <div align="center">
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-rentflow--lake.vercel.app-success?logo=vercel)](https://rentflow-lake.vercel.app/)
 [![Language](https://img.shields.io/badge/Language-Python%203.9+-blue.svg)](https://www.python.org)
 [![Framework](https://img.shields.io/badge/Framework-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 [![ORM](https://img.shields.io/badge/ORM-SQLAlchemy%202.0-d71f00.svg)](https://www.sqlalchemy.org/)
